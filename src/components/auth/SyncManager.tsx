@@ -42,6 +42,7 @@ export function SyncManager() {
             return;
           }
           setAccount({ user: { uid: user.uid, email: user.email, username: user.displayName }, sync: 'idle', ready: true });
+          if (!user.displayName) fb.fetchUsername(user.uid).then((n) => n && setAccount({ user: { uid: user.uid, email: user.email, username: n } }));
           engine = new SyncEngine(fb.initFirebase().db, user.uid, {
             getData: () => storeRef.current.data,
             getPrefs: () => storeRef.current.prefs,

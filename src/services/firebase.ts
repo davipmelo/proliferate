@@ -4,7 +4,7 @@ import {
   getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail,
   signOut, updateProfile, type Auth, type User,
 } from 'firebase/auth';
-import { getFirestore, doc, getDoc, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, runTransaction, serverTimestamp, type Firestore } from 'firebase/firestore';
 import { getFirebaseConfig } from './firebaseConfig.ts';
 
 let app: FirebaseApp | null = null;
@@ -77,6 +77,8 @@ export async function register(username: string, email: string, password: string
       tx.set(ref, { uid: cred.user.uid, username: username.trim(), createdAt: serverTimestamp() });
     });
     await updateProfile(cred.user, { displayName: username.trim() });
+    // Perfil compatível com o Proliferate v1 (só o nome de usuário; nunca o e-mail).
+    await setDoc(doc(db, 'users', cred.user.uid), { username: username.trim() }).catch(() => undefined);
   } catch (e) {
     // Desfaz a conta se o nome não pôde ser reservado.
     await cred.user.delete().catch(() => undefined);
@@ -96,4 +98,10 @@ export async function resetPassword(email: string): Promise<void> {
 
 export async function logout(): Promise<void> {
   await signOut(initFirebase().auth);
+}
+
+/** Nome de usuário de contas criadas no Proliferate v1 (perfil em /users/{uid}). */
+export async function fetchUsername(uid: string): Promise<string | null> {
+  const snap = await getDoc(doc(initFirebase().db, 'users', uid)).catch(() => null);
+  return (snap?.exists() && (snap.data() as { username?: string }).username) || null;
 }

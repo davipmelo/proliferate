@@ -4,11 +4,18 @@ import {
 } from 'firebase/firestore';
 import type { AppData, Preferences } from '../types/models.ts';
 import { SCHEMA_VERSION } from '../types/models.ts';
-import { decodePayload, encodePayload, sha256Hex } from './cloudCodec.ts';
-import { packAppData, unpackAppData, type PackedData } from './normalize.ts';
+import { base64ToBytes, decodePayload, encodePayload, gunzip, sha256Hex } from './cloudCodec.ts';
+import { normalizeAppData, packAppData, unpackAppData, type PackedData } from './normalize.ts';
 import { loadMeta, saveMeta } from './storage.ts';
 import { mergeData } from './backup.ts';
 import { setAccount, getAccount } from '../state/syncStatus.ts';
+
+/**
+ * Coleção do Firestore usada pelo V2. O projeto Firebase é compartilhado com o Proliferate v1,
+ * que grava em /userData/{uid} num formato diferente — o V2 só LÊ esse documento (migração).
+ */
+export const CLOUD_COLLECTION = 'userDataV2';
+const LEGACY_COLLECTION = 'userData';
 
 export const DEBOUNCE_MS = 2000;
 export const MAX_WAIT_MS = 10000;
@@ -75,7 +82,7 @@ export class SyncEngine {
   }
 
   private metaRef() {
-    return doc(this.db, 'userData', this.uid);
+    return doc(this.db, CLOUD_COLLECTION, this.uid);
   }
 
   async start(): Promise<void> {
@@ -198,6 +205,24 @@ export class SyncEngine {
     const isEmpty = !data.collection.length && !data.decks.length && !data.proxies.length;
 
     if (!remote) {
+      // Primeiro uso do V2 nesta conta: traz os dados do Proliferate v1, se existirem.
+      if (!sameAccount) {
+        const legacy = await this.readLegacy().catch((e) => {
+          console.warn('Leitura dos dados do v1 falhou', e);
+          return null;
+        });
+        if (legacy && (legacy.collection.length || legacy.decks.length || legacy.proxies.length)) {
+          let next = legacy;
+          if (!isEmpty) {
+            const choice = await this.host.askFirstSync();
+            next = choice === 'merge' ? mergeData(legacy, data) : choice === 'local' ? data : legacy;
+          }
+          this.host.apply(next, meta.revision);
+          this.host.notify(`Dados do Proliferate v1 importados: ${legacy.collection.length} itens na coleção e ${legacy.decks.length} deck(s). O v1 não foi alterado.`, 'success');
+          const np = packAppData(next);
+          return this.push(np, await sha256Hex(JSON.stringify(np)), null);
+        }
+      }
       if (!isEmpty || this.prefsDirty || initial) await this.push(packed, localHash, null);
       return;
     }
@@ -235,11 +260,49 @@ export class SyncEngine {
     else saveMeta({ ...meta, lastSyncedRevision: remote.revision, lastSyncedHash: remote.hash, uid: this.uid });
   }
 
+  /** Lê (somente leitura) os dados do Proliferate v1 em /userData/{uid}. */
+  private async readLegacy(): Promise<AppData | null> {
+    const snap = await getDoc(doc(this.db, LEGACY_COLLECTION, this.uid));
+    if (!snap.exists()) return null;
+    const raw = snap.data() as any;
+    let content: any;
+    if (raw.format === 'gz2') {
+      let bytes: Uint8Array;
+      if (raw.chunks > 0) {
+        const parts = await Promise.all(
+          Array.from({ length: raw.chunks }, async (_, i) => {
+            const d = await getDoc(doc(this.db, LEGACY_COLLECTION, this.uid, 'chunks', String(i)));
+            const v = d.exists() ? (d.data() as any) : null;
+            if (!v || v.setId !== raw.setId) throw new Error('Dados do v1 incompletos.');
+            return v.data.toUint8Array() as Uint8Array;
+          }),
+        );
+        bytes = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+        let off = 0;
+        for (const p of parts) {
+          bytes.set(p, off);
+          off += p.length;
+        }
+      } else bytes = raw.data.toUint8Array();
+      content = JSON.parse(await gunzip(bytes));
+      // Envelope de assets do v1: { v: 1, assets: [dataUrl…], data } com "@asset:N".
+      if (content?.v === 1 && Array.isArray(content.assets) && 'data' in content) {
+        const assets: string[] = content.assets;
+        content = JSON.parse(JSON.stringify(content.data), (_k, v) =>
+          typeof v === 'string' && v.startsWith('@asset:') ? assets[Number(v.slice(7))] ?? v : v,
+        );
+      }
+    } else if (typeof raw.blobGzip === 'string') {
+      content = JSON.parse(await gunzip(base64ToBytes(raw.blobGzip)));
+    } else content = raw;
+    return normalizeAppData(content);
+  }
+
   private async download(remote: RemoteMeta): Promise<AppData> {
     let chunks: string[] | undefined;
     if (!remote.data && remote.chunkSet) {
       const docs = await Promise.all(
-        Array.from({ length: remote.chunkCount ?? 0 }, (_, i) => getDoc(doc(this.db, 'userData', this.uid, 'chunks', `${remote.chunkSet}_${i}`))),
+        Array.from({ length: remote.chunkCount ?? 0 }, (_, i) => getDoc(doc(this.db, CLOUD_COLLECTION, this.uid, 'chunks', `${remote.chunkSet}_${i}`))),
       );
       chunks = docs.map((d) => {
         if (!d.exists()) throw new Error('Pedaço de dados ausente na nuvem; tente novamente.');
@@ -249,7 +312,7 @@ export class SyncEngine {
     const images: Record<string, string> = {};
     await Promise.all(
       (remote.imageHashes ?? []).map(async (h) => {
-        const d = await getDoc(doc(this.db, 'userData', this.uid, 'images', h));
+        const d = await getDoc(doc(this.db, CLOUD_COLLECTION, this.uid, 'images', h));
         if (d.exists()) images[h] = (d.data() as { data: string }).data;
       }),
     );
@@ -275,7 +338,7 @@ export class SyncEngine {
     for (const h of imageHashes) {
       if (existing.has(h)) continue;
       const data = enc.images[h];
-      if (data && data.length < 1_000_000) await setDoc(doc(this.db, 'userData', this.uid, 'images', h), { data });
+      if (data && data.length < 1_000_000) await setDoc(doc(this.db, CLOUD_COLLECTION, this.uid, 'images', h), { data });
     }
     // 2) Pedaços (quando não cabe num documento só).
     let chunkSet: string | undefined;
@@ -283,7 +346,7 @@ export class SyncEngine {
       chunkSet = `s${Date.now().toString(36)}`;
       for (let i = 0; i < enc.chunks.length; i += 8) {
         const batch = writeBatch(this.db);
-        enc.chunks.slice(i, i + 8).forEach((c, j) => batch.set(doc(this.db, 'userData', this.uid, 'chunks', `${chunkSet}_${i + j}`), { data: c }));
+        enc.chunks.slice(i, i + 8).forEach((c, j) => batch.set(doc(this.db, CLOUD_COLLECTION, this.uid, 'chunks', `${chunkSet}_${i + j}`), { data: c }));
         await batch.commit();
       }
     }
@@ -325,7 +388,7 @@ export class SyncEngine {
   }
 
   private async cleanupChunks(keep?: string): Promise<void> {
-    const all = await getDocs(collection(this.db, 'userData', this.uid, 'chunks'));
+    const all = await getDocs(collection(this.db, CLOUD_COLLECTION, this.uid, 'chunks'));
     await Promise.all(all.docs.filter((d) => !keep || !d.id.startsWith(keep + '_')).map((d) => deleteDoc(d.ref)));
   }
 }

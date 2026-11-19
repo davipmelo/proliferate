@@ -56,10 +56,22 @@ Abas, modais, gráficos (Chart.js), jsPDF e Firebase são carregados sob demanda
 
 Como os dados são guardados:
 
-- `/userData/{uid}` — documento principal com revisão, id da sessão do cliente, hash e os dados comprimidos com **gzip** (base64).
-- `/userData/{uid}/chunks/*` — pedaços, quando os dados passam de ~900 KB.
-- `/userData/{uid}/images/*` — imagens próprias (data URLs) extraídas, uma por documento.
+> O site publicado usa o mesmo projeto Firebase do Proliferate v1 (`dms-mtg-manager`). O v1 grava em `/userData/{uid}` num formato próprio,
+> por isso o V2 usa a coleção **`/userDataV2`** e apenas **lê** `/userData/{uid}` para importar os dados do v1 no primeiro login (o v1 não é alterado).
+> O `firestore.rules` inclui as regras das duas versões — publicá-lo substitui as regras do projeto.
+
+- `/userDataV2/{uid}` — documento principal com revisão, id da sessão do cliente, hash e os dados comprimidos com **gzip** (base64).
+- `/userDataV2/{uid}/chunks/*` — pedaços, quando os dados passam de ~900 KB.
+- `/userDataV2/{uid}/images/*` — imagens próprias (data URLs) extraídas, uma por documento.
 - `/usernames/{nome}` — documento público com **apenas** o uid e o nome de usuário. O e-mail nunca é gravado no Firestore.
+- `/users/{uid}` — perfil com o nome de usuário (compatível com o v1).
+
+Para publicar as regras pela linha de comando (o projeto padrão está em `.firebaserc`):
+
+```bash
+npx firebase-tools login
+npx firebase-tools deploy --only firestore:rules
+```
 
 A sincronização usa debounce de 2 s (máx. 10 s em edição contínua), listener em tempo real, nova verificação ao focar a aba ou voltar a ficar online, novas tentativas com espera exponencial e transação que nunca sobrescreve uma revisão mais nova. Em conflito, a versão mais recente vence e a outra fica guardada como backup local.
 

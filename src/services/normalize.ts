@@ -52,7 +52,7 @@ export function normalizeCard(raw: Any | undefined | null): Card {
     power: f.power ?? undefined,
     toughness: f.toughness ?? undefined,
     colors: f.colors ?? undefined,
-    images: f.images || f.image_uris ? normalizeImages(f.images ?? f.image_uris) : undefined,
+    images: f.images || f.image_uris ? normalizeImages(f.images ?? f.image_uris) : f.imageUrl ? normalizeImages(f) : undefined,
   }));
   if (!images.normal && faces[0]?.images) Object.assign(images, faces[0].images);
   const price = r.priceUsd ?? r.prices?.usd ?? r.price;
@@ -81,7 +81,7 @@ export function normalizeCard(raw: Any | undefined | null): Card {
     artist: r.artist ?? undefined,
     frame: r.frame ?? undefined,
     releasedAt: r.releasedAt ?? r.released_at ?? undefined,
-    meld: r.meld ?? undefined,
+    meld: r.meld ?? (r.meldResultName ? { role: 'meld_part', resultName: r.meldResultName } : undefined),
     artSource: r.artSource ?? (/^mpc-/.test(str(r.id)) ? 'mpcfill' : /^custom-/.test(str(r.id)) ? 'custom' : undefined),
     backImage: r.backImage ?? undefined,
     hasBleed: r.hasBleed ?? undefined,
@@ -148,8 +148,10 @@ export function normalizeDeck(raw: Any): Deck {
     if (same) same.quantity += c.quantity;
     else cards.push(c);
   }
-  const commander = raw?.commander ? normalizeCard(raw.commander) : undefined;
-  const partner = raw?.partner ? normalizeCard(raw.partner) : undefined;
+  const cmdRaw = raw?.commander ?? raw?.commanderCard;
+  const ptnRaw = raw?.partner ?? raw?.partnerCard;
+  const commander = cmdRaw ? normalizeCard(cmdRaw) : undefined;
+  const partner = ptnRaw ? normalizeCard(ptnRaw) : undefined;
   // Comandante e parceiro ficam como DeckCard nas categorias próprias (fonte da verdade = campos do deck).
   const ensure = (card: Card | undefined, category: DeckCategory) => {
     if (!card) return;
@@ -172,7 +174,7 @@ export function normalizeDeck(raw: Any): Deck {
   const coverRaw: Any = raw?.cover ?? {};
   const tokens: DeckToken[] = arr<Any>(raw?.tokens).map((t) => ({
     instanceId: str(t?.instanceId ?? t?.id, uid('dt')),
-    card: normalizeTokenCard(t?.card ?? t),
+    card: normalizeTokenCard(t?.card ?? t?.token ?? t),
     quantity: Math.max(1, Math.round(num(t?.quantity, 1))),
   }));
   return {
@@ -185,7 +187,7 @@ export function normalizeDeck(raw: Any): Deck {
     cards,
     tokens,
     cover: {
-      image: coverRaw.image ?? raw?.coverImage ?? undefined,
+      image: coverRaw.image ?? raw?.coverImage ?? raw?.coverImageUrl ?? undefined,
       zoom: clamp(num(coverRaw.zoom ?? raw?.coverZoom, 1), 1, 3),
       positionY: clamp(num(coverRaw.positionY ?? raw?.coverPosition, 30), 0, 100),
     },
@@ -201,7 +203,7 @@ export function normalizeTag(raw: Any): DeckTag {
 
 export function normalizeProxyItem(raw: Any): ProxyItem {
   const c = raw?.card ?? raw;
-  const card = c?.utilityType ? normalizeTokenCard(c) : normalizeCard(c);
+  const card = c?.utilityType || raw?.isToken ? normalizeTokenCard(c, 'token') : normalizeCard(c);
   return { id: str(raw?.id, uid('px')), card, quantity: Math.max(1, Math.round(num(raw?.quantity, 1))) };
 }
 

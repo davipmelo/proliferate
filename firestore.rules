@@ -1,20 +1,20 @@
 rules_version = '2';
 
-// Regras do Proliferate V2:
-// - /userData/{uid} (e subcoleções chunks/images): somente o dono lê e escreve.
-// - /usernames/{nome}: público para leitura (verificar disponibilidade); contém só uid + nome de usuário.
-//   O e-mail nunca é gravado no Firestore.
+// Regras do projeto Firebase compartilhado pelo Proliferate v1 e V2.
+// Publicar este arquivo SUBSTITUI as regras do projeto, por isso as do v1 continuam aqui.
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    match /userData/{uid} {
+    // ---------- Proliferate V2 ----------
+    // Documento principal + subcoleções (chunks, images): somente o dono.
+    match /userDataV2/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
-
       match /{sub=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
       }
     }
 
+    // Nome de usuário público: apenas uid + nome (o e-mail nunca é gravado).
     match /usernames/{name} {
       allow read: if true;
       allow create: if request.auth != null
@@ -24,6 +24,20 @@ service cloud.firestore {
         && request.resource.data.username.lower() == name;
       allow update: if false;
       allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // ---------- Proliferate v1 (mantido; o V2 só lê /userData para migrar) ----------
+    match /userData/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      match /chunks/{chunkId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Perfil com o nome de usuário (nunca o e-mail).
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /{document=**} {
