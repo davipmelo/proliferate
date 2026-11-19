@@ -85,3 +85,28 @@ test('computeUsage: em uso, disponível e decks por impressão', () => {
   assert.equal(s.inUse, 6);
   assert.equal(s.available, 6);
 });
+
+test('migração: formato do Proliferate v1', () => {
+  const d = normalizeAppData({
+    collection: [{ id: 'c1', card: { id: 'x', name: 'Sol Ring', imageUrl: 'n.jpg', imageUrlSmall: 's.jpg', imageUrlArtCrop: 'a.jpg', setCode: 'C21', setName: 'Commander 2021', collectorNumber: '263', rarity: 'uncommon' }, quantity: 2, inUseQuantity: 1, dateAdded: '2024-01-01' }],
+    decks: [{
+      id: 'd1', name: 'Velho', format: 'commander', commanderCard: { id: 'cmd', name: 'Atraxa', imageUrl: 'c.jpg' },
+      coverImageUrl: 'capa.jpg', coverZoom: 2, coverPosition: 50, createdAt: '2024', updatedAt: '2024',
+      cards: [{ card: { id: 'f', name: 'Delver // Aberration', layout: 'transform', imageUrl: 'f.jpg', cardFaces: [{ name: 'Delver', imageUrl: 'f.jpg' }, { name: 'Aberration', imageUrl: 'b.jpg' }] }, quantity: 1, category: 'main' }],
+      tokens: [{ id: 't1', token: { id: 'tk', name: 'Treasure', typeLine: 'Token Artifact — Treasure', imageUrl: 't.jpg' }, quantity: 3 }],
+    }],
+    proxies: [{ id: 'p', card: { id: 'tk', name: 'Treasure', imageUrl: 't.jpg' }, quantity: 1, isToken: true }],
+    deckTags: [{ id: 'g', name: 'Casual', color: '#f00' }],
+  });
+  const c = d.collection[0].card;
+  assert.deepEqual([c.images.normal, c.images.small, c.images.art_crop, c.setCode], ['n.jpg', 's.jpg', 'a.jpg', 'c21']);
+  const deck = d.decks[0];
+  assert.equal(deck.commander?.name, 'Atraxa');
+  assert.equal(deck.cards.find((x) => x.category === 'commander')?.card.name, 'Atraxa');
+  assert.deepEqual(deck.cover, { image: 'capa.jpg', zoom: 2, positionY: 50 });
+  assert.equal(deck.cards.find((x) => x.card.id === 'f')?.card.cardFaces?.[1].images?.normal, 'b.jpg');
+  assert.equal(deck.tokens[0].card.name, 'Treasure');
+  assert.equal(deck.tokens[0].quantity, 3);
+  assert.equal((d.proxies[0].card as any).utilityType, 'token');
+  assert.equal(d.tags[0].name, 'Casual');
+});
