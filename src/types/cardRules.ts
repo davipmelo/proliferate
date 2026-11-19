@@ -1,12 +1,14 @@
 import type { Card, CardImages } from './models.ts';
 
-/** Layouts com duas faces físicas (frente e verso impressos). */
+/**
+ * Layouts com duas faces físicas DIFERENTES (frente e verso impressos).
+ * "reversible_card" fica de fora: os dois lados são a mesma carta, só com outra arte.
+ */
 export const DOUBLE_FACED_LAYOUTS = new Set([
   'transform',
   'modal_dfc',
   'meld',
   'battle',
-  'reversible_card',
   'double_faced_token',
 ]);
 

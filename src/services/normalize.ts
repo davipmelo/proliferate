@@ -23,7 +23,7 @@ const num = (v: unknown, d = 0): number => {
 const arr = <T = unknown>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
 
-function normalizeImages(raw: Any | undefined, fallback?: Any): CardImages {
+export function normalizeImages(raw: Any | undefined, fallback?: Any): CardImages {
   const r = raw ?? {};
   const f = fallback ?? {};
   const pick = (...keys: string[]) => {
@@ -87,11 +87,50 @@ export function normalizeCard(raw: Any | undefined | null): Card {
     backImage: r.backImage ?? undefined,
     hasBleed: r.hasBleed ?? undefined,
   };
+  // Carta reversível (mesma carta dos dois lados, com artes diferentes) vira a carta real de uma face.
+  if (card.layout === 'reversible_card') flattenReversible(card, r);
   // Verso guardado em carta de face única (aventura, omen, split…) é dado inválido: descarta.
   if (card.backImage && !canHaveBack(card)) card.backImage = undefined;
   // Remove chaves indefinidas para economizar espaço.
   for (const k of Object.keys(card) as (keyof Card)[]) if (card[k] === undefined) delete card[k];
   return card;
+}
+
+/** Valor de mana de um custo como "{3}{B}{B}" (X = 0, híbridos/phyrexianos = 1). */
+export function cmcFromCost(cost?: string): number {
+  if (!cost) return 0;
+  return Array.from(cost.matchAll(/\{([^}]+)\}/g), (m) => m[1]).reduce((s, sym) => {
+    if (/^\d+$/.test(sym)) return s + Number(sym);
+    if (/^[XYZ]$/i.test(sym)) return s;
+    if (/^2\//.test(sym)) return s + 2;
+    return s + 1;
+  }, 0);
+}
+
+/**
+ * "reversible_card" (Secret Lair, borderless de Tarkir etc.): os dois lados são a MESMA carta com
+ * artes diferentes, e o Scryfall deixa vazios os dados no nível da carta (custo, CMC, texto) e repete o
+ * nome ("A // B // A"). Achata para a carta real: dados e arte da frente, sem verso.
+ */
+function flattenReversible(card: Card, raw: Any): void {
+  const parts = [...new Set(card.name.split(' // ').map((p) => p.trim()).filter(Boolean))];
+  const f0 = card.cardFaces?.[0];
+  const f1 = card.cardFaces?.[1];
+  const rawFace0 = arr<Any>(raw.card_faces ?? raw.cardFaces)[0] ?? {};
+  const multi = parts.length > 1;
+  card.name = parts.join(' // ') || card.name;
+  card.layout = rawFace0.layout && rawFace0.layout !== 'reversible_card' ? rawFace0.layout : multi ? 'adventure' : 'normal';
+  card.manaCost = card.manaCost ?? f0?.manaCost;
+  card.typeLine = multi && f0?.typeLine && f1?.typeLine ? `${f0.typeLine} // ${f1.typeLine}` : f0?.typeLine ?? card.typeLine;
+  card.oracleText = card.oracleText ?? f0?.oracleText;
+  card.power = card.power ?? f0?.power;
+  card.toughness = card.toughness ?? f0?.toughness;
+  if (!card.colors.length && f0?.colors?.length) card.colors = f0.colors;
+  if (!card.cmc) card.cmc = num(rawFace0.cmc, cmcFromCost(f0?.manaCost));
+  if (f0?.images && !card.images.normal) card.images = { ...f0.images };
+  // Partes da carta (ex.: aventura) sem imagens; o texto do 2º lado no Scryfall é cópia do 1º, então não é usado.
+  card.cardFaces = multi && f0 ? [{ ...f0, images: undefined }, { name: parts[1], manaCost: f1?.manaCost, typeLine: f1?.typeLine }] : undefined;
+  card.backImage = undefined;
 }
 
 export function normalizeTokenCard(raw: Any, fallbackType: UtilityCategory = 'token'): TokenCard {

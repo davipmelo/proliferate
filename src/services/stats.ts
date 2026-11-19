@@ -116,7 +116,7 @@ export function computeCardStats(entries: Entry[]): CardStats {
     const t: MainType = mainType(card.typeLine);
     bump(types, t, t, q);
     if (/\bLegendary\b/i.test(card.typeLine)) legendary += q;
-    if ((card.cardFaces?.length ?? 0) > 1 && ['transform', 'modal_dfc', 'meld', 'battle', 'reversible_card'].includes(card.layout ?? '')) doubleFaced += q;
+    if ((card.cardFaces?.length ?? 0) > 1 && ['transform', 'modal_dfc', 'meld', 'battle'].includes(card.layout ?? '')) doubleFaced += q;
 
     if (isLand(card)) {
       lands += q;

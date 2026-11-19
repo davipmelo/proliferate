@@ -39,6 +39,7 @@ export default function CardInfoModal({ card, foil, onClose }: { card: Card; foi
   const [data, setData] = useState<CardDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [face, setFace] = useState(0);
+  const [reverse, setReverse] = useState(false);
   const [reload, setReload] = useState(0);
   const custom = isCustomArt(card);
 
@@ -46,7 +47,7 @@ export default function CardInfoModal({ card, foil, onClose }: { card: Card; foi
     let alive = true;
     setError(null);
     getCardDetails(card, printId)
-      .then((d) => alive && (setData(d), setFace(0)))
+      .then((d) => alive && (setData(d), setFace(0), setReverse(false)))
       .catch((e) => alive && setError(e?.message ?? 'Não foi possível carregar do Scryfall.'));
     return () => {
       alive = false;
@@ -56,7 +57,7 @@ export default function CardInfoModal({ card, foil, onClose }: { card: Card; foi
   // Na impressão própria do usuário, a imagem mostrada é a dele; ao escolher outra impressão, a do Scryfall.
   const ownImage = !printId ? frontImage(card, 'large') || frontImage(card, 'normal') : undefined;
   const faceImg = data?.faces[face]?.image;
-  const image = face === 0 && ownImage ? ownImage : faceImg ?? ownImage;
+  const image = reverse && data?.reverseImage ? data.reverseImage : face === 0 && ownImage ? ownImage : faceImg ?? ownImage;
   const p = data?.print;
   const shownPrints = data?.prints.slice(0, 10) ?? [];
   const isCurrent = (x: DetailPrint) => x.id === p?.id;
@@ -75,6 +76,9 @@ export default function CardInfoModal({ card, foil, onClose }: { card: Card; foi
             </div>
             {data.faces.length > 1 && data.faces.some((f) => f.image && f.image !== data.faces[0].image) && (
               <button className="btn btn-secondary btn-sm" onClick={() => setFace((f) => (f + 1) % data.faces.length)}><Repeat2 size={15} /> Virar carta</button>
+            )}
+            {data.reverseImage && (
+              <button className="btn btn-secondary btn-sm" onClick={() => setReverse((r) => !r)}><Repeat2 size={15} /> {reverse ? 'Ver frente' : 'Ver outro lado (outra arte)'}</button>
             )}
             {custom && !printId && <span className="small subtle" style={{ textAlign: 'center' }}>Arte {card.artSource === 'mpcfill' ? 'do MPCFill' : 'própria'} · dados da impressão oficial</span>}
           </div>

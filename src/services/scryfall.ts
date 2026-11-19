@@ -1,6 +1,7 @@
 // Cliente da API pública do Scryfall: requisições sequenciais com intervalo, cache de impressões.
 import type { Card, CardImages, CardPrint, TokenCard, UtilityCategory } from '../types/models.ts';
-import { normalizeCard } from './normalize.ts';
+import { normalizeCard, normalizeImages } from './normalize.ts';
+import { isDoubleFaced } from '../types/cardRules.ts';
 
 const API = 'https://api.scryfall.com';
 const MIN_INTERVAL = 110; // ms entre requisições (Scryfall pede 50–100 ms)
@@ -96,12 +97,25 @@ export function mapPrint(raw: any): CardPrint {
     frame: card.frame,
     priceUsd: card.priceUsd ?? (raw?.prices?.usd_foil ? Number(raw.prices.usd_foil) : undefined),
     images: card.images,
-    backImages: card.cardFaces?.[1]?.images,
+    backImages: isDoubleFaced(card) ? card.cardFaces?.[1]?.images : undefined,
     isPromo: !!raw?.promo,
     setType: raw?.set_type,
     borderColor: raw?.border_color,
     card,
   };
+}
+
+/**
+ * Impressões de uma entrada do Scryfall. Cartas reversíveis (mesma carta dos dois lados) viram duas
+ * opções de arte de UMA face: a frente e o outro lado.
+ */
+export function mapPrints(raw: any): CardPrint[] {
+  const front = mapPrint(raw);
+  if (raw?.layout !== 'reversible_card' || !raw.card_faces?.[1]?.image_uris) return [front];
+  const imgs = normalizeImages(raw.card_faces[1].image_uris);
+  const id = `${raw.id}~r`;
+  const card = { ...front.card!, id, images: imgs, artist: raw.card_faces[1].artist ?? front.card!.artist };
+  return [front, { ...front, id, images: imgs, backImages: undefined, setName: `${front.setName ?? ''} (outro lado)`, artist: card.artist, card }];
 }
 
 export interface SearchResult<T> {
@@ -201,7 +215,7 @@ export async function getPtName(oracleId: string): Promise<string | null> {
 
 // ---------- Impressões (cache) ----------
 
-const PRINTS_CACHE_KEY = 'proliferate:prints-cache';
+const PRINTS_CACHE_KEY = 'proliferate:prints-cache:v2';
 const PRINTS_TTL = 1000 * 60 * 60 * 24 * 3; // 3 dias
 const printsMem = new Map<string, { at: number; prints: CardPrint[] }>();
 
@@ -239,7 +253,7 @@ export async function getPrints(card: Pick<Card, 'oracleId' | 'name'>, force = f
   while (page && guard++ < 10) {
     try {
       const r: any = await sfFetch(page);
-      prints.push(...(r.data ?? []).map(mapPrint));
+      prints.push(...(r.data ?? []).flatMap(mapPrints));
       page = r.has_more ? r.next_page : undefined;
     } catch (e: any) {
       if (e?.status === 404) break;
@@ -367,6 +381,8 @@ export interface CardDetails {
   totalPrints: number;
   scryfallUri?: string;
   setIcon?: string;
+  /** Outra arte do mesmo lado (cartas reversíveis). */
+  reverseImage?: string;
 }
 
 const num = (v: any) => (v == null || v === '' ? undefined : Number(v));
@@ -391,20 +407,23 @@ function toDetailPrint(raw: any): DetailPrint {
 }
 
 const detailsCache = new Map<string, CardDetails>();
+const baseId = (id?: string) => id?.replace(/~r$/, '');
 
 /**
  * Tudo o que a janela de informações mostra: textos de cada face, legalidades, preços e outras
  * impressões. Cartas com arte própria/MPCFill usam a impressão oficial mais recente pelo nome.
  */
 export async function getCardDetails(card: Pick<Card, 'id' | 'name' | 'oracleId'>, printId?: string): Promise<CardDetails> {
-  const id = printId ?? (isUuid(card.id) ? card.id : undefined);
+  const id = baseId(printId) ?? (isUuid(baseId(card.id)) ? baseId(card.id) : undefined);
   const key = id ?? `n:${card.name}`;
   const hit = detailsCache.get(key);
   if (hit) return hit;
   const raw: any = id
     ? await sfFetch(`/cards/${id}`)
     : await sfFetch(`/cards/named?exact=${encodeURIComponent(card.name.split(' // ')[0])}`).catch(() => sfFetch(`/cards/named?fuzzy=${encodeURIComponent(card.name)}`));
-  const facesRaw: any[] = raw.card_faces?.length ? raw.card_faces : [raw];
+  // Reversível: o 2º lado é a mesma carta com outra arte (e o Scryfall copia o texto errado nele).
+  const reversible = raw.layout === 'reversible_card';
+  const facesRaw: any[] = reversible ? [raw.card_faces[0]] : raw.card_faces?.length ? raw.card_faces : [raw];
   const faces: DetailFace[] = facesRaw.map((f) => ({
     name: f.name,
     manaCost: f.mana_cost || undefined,
@@ -439,6 +458,7 @@ export async function getCardDetails(card: Pick<Card, 'id' | 'name' | 'oracleId'
     totalPrints,
     scryfallUri: raw.scryfall_uri,
     setIcon: undefined,
+    reverseImage: reversible ? raw.card_faces?.[1]?.image_uris?.normal : undefined,
   };
   detailsCache.set(key, details);
   return details;

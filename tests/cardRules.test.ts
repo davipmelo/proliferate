@@ -88,3 +88,58 @@ test('verso inválido em carta de face única é descartado e não vai para a im
   const dfc = normalizeCard({ id: 'd', name: 'Delver // Aberration', layout: 'transform', images: { normal: 'f.jpg' }, cardFaces: [{ name: 'A', images: { normal: 'a.jpg' } }, { name: 'B', images: { normal: 'b.jpg' } }] });
   assert.equal(expandQueue([{ id: 'p2', card: dfc, quantity: 1 }]).length, 2);
 });
+
+// Formato real do Scryfall para TDM #379 (reversible_card): nível da carta vazio, nome repetido.
+const reversibleRaw = {
+  id: '9cf54062-7b5b-4e46-ae1e-fab7e419a9fa', name: 'Scavenger Regent // Exude Toxin // Scavenger Regent', layout: 'reversible_card',
+  set: 'tdm', collector_number: '379', color_identity: ['B'],
+  card_faces: [
+    { name: 'Scavenger Regent', layout: 'adventure', mana_cost: '{3}{B}', cmc: 4, type_line: 'Creature — Dragon', oracle_text: 'Flying\nWard—Discard a card.', colors: ['B'], power: '4', toughness: '4', image_uris: { normal: 'https://cards.scryfall.io/normal/front/9/c/x.jpg' } },
+    { name: 'Exude Toxin', layout: 'adventure', mana_cost: '{X}{B}{B}', cmc: 4, type_line: 'Sorcery — Omen', oracle_text: 'Flying\nWard—Discard a card.', colors: ['B'], image_uris: { normal: 'https://cards.scryfall.io/normal/back/9/c/x.jpg' } },
+  ],
+};
+
+test('carta reversível vira a carta real de uma face (dados do Scryfall)', async () => {
+  const { mapScryfallCard, mapPrints } = await import('../src/services/scryfall.ts');
+  const { expandQueue } = await import('../src/services/proxyLayout.ts');
+  const c = mapScryfallCard(reversibleRaw);
+  assert.equal(c.name, 'Scavenger Regent // Exude Toxin');
+  assert.equal(c.layout, 'adventure');
+  assert.equal(c.cmc, 4);
+  assert.equal(c.manaCost, '{3}{B}');
+  assert.equal(c.typeLine, 'Creature — Dragon // Sorcery — Omen');
+  assert.ok(c.images.normal?.includes('/front/'));
+  assert.ok(!isDoubleFaced(c));
+  assert.equal(expandQueue([{ id: 'p', card: c, quantity: 3 }]).length, 3, 'só frentes na impressão');
+  // O outro lado vira uma opção de arte separada, também de uma face só.
+  const prints = mapPrints(reversibleRaw);
+  assert.equal(prints.length, 2);
+  assert.ok(prints[1].images.normal?.includes('/back/'));
+  assert.equal(prints[1].backImages, undefined);
+  assert.ok(!isDoubleFaced(prints[1].card!));
+});
+
+test('carta reversível já salva (com verso e faces com imagem) é reparada ao carregar', async () => {
+  const { normalizeCard } = await import('../src/services/normalize.ts');
+  // Como ficava salvo antes: layout reversible_card, cmc 0, faces com imagens e arte do MPCFill.
+  const stored = normalizeCard({
+    id: 'mpc-123', name: 'Scavenger Regent // Exude Toxin // Scavenger Regent', layout: 'reversible_card', cmc: 0, typeLine: 'Creature — Dragon',
+    artSource: 'mpcfill', images: { normal: 'mpc.jpg' }, backImage: 'https://cards.scryfall.io/normal/back/9/c/x.jpg',
+    cardFaces: [
+      { name: 'Scavenger Regent', manaCost: '{3}{B}', typeLine: 'Creature — Dragon', images: { normal: 'f.jpg' } },
+      { name: 'Exude Toxin', manaCost: '{X}{B}{B}', typeLine: 'Sorcery — Omen', images: { normal: 'b.jpg' } },
+    ],
+  });
+  assert.equal(stored.name, 'Scavenger Regent // Exude Toxin');
+  assert.equal(stored.cmc, 4, 'CMC recalculado pelo custo');
+  assert.equal(stored.images.normal, 'mpc.jpg', 'arte escolhida é mantida');
+  assert.equal(stored.backImage, undefined);
+  assert.ok(!isDoubleFaced(stored));
+  // Reversível de nome único (Secret Lair).
+  const sld = normalizeCard({ id: 's', name: 'Birds of Paradise // Birds of Paradise', layout: 'reversible_card', cardFaces: [{ name: 'Birds of Paradise', manaCost: '{G}', typeLine: 'Creature — Bird', images: { normal: 'a.jpg' } }, { name: 'Birds of Paradise', images: { normal: 'b.jpg' } }] });
+  assert.equal(sld.name, 'Birds of Paradise');
+  assert.equal(sld.layout, 'normal');
+  assert.equal(sld.cmc, 1);
+  assert.equal(sld.cardFaces, undefined);
+  assert.ok(!isDoubleFaced(sld));
+});
