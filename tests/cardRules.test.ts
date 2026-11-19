@@ -58,3 +58,12 @@ test('mainType e parseManaCost', () => {
   assert.equal(mainType('Instant // Sorcery'), 'Instant');
   assert.deepEqual(parseManaCost('{2}{W}{U/P}'), ['2', 'W', 'U/P']);
 });
+
+test('mainType reconhece tipos em português e Kindred/Tribal', () => {
+  assert.equal(mainType('Enchantment'), 'Enchantment');
+  assert.equal(mainType('Encantamento'), 'Enchantment');
+  assert.equal(mainType('Criatura — Elfo'), 'Creature');
+  assert.equal(mainType('Mágica Instantânea'), 'Instant');
+  assert.equal(mainType('Kindred Enchantment — Elf'), 'Enchantment');
+  assert.equal(mainType('Proxy Alter MPCFill'), 'Other');
+});

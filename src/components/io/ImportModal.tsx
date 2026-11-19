@@ -13,7 +13,7 @@ import { normalizeDeck, uid } from '../../services/normalize.ts';
 import { namesMatch, sameArt } from '../../types/cardRules.ts';
 import { Modal } from '../common/Modal.tsx';
 import { CommanderPicker } from '../decks/CommanderPicker.tsx';
-import { buildDeckCards } from '../decks/deckBuild.ts';
+import { buildDeckCards, detectCommanderFromList } from '../decks/deckBuild.ts';
 
 type Target = 'collection' | 'new-deck' | 'existing-deck';
 const FORMAT_NAMES: Record<string, string> = { arena: 'MTG Arena', moxfield: 'Moxfield', ligamagic: 'LigaMagic', simple: 'Lista simples', csv: 'CSV' };
@@ -73,8 +73,15 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
         toast(`${cards.reduce((s, r) => s + r.entry.quantity, 0)} carta(s) importadas para a coleção.`);
       } else {
         const tokens = resolved.filter((r) => r.entry.section === 'token').map((r) => ({ instanceId: uid('dt'), card: { ...r.card, utilityType: 'token' as const }, quantity: r.entry.quantity }));
-        let newCards: DeckCard[] = buildDeckCards(cards);
+        // Lista de Commander sem comandante informado: tenta usar a primeira carta da lista.
+        const detected = target === 'new-deck' && formatInfo(format).hasCommander && !commander ? detectCommanderFromList(cards) : { consumed: 0 as number, commander: undefined, partner: undefined };
+        const forDeck = detected.consumed ? cards.filter((r) => r.card !== detected.commander && r.card !== detected.partner) : cards;
+        let newCards: DeckCard[] = buildDeckCards(forDeck);
+        if (detected.commander) newCards.unshift({ instanceId: uid('dc'), card: detected.commander, quantity: 1, category: 'commander' });
+        if (detected.partner) newCards.splice(1, 0, { instanceId: uid('dc'), card: detected.partner, quantity: 1, category: 'partner' });
         let cmd = commander ?? newCards.find((c) => c.category === 'commander')?.card;
+        const ptn = newCards.find((c) => c.category === 'partner')?.card;
+        if (detected.commander) toast(`Comandante detectado: ${detected.commander.name}${detected.partner ? ` + ${detected.partner.name}` : ''}.`, 'info', 5000);
         // Vincula à coleção (cria/incrementa itens) se pedido.
         const link = (d: { collection: typeof store.data.collection }) => {
           if (!alsoCollection) return d.collection;
@@ -100,7 +107,7 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
           const id = uid('deck');
           store.update((d) => {
             const collection = link(d);
-            const deck = normalizeDeck({ id, name: name.trim(), format, commander: cmd, cards: newCards, tokens, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            const deck = normalizeDeck({ id, name: name.trim(), format, commander: cmd, partner: ptn, cards: newCards, tokens, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
             return { ...d, collection, decks: [deck, ...d.decks] };
           });
           toast(`Deck “${name.trim()}” criado.`);

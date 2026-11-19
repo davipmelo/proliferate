@@ -257,7 +257,7 @@ export const UTILITY_CATEGORIES: { id: UtilityCategory; label: string; query: st
   { id: 'token', label: 'Fichas', query: 't:token -t:emblem -t:card' },
   { id: 'plane', label: 'Planos', query: '(t:plane or t:phenomenon)' },
   { id: 'emblem', label: 'Emblemas', query: 't:emblem' },
-  { id: 'counter', label: 'Marcadores', query: 't:card (layout:token or layout:double_faced_token) -t:dungeon -name:checklist -name:ad' },
+  { id: 'counter', label: 'Marcadores', query: 't:card (layout:token or layout:double_faced_token) -t:dungeon -name:checklist -name:championships -name:bounty -name:punchcard' },
   { id: 'dungeon', label: 'Masmorras', query: 't:dungeon -t:creature' },
   { id: 'scheme', label: 'Esquemas', query: 't:scheme' },
   { id: 'conspiracy', label: 'Conspirações', query: 't:conspiracy' },

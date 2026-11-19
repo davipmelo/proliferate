@@ -1,5 +1,5 @@
 import type { Card, DeckCard, DeckCategory } from '../../types/models.ts';
-import { namesMatch } from '../../types/cardRules.ts';
+import { canBeCommander, hasPartner, namesMatch } from '../../types/cardRules.ts';
 import { uid } from '../../services/normalize.ts';
 import type { ResolvedEntry } from '../../services/importer.ts';
 
@@ -27,4 +27,20 @@ export function buildDeckCards(resolved: ResolvedEntry[], existing: DeckCard[] =
       });
   }
   return out;
+}
+
+/**
+ * Lista colada sem seção de comandante: se a primeira carta (1 cópia) pode ser comandante, ela é o
+ * comandante; se a segunda também puder e ambas tiverem Partner, ela vira o parceiro.
+ */
+export function detectCommanderFromList(resolved: ResolvedEntry[]): { commander?: Card; partner?: Card; consumed: number } {
+  const main = resolved.filter((r) => r.entry.section === 'main');
+  if (resolved.some((r) => r.entry.section === 'commander')) return { consumed: 0 };
+  const first = main[0];
+  if (!first || first.entry.quantity !== 1 || !canBeCommander(first.card)) return { consumed: 0 };
+  const second = main[1];
+  if (second && second.entry.quantity === 1 && canBeCommander(second.card) && hasPartner(first.card) && hasPartner(second.card)) {
+    return { commander: first.card, partner: second.card, consumed: 2 };
+  }
+  return { commander: first.card, consumed: 1 };
 }

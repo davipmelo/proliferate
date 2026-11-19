@@ -21,6 +21,8 @@
   body.printing #print-root { display: block; }
   #print-root .a4 {
     position: relative !important;
+    /* 1 mm a menos evita página em branco extra por arredondamento; as cartas usam posições absolutas em mm. */
+    height: 296mm !important;
     transform: none !important;
     box-shadow: none !important;
     page-break-after: always;

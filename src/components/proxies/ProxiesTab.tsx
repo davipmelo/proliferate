@@ -138,7 +138,7 @@ export default function ProxiesTab() {
         </aside>
 
         <aside className="proxy-col proxy-col-right">
-          <div className="section proxy-settings">
+          <div className="section proxy-settings" style={{ flex: 1 }}>
             <div className="section-title" style={{ fontSize: 'var(--fs-md)' }}>Predefinições {!preset && <span className="badge">Personalizado</span>}</div>
             <div className="preset-grid">
               {PROXY_PRESETS.map((p) => (
@@ -152,7 +152,7 @@ export default function ProxiesTab() {
               <label className="check"><input type="checkbox" checked={s.footer} onChange={(e) => set({ footer: e.target.checked })} /> Rodapé com metadados</label>
               <label className="check"><input type="checkbox" checked={s.trimBleed} onChange={(e) => set({ trimBleed: e.target.checked })} /> Recortar sangria das artes MPCFill</label>
             </div>
-            <details className="details" style={{ marginTop: 8 }}>
+            <details className="details" style={{ marginTop: 8 }} open>
               <summary><ChevronRight size={14} className="chev" /> Controles avançados</summary>
               <AdvancedControls s={s} set={set} />
             </details>

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Check, Eye, EyeOff } from 'lucide-react';
+import { Check, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 /** Seleção múltipla com suporte a Shift (intervalo) e Ctrl/Cmd. */
 export function useSelection(orderedIds: string[]) {
@@ -53,14 +53,21 @@ export function SelectBox({ checked, onClick, className = '' }: { checked: boole
   );
 }
 
-/** Controles da grade: tamanho da carta e mostrar/ocultar detalhes. */
-export function GridControls({ size, onSize, details, onDetails }: { size: number; onSize: (n: number) => void; details: boolean; onDetails: (b: boolean) => void }) {
+/** Controles de visualização: tamanho da carta (grade), detalhes e efeito foil. */
+export function GridControls({ size, onSize, details, onDetails, foil, onFoil }: { size?: number; onSize?: (n: number) => void; details?: boolean; onDetails?: (b: boolean) => void; foil?: boolean; onFoil?: (b: boolean) => void }) {
   return (
     <div className="row grid-controls">
-      <input type="range" min={110} max={300} step={10} value={size} onChange={(e) => onSize(Number(e.target.value))} aria-label="Tamanho da carta" style={{ width: 110 }} />
-      <button className={`btn btn-ghost btn-icon btn-sm ${details ? 'active' : ''}`} onClick={() => onDetails(!details)} title={details ? 'Ocultar detalhes' : 'Mostrar detalhes'}>
-        {details ? <Eye size={16} /> : <EyeOff size={16} />}
-      </button>
+      {onSize && size != null && <input type="range" min={110} max={300} step={10} value={size} onChange={(e) => onSize(Number(e.target.value))} aria-label="Tamanho da carta" style={{ width: 110 }} />}
+      {foil != null && onFoil && (
+        <button className={`btn btn-ghost btn-icon btn-sm ${foil ? 'active' : ''}`} onClick={() => onFoil(!foil)} title={foil ? 'Ocultar efeito foil' : 'Mostrar efeito foil'} aria-pressed={foil}>
+          <Sparkles size={16} />
+        </button>
+      )}
+      {details != null && onDetails && (
+        <button className={`btn btn-ghost btn-icon btn-sm ${details ? 'active' : ''}`} onClick={() => onDetails(!details)} title={details ? 'Ocultar detalhes' : 'Mostrar detalhes'} aria-pressed={details}>
+          {details ? <Eye size={16} /> : <EyeOff size={16} />}
+        </button>
+      )}
     </div>
   );
 }

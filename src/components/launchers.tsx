@@ -1,7 +1,7 @@
 // Atalhos para abrir modais globais com carregamento sob demanda.
 import { lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
-import type { Card, Deck } from '../types/models.ts';
+import type { Card, Deck, TokenCard } from '../types/models.ts';
 import { openModal } from '../state/ui.tsx';
 import { Spinner } from './common/bits.tsx';
 
@@ -11,6 +11,7 @@ const ImportModal = lazy(() => import('./io/ImportModal.tsx'));
 const ExportModal = lazy(() => import('./io/ExportModal.tsx'));
 const BackupModal = lazy(() => import('./io/BackupModal.tsx'));
 const AuthModal = lazy(() => import('./auth/AuthModal.tsx'));
+const UtilityPickerModal = lazy(() => import('./utilities/UtilityPickerModal.tsx'));
 
 function ModalFallback() {
   return createPortal(
@@ -76,6 +77,14 @@ export function openAuth(mode: 'login' | 'register' | 'config' = 'login'): void 
   openModal((close) => (
     <Suspense fallback={<ModalFallback />}>
       <AuthModal mode={mode} onClose={close} />
+    </Suspense>
+  ));
+}
+
+export function openUtilityPicker(opts: { title?: string; onPick: (cards: TokenCard[]) => void }): void {
+  openModal((close) => (
+    <Suspense fallback={<ModalFallback />}>
+      <UtilityPickerModal {...opts} onClose={close} />
     </Suspense>
   ));
 }

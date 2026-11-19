@@ -50,9 +50,9 @@ async function prepareImage(slot: Slot, s: ProxySettings, cache: Map<string, str
   return url;
 }
 
-export async function generateProxyPdf(slots: Slot[], s: ProxySettings, onProgress?: (done: number, total: number) => void): Promise<Blob> {
+export async function generateProxyPdf(slots: Slot[], s: ProxySettings, onProgress?: (done: number, total: number) => void, opts: { compress?: boolean } = {}): Promise<Blob> {
   const { jsPDF } = await import('jspdf');
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: opts.compress ?? true });
   const pages = paginate(slots);
   const cache = new Map<string, string>();
   let done = 0;

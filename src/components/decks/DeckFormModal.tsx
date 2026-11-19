@@ -10,7 +10,7 @@ import { exportDeck } from '../../services/exporters.ts';
 import { normalizeDeck } from '../../services/normalize.ts';
 import { Modal } from '../common/Modal.tsx';
 import { CommanderPicker } from './CommanderPicker.tsx';
-import { buildDeckCards } from './deckBuild.ts';
+import { buildDeckCards, detectCommanderFromList } from './deckBuild.ts';
 
 interface Props {
   deck?: Deck;
@@ -57,8 +57,19 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
           if (!ptn && cmdEntries[1]) ptn = cmdEntries[1].card;
           const ptnEntry = resolved.find((r) => r.entry.section === 'partner');
           if (!ptn && ptnEntry) ptn = ptnEntry.card;
+          // Sem comandante: a primeira carta da lista pode ser o comandante.
+          let consumed: Card[] = [];
+          if (!cmd && info.hasCommander) {
+            const d = detectCommanderFromList(resolved);
+            if (d.commander) {
+              cmd = d.commander;
+              ptn = ptn ?? d.partner;
+              consumed = [d.commander, ...(d.partner ? [d.partner] : [])];
+              toast(`Comandante detectado: ${d.commander.name}${d.partner ? ` + ${d.partner.name}` : ''}.`, 'info', 5000);
+            }
+          }
           cards = buildDeckCards(
-            resolved.filter((r) => r.entry.section !== 'commander' && r.entry.section !== 'partner'),
+            resolved.filter((r) => r.entry.section !== 'commander' && r.entry.section !== 'partner' && !consumed.includes(r.card)),
             deck?.cards ?? [],
           );
         } catch (e: any) {

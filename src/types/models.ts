@@ -240,9 +240,13 @@ export interface Preferences {
   deckEditorView: ViewMode;
   gridSize: number; // largura da carta em px (grade)
   showDetails: boolean;
-  deckGroupBy: 'category' | 'type';
+  deckGroupMode: DeckGroupMode;
+  /** Efeito visual de foil nas grades. */
+  showFoil: boolean;
   proxySettings: ProxySettings;
   lastTab: TabId;
 }
+
+export type DeckGroupMode = 'none' | 'type' | 'cmc';
 
 export type TabId = 'decks' | 'collection' | 'utilities' | 'proxies';

@@ -31,7 +31,8 @@ export const DEFAULT_PREFS: Preferences = {
   deckEditorView: 'list',
   gridSize: 170,
   showDetails: true,
-  deckGroupBy: 'type',
+  deckGroupMode: 'none',
+  showFoil: true,
   proxySettings: DEFAULT_PROXY_SETTINGS,
   lastTab: 'decks',
 };

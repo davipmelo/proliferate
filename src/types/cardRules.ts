@@ -97,7 +97,7 @@ export function sameCard(a: Card, b: Card): boolean {
 }
 
 export function isLand(card: Pick<Card, 'typeLine'>): boolean {
-  return /\bLand\b/i.test(frontType(card.typeLine));
+  return /\b(land|terreno)\b/i.test(frontType(card.typeLine));
 }
 
 export function isBasicLand(card: Pick<Card, 'typeLine' | 'name'>): boolean {
@@ -117,12 +117,25 @@ export const TYPE_LABELS: Record<MainType, string> = {
   Sorcery: 'Feitiços', Artifact: 'Artefatos', Enchantment: 'Encantamentos', Land: 'Terrenos', Other: 'Outros',
 };
 
+/** Palavras de tipo em inglês e português (linhas de tipo impressas em PT). */
+const TYPE_WORDS: [MainType, RegExp][] = [
+  ['Creature', /\b(creature|criatura)\b/i],
+  ['Land', /\b(land|terreno)\b/i],
+  ['Planeswalker', /\bplaneswalker\b/i],
+  ['Battle', /\b(battle|batalha)\b/i],
+  ['Instant', /\b(instant|instant[aâ]nea)\b/i],
+  ['Sorcery', /\b(sorcery|feiti[cç]o)\b/i],
+  ['Artifact', /\b(artifact|artefato)\b/i],
+  ['Enchantment', /\b(enchantment|encantamento)\b/i],
+];
+
 /** Tipo principal para agrupamento (criatura tem prioridade, depois terreno etc.). */
 export function mainType(typeLine: string): MainType {
   const t = frontType(typeLine);
-  for (const k of ['Creature', 'Land', 'Planeswalker', 'Battle', 'Instant', 'Sorcery', 'Artifact', 'Enchantment'] as MainType[]) {
-    if (new RegExp(`\\b${k}\\b`, 'i').test(t)) return k;
-  }
+  for (const [k, re] of TYPE_WORDS) if (re.test(t)) return k;
+  // Tipo da face de trás como último recurso (ex.: frente "Card" sem tipo).
+  const back = (typeLine || '').split('//')[1];
+  if (back) for (const [k, re] of TYPE_WORDS) if (re.test(back)) return k;
   return 'Other';
 }
 
@@ -168,4 +181,18 @@ export function parseManaCost(cost?: string): string[] {
 
 export function displayName(card: Pick<Card, 'name' | 'namePt'>): string {
   return card.namePt && card.namePt !== card.name ? `${card.namePt}` : card.name;
+}
+
+/** A carta pode ser comandante? (criatura lendária ou texto "can be your commander") */
+export function canBeCommander(card: Pick<Card, 'typeLine' | 'oracleText' | 'cardFaces'>): boolean {
+  const front = frontType(card.typeLine);
+  const text = `${card.oracleText ?? ''} ${(card.cardFaces ?? []).map((f) => f.oracleText ?? '').join(' ')}`;
+  if (/can be your commander/i.test(text)) return true;
+  return /\b(legendary|lend[aá]ri[ao])\b/i.test(front) && /\b(creature|criatura)\b/i.test(front);
+}
+
+/** Tem a habilidade Partner / Parceiro (inclui "Partner with", "Friends forever", "Choose a Background"). */
+export function hasPartner(card: Pick<Card, 'oracleText' | 'cardFaces'>): boolean {
+  const text = `${card.oracleText ?? ''} ${(card.cardFaces ?? []).map((f) => f.oracleText ?? '').join(' ')}`;
+  return /\b(partner|friends forever|doctor's companion)\b/i.test(text);
 }

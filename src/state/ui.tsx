@@ -175,8 +175,8 @@ function PreviewLayer() {
     };
   }, []);
   if (!p.url) return null;
-  const w = p.back ? 520 : 260;
-  const h = 363;
+  const w = p.back ? 656 : 324;
+  const h = 452;
   const left = p.x + 24 + w > vw ? p.x - w - 24 : p.x + 24;
   const top = Math.max(8, Math.min(window.innerHeight - h - 8, p.y - h / 2));
   return (

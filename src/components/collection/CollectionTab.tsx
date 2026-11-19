@@ -149,7 +149,7 @@ export default function CollectionTab() {
           {SORTS.map((s) => <option key={s} value={s}>Ordenar: {SORT_LABELS[s]}</option>)}
         </select>
         <div className="spacer" />
-        {view === 'grid' && <GridControls size={prefs.gridSize} onSize={(n) => setPrefs({ gridSize: n })} details={prefs.showDetails} onDetails={(b) => setPrefs({ showDetails: b })} />}
+        <GridControls size={prefs.gridSize} onSize={view === 'grid' ? (n) => setPrefs({ gridSize: n }) : undefined} details={prefs.showDetails} onDetails={(b) => setPrefs({ showDetails: b })} foil={view === 'grid' ? prefs.showFoil : undefined} onFoil={(b) => setPrefs({ showFoil: b })} />
         <ViewToggle value={view} onChange={(v) => setPrefs({ collectionView: v })} />
       </div>
       <div className="toolbar">
@@ -174,7 +174,7 @@ export default function CollectionTab() {
           {visible.map((item) => {
             const u = usage.get(item.id);
             return (
-              <div key={item.id} className={`list-row ${sel.isSelected(item.id) ? 'selected' : ''}`} onClick={(e) => (e.shiftKey || e.ctrlKey || e.metaKey || sel.count > 0) && sel.toggle(item.id, e)}>
+              <div key={item.id} className={`list-row ${sel.isSelected(item.id) ? 'selected' : ''} ${prefs.showDetails ? '' : 'compact'}`} onClick={(e) => (e.shiftKey || e.ctrlKey || e.metaKey || sel.count > 0) && sel.toggle(item.id, e)}>
                 <SelectBox checked={sel.isSelected(item.id)} onClick={(e) => sel.toggle(item.id, e)} className="inline-select" />
                 <CardThumb card={item.card} />
                 <div className="list-main">
@@ -183,11 +183,11 @@ export default function CollectionTab() {
                     {item.isFoil && <span className="badge badge-accent">Foil</span>}
                     <ManaCost cost={item.card.manaCost} />
                   </div>
-                  <div className="list-sub">
+                  {prefs.showDetails && <div className="list-sub">
                     <span className="ellipsis">{item.card.setName ?? item.card.setCode?.toUpperCase() ?? 'Arte customizada'}{item.card.collectorNumber ? ` #${item.card.collectorNumber}` : ''}</span>
                     {item.condition !== 'NM' && <span className="badge">{item.condition}</span>}
                     {item.language !== 'en' && <span className="badge">{item.language.toUpperCase()}</span>}
-                  </div>
+                  </div>}
                 </div>
                 <div className="list-meta hide-mobile">
                   <span className="col-usage"><UsageBadges item={item} inUse={u?.inUse ?? 0} available={u?.available ?? item.quantity} decks={u?.decks ?? []} /></span>
@@ -207,7 +207,7 @@ export default function CollectionTab() {
             const u = usage.get(item.id);
             return (
               <div key={item.id} className={`card-tile ${sel.isSelected(item.id) ? 'selected' : ''}`}>
-                <div className={`card-img-wrap ${item.isFoil ? 'foil-shine' : ''}`} {...previewProps(frontImage(item.card, 'normal'), backImage(item.card))} onClick={(e) => (e.shiftKey || sel.count > 0) && sel.toggle(item.id, e)}>
+                <div className={`card-img-wrap ${item.isFoil && prefs.showFoil ? 'foil' : ''}`} {...previewProps(frontImage(item.card, 'normal'), backImage(item.card))} onClick={(e) => (e.shiftKey || sel.count > 0) && sel.toggle(item.id, e)}>
                   <img src={frontImage(item.card, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={item.card.name} />
                   <SelectBox checked={sel.isSelected(item.id)} onClick={(e) => sel.toggle(item.id, e)} />
                   <div className="corner-badges"><span className="badge" style={{ background: 'rgba(0,0,0,.78)', color: 'var(--accent)' }}>{item.quantity}×</span></div>

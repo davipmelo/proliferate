@@ -5,6 +5,7 @@ import { useStore } from './state/store.tsx';
 import { TopBar } from './components/layout/TopBar.tsx';
 import { Loading } from './components/common/bits.tsx';
 import { SyncManager } from './components/auth/SyncManager.tsx';
+import { CardRepair } from './components/common/CardRepair.tsx';
 
 const DecksTab = lazy(() => import('./components/decks/DecksTab.tsx'));
 const CollectionTab = lazy(() => import('./components/collection/CollectionTab.tsx'));
@@ -52,6 +53,7 @@ export default function App() {
         ))}
       </nav>
       <SyncManager />
+      <CardRepair />
     </div>
   );
 }
