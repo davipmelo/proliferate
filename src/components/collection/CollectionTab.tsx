@@ -5,6 +5,7 @@ import { CONDITIONS } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, openModal, previewProps, toast } from '../../state/ui.tsx';
 import { ItemEditModal } from './ItemEditModal.tsx';
+import { StatsPanel } from '../stats/StatsPanel.tsx';
 import { backImage, frontImage, matchesColorFilter, type ColorFilterValue } from '../../types/cardRules.ts';
 import { summarizeCollection } from '../../services/usage.ts';
 import { compareBy, matchesText, SORT_LABELS, type SortKey } from '../../services/sorting.ts';
@@ -132,6 +133,8 @@ export default function CollectionTab() {
         <div className="stat"><div className="label">Valor estimado</div><div className="value">{formatUsd(summary.value)}</div><div className="hint">preços do Scryfall</div></div>
       </div>
 
+      {data.collection.length > 0 && <StatsPanel kind="collection" teaser={<><span>{summary.unique} itens</span><span>{formatUsd(summary.value)}</span></>} />}
+
       <div className="toolbar">
         <div className="input-icon">
           <Search size={16} />
@@ -187,8 +190,8 @@ export default function CollectionTab() {
                   </div>
                 </div>
                 <div className="list-meta hide-mobile">
-                  <UsageBadges item={item} inUse={u?.inUse ?? 0} available={u?.available ?? item.quantity} decks={u?.decks ?? []} />
-                  <span className="small subtle nowrap" style={{ width: 64, textAlign: 'right' }}>{formatUsd(item.card.priceUsd)}</span>
+                  <span className="col-usage"><UsageBadges item={item} inUse={u?.inUse ?? 0} available={u?.available ?? item.quantity} decks={u?.decks ?? []} /></span>
+                  <span className="col-price small muted">{formatUsd(item.card.priceUsd)}</span>
                 </div>
                 <div className="list-actions" onClick={(e) => e.stopPropagation()}>
                   <QtyControl value={item.quantity} min={1} onChange={(n) => store.updateCollectionItem(item.id, { quantity: n })} />

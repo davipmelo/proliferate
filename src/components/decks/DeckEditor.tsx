@@ -149,7 +149,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
             </div>
             <h1>{deck.name}</h1>
             {deck.description && <p className="small muted" style={{ maxWidth: 640, whiteSpace: 'pre-wrap' }}>{deck.description}</p>}
-            <div className="row-wrap" style={{ gap: 24, marginTop: 4 }}>
+            <div className="hero-metrics">
               <div className="count-meter">
                 <span className="label">Cartas</span>
                 <span className="nums" style={{ color: count === target ? 'var(--success)' : count > target ? 'var(--warning)' : undefined }}>{count}<small> / {target}</small></span>
@@ -197,7 +197,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
             </div>
           )}
 
-          <div className="col" style={{ gap: 14 }}>
+          <div className={`deck-groups ${view === 'list' ? 'list-mode' : ''}`}>
             {groups.map((g) => (
               <section key={g.key}>
                 {view === 'list' ? (
@@ -208,9 +208,9 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
                         <CardThumb card={dc.card} />
                         <div className="list-main">
                           <div className="list-title"><span>{dc.card.name}</span>{dc.isFoil && <span className="badge badge-accent">Foil</span>}<ManaCost cost={dc.card.manaCost} /></div>
-                          <div className="list-sub"><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>
+                          <div className="list-sub"><span className="only-mobile"><AvailBadge dc={dc} /></span><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>
                         </div>
-                        <div className="list-meta"><AvailBadge dc={dc} onAdd={() => addToCollection(dc)} /><span className="small subtle hide-mobile" style={{ width: 58, textAlign: 'right' }}>{formatUsd(dc.card.priceUsd)}</span></div>
+                        <div className="list-meta hide-mobile"><AvailBadge dc={dc} /><span className="deck-price small subtle hide-mobile tabular">{formatUsd(dc.card.priceUsd)}</span></div>
                         <div className="list-actions">
                           <QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} />
                           <CardMenu dc={dc} onArt={() => changeArt(ordered, ordered.indexOf(dc))} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} onCollect={() => addToCollection(dc)} />
@@ -265,14 +265,13 @@ function availOf(dc: DeckCard, collection: Parameters<typeof deckCardAvailabilit
   return a.owned - a.inUse;
 }
 
-function AvailBadge({ dc, onAdd }: { dc: DeckCard; onAdd?: () => void }) {
+function AvailBadge({ dc }: { dc: DeckCard }) {
   const { data, usage } = useStore();
   const a = deckCardAvailability(dc, data.collection, usage);
   if (a.status === 'missing')
     return (
       <span className="row" style={{ gap: 2 }}>
         <span className="avail missing" title="Esta impressão não está na sua coleção">fora da coleção</span>
-        {onAdd && <button className="btn btn-ghost btn-icon btn-xs hide-mobile" title="Registrar na coleção" onClick={onAdd}><Library size={13} /></button>}
       </span>
     );
   if (a.status === 'short') return <span className="avail short" title={`Você tem ${a.owned}, mas ${a.inUse} cópias estão em uso nos decks`}>faltam {a.inUse - a.owned}</span>;

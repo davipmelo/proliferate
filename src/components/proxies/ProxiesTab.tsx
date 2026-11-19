@@ -104,13 +104,14 @@ export default function ProxiesTab() {
       </div>
 
       <div className="proxy-layout">
-        <aside className="proxy-side">
-          <div className="section">
-            <div className="section-title" style={{ fontSize: 'var(--fs-md)' }}>
-              Fila de impressão <span className="count">{total} carta(s) · {pages.length} folha(s)</span>
+        <aside className="proxy-col proxy-col-left">
+          <div className="section" style={{ flex: 1 }}>
+            <div className="section-title" style={{ fontSize: 'var(--fs-md)', marginBottom: 4 }}>
+              Fila de impressão
               <div className="spacer" />
               {data.proxies.length > 0 && <button className="btn btn-ghost btn-xs" onClick={clear}><Trash2 size={13} /> Limpar</button>}
             </div>
+            <p className="small subtle" style={{ marginBottom: 12 }}>{total} carta(s) · {pages.length} folha(s) A4</p>
             <CardSearch placeholder="Adicionar carta à fila…" onSelect={addByName} clearOnSelect />
             <div className="row-wrap" style={{ marginTop: 8, gap: 6 }}>
               <button className="btn btn-ghost btn-xs" onClick={addDeck}><Layers size={13} /> Deck inteiro</button>
@@ -118,9 +119,9 @@ export default function ProxiesTab() {
               <button className="btn btn-ghost btn-xs" onClick={() => goToTab('utilities')}><Sparkles size={13} /> Fichas e utilitários</button>
             </div>
             {data.proxies.length > 0 && (
-              <div className="proxy-queue col" style={{ gap: 2, marginTop: 10 }}>
+              <div className="proxy-queue col" style={{ gap: 1 }}>
                 {data.proxies.map((p, i) => (
-                  <div key={p.id} className="row" style={{ gap: 8, padding: '3px 0' }}>
+                  <div key={p.id} className="queue-row">
                     <CardThumb card={p.card} />
                     <div className="grow" style={{ minWidth: 0 }}>
                       <div className="ellipsis small" style={{ fontWeight: 600 }}>{p.card.name}</div>
@@ -134,8 +135,10 @@ export default function ProxiesTab() {
               </div>
             )}
           </div>
+        </aside>
 
-          <div className="section">
+        <aside className="proxy-col proxy-col-right">
+          <div className="section proxy-settings">
             <div className="section-title" style={{ fontSize: 'var(--fs-md)' }}>Predefinições {!preset && <span className="badge">Personalizado</span>}</div>
             <div className="preset-grid">
               {PROXY_PRESETS.map((p) => (
@@ -156,7 +159,7 @@ export default function ProxiesTab() {
           </div>
         </aside>
 
-        <div>
+        <div className="proxy-center">
           {total === 0 ? (
             <Empty icon={<Printer size={40} />} title="A fila de impressão está vazia" action={<button className="btn btn-secondary" onClick={addDeck}><Plus size={16} /> Enviar um deck</button>}>
               Adicione cartas pela busca ao lado ou pelos botões de impressão em Decks, Coleção e Utilitários.

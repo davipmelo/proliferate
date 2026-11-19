@@ -15,6 +15,7 @@ interface Props {
 export function TopBar({ tab, onTab, proxyCount }: Props) {
   return (
     <header className="topbar">
+      <div className="topbar-inner">
       <a className="brand" href="./" onClick={(e) => e.preventDefault()}>
         <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" />
         <span>Proliferate</span>
@@ -41,7 +42,9 @@ export function TopBar({ tab, onTab, proxyCount }: Props) {
             <Download size={16} /> Importar
           </button>
         </div>
+        <span className="topbar-divider hide-mobile" />
         <UserMenu />
+      </div>
       </div>
     </header>
   );

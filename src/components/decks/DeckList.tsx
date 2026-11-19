@@ -10,6 +10,7 @@ import { openImport } from '../launchers.tsx';
 import { DeckFormModal } from './DeckFormModal.tsx';
 import { TagManagerModal } from './TagManagerModal.tsx';
 import { CoverEditorModal } from './CoverEditorModal.tsx';
+import { StatsPanel } from '../stats/StatsPanel.tsx';
 import { coverStyle, deckColors, deckCount, deckCoverImage, deckTarget, deckValue } from './deckUtils.ts';
 
 type DeckSort = 'updated' | 'name' | 'format' | 'count';
@@ -88,6 +89,8 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
         <button className="btn btn-primary" onClick={create}><Plus size={16} /> Novo deck</button>
       </div>
 
+      {data.decks.length > 0 && <StatsPanel kind="decks" teaser={<><span>{data.decks.length} decks</span><span>{formatUsd(data.decks.reduce((s2, d) => s2 + deckValue(d), 0))}</span></>} />}
+
       <div className="toolbar">
         <div className="input-icon"><Search size={16} /><input className="input" placeholder="Buscar decks…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
         <select className="select select-sm" style={{ width: 'auto' }} value={sort} onChange={(e) => setSort(e.target.value as DeckSort)} aria-label="Ordenar">
@@ -118,24 +121,28 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
       ) : decks.length === 0 ? (
         <Empty icon={<Search size={36} />} title="Nenhum deck encontrado" />
       ) : view === 'list' ? (
-        <div className="list">
+        <div className="list deck-list">
           {decks.map((d) => {
             const img = deckCoverImage(d);
             const count = deckCount(d);
             const target = deckTarget(d);
             return (
-              <div key={d.id} className="list-row clickable" onClick={() => onOpen(d.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpen(d.id)}>
-                {img ? <img className="list-thumb-wide" src={img} loading="lazy" alt="" /> : <div className="list-thumb-wide" />}
+              <div key={d.id} className="list-row clickable deck-row" onClick={() => onOpen(d.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpen(d.id)}>
+                <div className="deck-row-art">{img && <img src={img} loading="lazy" alt="" style={coverStyle(d)} />}</div>
                 <div className="list-main">
-                  <div className="list-title"><span>{d.name}</span><ColorPips colors={deckColors(d)} /></div>
+                  <div className="list-title"><span className="deck-row-name">{d.name}</span><ColorPips colors={deckColors(d)} /></div>
                   <div className="list-sub">
-                    <span>{formatInfo(d.format).label}</span>
-                    <span className={count === target ? 'success-text' : ''}>{count}/{target}</span>
-                    {d.commander && <span className="ellipsis hide-mobile">{d.commander.name}</span>}
-                    <span className="hide-mobile row" style={{ gap: 4 }}><Tags_ d={d} /></span>
+                    <span className="badge">{formatInfo(d.format).label}</span>
+                    {d.commander && <span className="ellipsis">{d.commander.name}{d.partner ? ` & ${d.partner.name}` : ''}</span>}
                   </div>
                 </div>
-                <div className="list-meta hide-mobile"><span className="small subtle">{formatUsd(deckValue(d))}</span></div>
+                <div className="deck-row-tags hide-mobile"><Tags_ d={d} /></div>
+                <div className="deck-row-count hide-mobile">
+                  <span className="tabular"><b className={count === target ? 'success-text' : count > target ? 'warning-text' : ''}>{count}</b><span className="subtle"> / {target}</span></span>
+                  <div className="progress"><div style={{ width: `${Math.min(100, (count / target) * 100)}%`, background: count === target ? 'var(--success)' : undefined }} /></div>
+                </div>
+                <div className="deck-row-value hide-mobile tabular">{formatUsd(deckValue(d))}</div>
+                <div className="deck-row-date hide-mobile subtle small">{relativeDate(d.updatedAt)}</div>
                 <div className="list-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="btn btn-ghost btn-icon btn-sm hide-mobile" title="Mandar deck para impressão" onClick={() => print(d)}><Printer size={16} /></button>
                   <button className="btn btn-ghost btn-icon btn-sm hide-mobile" title="Editar" onClick={() => edit(d)}><Pencil size={16} /></button>
@@ -149,17 +156,32 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
         <div className="deck-cards">
           {decks.map((d) => {
             const img = deckCoverImage(d);
+            const count = deckCount(d);
+            const target = deckTarget(d);
             return (
               <div key={d.id} className="deck-card" onClick={() => onOpen(d.id)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && onOpen(d.id)}>
-                <div className="deck-cover">{img && <img src={img} loading="lazy" alt="" style={coverStyle(d)} />}</div>
+                <div className="deck-cover">
+                  {img && <img src={img} loading="lazy" alt="" style={coverStyle(d)} />}
+                  <div className="deck-cover-info">
+                    <span className="badge badge-accent">{formatInfo(d.format).label}</span>
+                    <h3 className="ellipsis">{d.name}</h3>
+                  </div>
+                </div>
                 <div className="deck-card-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para impressão" onClick={() => print(d)}><Printer size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Ajustar capa" onClick={() => cover(d)}><Crop size={15} /></button>
                   <Actions d={d} />
                 </div>
                 <div className="deck-card-body">
-                  <div className="row"><b className="grow ellipsis">{d.name}</b><ColorPips colors={deckColors(d)} /></div>
-                  <div className="small subtle row"><span>{formatInfo(d.format).label}</span>·<span>{deckCount(d)}/{deckTarget(d)} cartas</span>·<span>{formatUsd(deckValue(d))}</span></div>
+                  <div className="row small">
+                    <ColorPips colors={deckColors(d)} />
+                    <span className="grow ellipsis subtle">{d.commander?.name ?? `${d.cards.length} cartas distintas`}</span>
+                    <b className="tabular">{formatUsd(deckValue(d))}</b>
+                  </div>
+                  <div className="row small">
+                    <div className="progress grow"><div style={{ width: `${Math.min(100, (count / target) * 100)}%`, background: count === target ? 'var(--success)' : undefined }} /></div>
+                    <span className="tabular subtle">{count}/{target}</span>
+                  </div>
                   {d.tags.length > 0 && <div className="row-wrap" style={{ gap: 4 }}><Tags_ d={d} /></div>}
                 </div>
               </div>
@@ -169,4 +191,15 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
       )}
     </div>
   );
+}
+
+function relativeDate(iso: string): string {
+  const diff = Date.now() - Date.parse(iso);
+  const day = 864e5;
+  if (!Number.isFinite(diff)) return '';
+  if (diff < 60e3) return 'agora';
+  if (diff < 36e5) return `há ${Math.floor(diff / 60e3)} min`;
+  if (diff < day) return `há ${Math.floor(diff / 36e5)} h`;
+  if (diff < 30 * day) return `há ${Math.floor(diff / day)} dia(s)`;
+  return new Date(iso).toLocaleDateString('pt-BR');
 }

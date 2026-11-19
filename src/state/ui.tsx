@@ -27,14 +27,24 @@ interface ToastMsg {
   id: number;
   text: string;
   kind: ToastKind;
+  count: number;
 }
 const toasts = createStore<ToastMsg[]>([]);
 let toastId = 0;
 
+const toastTimers = new Map<number, ReturnType<typeof setTimeout>>();
+
 export function toast(text: string, kind: ToastKind = 'success', ms = 3200): void {
-  const id = ++toastId;
-  toasts.set((t) => [...t.slice(-3), { id, text, kind }]);
-  setTimeout(() => toasts.set((t) => t.filter((x) => x.id !== id)), ms);
+  // Mensagens iguais em sequência viram um único toast com contador.
+  const same = toasts.get().find((t) => t.text === text && t.kind === kind);
+  const id = same?.id ?? ++toastId;
+  if (same) toasts.set((t) => t.map((x) => (x.id === id ? { ...x, count: x.count + 1 } : x)));
+  else toasts.set((t) => [...t.slice(-3), { id, text, kind, count: 1 }]);
+  clearTimeout(toastTimers.get(id));
+  toastTimers.set(id, setTimeout(() => {
+    toastTimers.delete(id);
+    toasts.set((t) => t.filter((x) => x.id !== id));
+  }, ms));
 }
 
 function Toasts() {
@@ -45,6 +55,7 @@ function Toasts() {
         <div key={t.id} className={`toast toast-${t.kind}`}>
           {t.kind === 'success' ? <CheckCircle2 size={16} /> : t.kind === 'error' ? <AlertTriangle size={16} /> : <Info size={16} />}
           <span>{t.text}</span>
+          {t.count > 1 && <b className="toast-count">×{t.count}</b>}
           <button className="btn btn-ghost btn-icon btn-xs" aria-label="Fechar" onClick={() => toasts.set((x) => x.filter((m) => m.id !== t.id))}>
             <X size={14} />
           </button>
