@@ -82,7 +82,7 @@ test('migração: formato do Proliferate v1', () => {
   const deck = d.decks[0];
   assert.equal(deck.commander?.name, 'Atraxa');
   assert.equal(deck.cards.find((x) => x.category === 'commander')?.card.name, 'Atraxa');
-  assert.deepEqual(deck.cover, { image: 'capa.jpg', zoom: 2, positionY: 50 });
+  assert.deepEqual(deck.cover, { image: 'capa.jpg', zoom: 2, positionX: 50, positionY: 50 });
   assert.equal(deck.cards.find((x) => x.card.id === 'f')?.card.cardFaces?.[1].images?.normal, 'b.jpg');
   assert.equal(deck.tokens[0].card.name, 'Treasure');
   assert.equal(deck.tokens[0].quantity, 3);

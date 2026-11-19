@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Image as ImageIcon, Plus, Printer, Trash2, Wand2 } from 'lucide-react';
+import { Image as ImageIcon, Info, Plus, Printer, Trash2, Wand2 } from 'lucide-react';
 import type { Deck, DeckToken, TokenCard, ViewMode } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { previewProps, toast } from '../../state/ui.tsx';
@@ -7,7 +7,7 @@ import { getTokensForCards } from '../../services/scryfall.ts';
 import { uid } from '../../services/normalize.ts';
 import { backImage, frontImage, sameArt } from '../../types/cardRules.ts';
 import { CardThumb, QtyControl, Spinner } from '../common/bits.tsx';
-import { openArtPicker, openUtilityPicker } from '../launchers.tsx';
+import { openArtPicker, openCardInfo, openUtilityPicker } from '../launchers.tsx';
 import { DeckPart } from './DeckPart.tsx';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -75,7 +75,7 @@ export function DeckTokens({ deck, view, gridSize, details, closed, onToggle }: 
   );
 
   return (
-    <DeckPart title="Fichas e utilitários" count={total || undefined} closed={closed} onToggle={onToggle} actions={actions}>
+    <DeckPart title="Tokens" count={total || undefined} closed={closed} onToggle={onToggle} actions={actions}>
       {deck.tokens.length === 0 ? (
         <div className="part-empty small subtle">Nenhuma ficha. Use “Detectar” para buscar as fichas que as cartas do deck criam, ou “Adicionar” para escolher qualquer utilitário.</div>
       ) : view === 'list' ? (
@@ -90,6 +90,7 @@ export function DeckTokens({ deck, view, gridSize, details, closed, onToggle }: 
                 </div>
                 <div className="list-actions">
                   <QtyControl value={t.quantity} min={1} onChange={(n) => setQty(t.instanceId, n)} />
+                  <button className="btn btn-ghost btn-icon btn-sm" title="Informações" onClick={() => openCardInfo(t.card)}><Info size={15} /></button>
                   <button className="btn btn-ghost btn-icon btn-sm" title="Trocar arte" onClick={() => changeArt(i)}><ImageIcon size={15} /></button>
                   <button className="btn btn-ghost btn-icon btn-sm" title="Remover" onClick={() => remove(t.instanceId)}><Trash2 size={15} /></button>
                 </div>
@@ -105,6 +106,7 @@ export function DeckTokens({ deck, view, gridSize, details, closed, onToggle }: 
                 <img src={frontImage(t.card, gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={t.card.name} />
                 {t.quantity > 1 && <span className="qty-badge">{t.quantity}×</span>}
                 <div className="card-tile-actions">
+                  <button className="btn btn-secondary btn-icon btn-sm" title="Informações" onClick={() => openCardInfo(t.card)}><Info size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={() => changeArt(i)}><ImageIcon size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para proxies" onClick={() => print([t])}><Printer size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Remover" onClick={() => remove(t.instanceId)}><Trash2 size={15} /></button>

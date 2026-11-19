@@ -6,7 +6,7 @@ import { getPrints } from '../../services/scryfall.ts';
 import { cardWithMpcArt, driveIdFromUrl, driveThumb, mpcOrderEntries, normalizeImageUrl, parseMpcXml, searchMpc, sourceRank } from '../../services/mpcfill.ts';
 import { compressImage } from '../../services/image.ts';
 import { uid } from '../../services/normalize.ts';
-import { toast } from '../../state/ui.tsx';
+import { previewProps, toast } from '../../state/ui.tsx';
 import { Modal } from '../common/Modal.tsx';
 import { formatUsd, Loading } from '../common/bits.tsx';
 
@@ -114,16 +114,32 @@ export default function ArtPicker({ cards: initialCards, start = 0, title, token
         <aside className="art-compare hide-mobile">
           <div className="col" style={{ gap: 4 }}>
             <span className="label">Atual</span>
-            {current ? <img src={current} alt="Arte atual" /> : <div className="art-ph">Sem verso</div>}
+            {current ? <img src={current} alt="Arte atual" {...previewProps(current)} /> : <div className="art-ph">Sem verso</div>}
           </div>
           <div className="col" style={{ gap: 4 }}>
             <span className="label">{hover ? 'Comparando' : 'Passe o mouse para comparar'}</span>
-            {hover ? <img src={hover} alt="Arte em comparação" /> : <div className="art-ph" />}
+            {hover ? <img src={hover} alt="Arte em comparação" {...previewProps(hover)} /> : <div className="art-ph" />}
           </div>
         </aside>
       </div>
     </Modal>
   );
+}
+
+/** Junta o zoom ao passar o mouse com a comparação lateral do seletor. */
+function withPreview(zoomUrl: string | undefined, onHover: (u: string | null) => void, compareUrl?: string) {
+  const pv = previewProps(zoomUrl);
+  return {
+    onMouseEnter: (e: React.MouseEvent) => {
+      onHover(compareUrl ?? zoomUrl ?? null);
+      pv.onMouseEnter(e);
+    },
+    onMouseMove: pv.onMouseMove,
+    onMouseLeave: () => {
+      onHover(null);
+      pv.onMouseLeave();
+    },
+  };
 }
 
 // ---------------- Artes oficiais ----------------
@@ -200,8 +216,7 @@ function OfficialArts({ card, face, onPick, onHover }: { card: Card; face: Face;
             <button
               key={p.id}
               className={`art-option ${active ? 'active' : ''}`}
-              onMouseEnter={() => onHover(img?.normal ?? null)}
-              onMouseLeave={() => onHover(null)}
+              {...withPreview(img?.large ?? img?.normal, onHover, img?.normal)}
               onClick={() => p.card && onPick({ ...p.card, isFoil: card.isFoil, namePt: card.namePt })}
             >
               <img src={img?.small} loading="lazy" alt="" />
@@ -326,8 +341,7 @@ function MpcArts({ card, face, tokens, onPick, onHover }: { card: Card; face: Fa
           <button
             key={p.id + (p.sourceName ?? '')}
             className={`art-option ${card.id === p.id || card.backImage === p.images.normal ? 'active' : ''}`}
-            onMouseEnter={() => onHover(p.images.normal ?? null)}
-            onMouseLeave={() => onHover(null)}
+            {...withPreview(p.images.large ?? p.images.normal, onHover, p.images.normal)}
             onClick={() => pick(p)}
           >
             <img src={p.images.small} loading="lazy" alt="" referrerPolicy="no-referrer" />

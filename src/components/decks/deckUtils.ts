@@ -35,11 +35,25 @@ export function deckColors(deck: Deck): string[] {
   return ['W', 'U', 'B', 'R', 'G'].filter((c) => set.has(c));
 }
 
-/** Estilo de capa (zoom 1–3 e posição vertical 0–100%). */
+/** Estilo de capa: recorte (object-fit: cover) com zoom 1–3 em torno do ponto de posição X/Y. */
 export function coverStyle(deck: Pick<Deck, 'cover'>): React.CSSProperties {
+  const x = deck.cover.positionX ?? 50;
+  const y = deck.cover.positionY;
   return {
-    objectPosition: `50% ${deck.cover.positionY}%`,
+    objectPosition: `${x}% ${y}%`,
     transform: `scale(${deck.cover.zoom})`,
-    transformOrigin: `50% ${deck.cover.positionY}%`,
+    transformOrigin: `${x}% ${y}%`,
   };
+}
+
+/**
+ * Área visível (frações 0–1 da imagem) de uma capa num quadro com proporção `boxAspect`
+ * (largura/altura), para a imagem de proporção `imgAspect`. Mesma conta do `coverStyle`.
+ */
+export function coverCrop(imgAspect: number, boxAspect: number, cover: Pick<Deck['cover'], 'zoom' | 'positionX' | 'positionY'>) {
+  const fw = Math.min(1, boxAspect / imgAspect) / cover.zoom;
+  const fh = Math.min(1, imgAspect / boxAspect) / cover.zoom;
+  const x = (cover.positionX ?? 50) / 100;
+  const y = cover.positionY / 100;
+  return { left: x * (1 - fw), top: y * (1 - fh), width: fw, height: fh };
 }

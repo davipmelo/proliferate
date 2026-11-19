@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, FileDown, Image as ImageIcon, Layers, Library, Maximize2, Minus, Plus, Printer, Search, Sparkles, Trash2, X, ZoomIn } from 'lucide-react';
+import { ChevronRight, FileDown, Image as ImageIcon, Info, Layers, Library, Maximize2, Minus, Plus, Printer, Search, Sparkles, Trash2, X, ZoomIn } from 'lucide-react';
 import type { ProxySettings } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, toast } from '../../state/ui.tsx';
@@ -13,7 +13,7 @@ import { isDoubleFaced } from '../../types/cardRules.ts';
 import { CardThumb, Empty, QtyControl, Spinner } from '../common/bits.tsx';
 import { CardSearch } from '../common/CardSearch.tsx';
 import { pickDeck } from '../common/DeckPicker.tsx';
-import { openArtPicker } from '../launchers.tsx';
+import { openArtPicker, openCardInfo } from '../launchers.tsx';
 import { Sheet } from './Sheet.tsx';
 import { useFitsViewport, usePersistent } from '../common/hooks.ts';
 
@@ -207,6 +207,7 @@ export default function ProxiesTab() {
                         <div className="xs subtle ellipsis">{isDoubleFaced(p.card) ? 'Frente + verso · ' : ''}{p.card.artSource === 'mpcfill' ? 'MPCFill' : p.card.artSource === 'custom' ? 'Arte própria' : p.card.setCode?.toUpperCase()}</div>
                       </div>
                       <QtyControl value={p.quantity} min={1} onChange={(n) => store.updateProxies((ps) => ps.map((x) => (x.id === p.id ? { ...x, quantity: n } : x)))} />
+                      <button className="btn btn-ghost btn-icon btn-xs" title="Informações" onClick={() => openCardInfo(p.card)}><Info size={14} /></button>
                       <button className="btn btn-ghost btn-icon btn-xs" title="Trocar arte" onClick={() => changeArt(shownQueue, i)}><ImageIcon size={14} /></button>
                       <button className="btn btn-ghost btn-icon btn-xs" title="Remover" onClick={() => store.updateProxies((ps) => ps.filter((x) => x.id !== p.id))}><Trash2 size={14} /></button>
                     </div>

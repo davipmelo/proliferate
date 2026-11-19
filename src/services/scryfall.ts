@@ -324,3 +324,122 @@ export async function getTokensForCards(cardIds: string[]): Promise<TokenCard[]>
     .filter((c) => (seen.has(c.name) ? false : (seen.add(c.name), true)))
     .map((c) => ({ ...c, utilityType: detectUtilityType(c) }));
 }
+
+// ---------- Detalhes da carta (janela de informações) ----------
+
+export interface DetailFace {
+  name: string;
+  manaCost?: string;
+  typeLine?: string;
+  oracleText?: string;
+  flavorText?: string;
+  power?: string;
+  toughness?: string;
+  loyalty?: string;
+  defense?: string;
+  image?: string;
+}
+
+export interface DetailPrint {
+  id: string;
+  setCode: string;
+  setName: string;
+  collectorNumber: string;
+  rarity: string;
+  lang: string;
+  releasedAt?: string;
+  usd?: number;
+  usdFoil?: number;
+  eur?: number;
+  tix?: number;
+  image?: string;
+  scryfallUri?: string;
+}
+
+export interface CardDetails {
+  id: string;
+  name: string;
+  faces: DetailFace[];
+  artist?: string;
+  legalities: Record<string, string>;
+  print: DetailPrint;
+  prints: DetailPrint[];
+  totalPrints: number;
+  scryfallUri?: string;
+  setIcon?: string;
+}
+
+const num = (v: any) => (v == null || v === '' ? undefined : Number(v));
+const isUuid = (id?: string) => !!id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+function toDetailPrint(raw: any): DetailPrint {
+  return {
+    id: raw.id,
+    setCode: String(raw.set ?? '').toUpperCase(),
+    setName: raw.set_name ?? '',
+    collectorNumber: raw.collector_number ?? '',
+    rarity: raw.rarity ?? '',
+    lang: raw.lang ?? 'en',
+    releasedAt: raw.released_at,
+    usd: num(raw.prices?.usd),
+    usdFoil: num(raw.prices?.usd_foil) ?? num(raw.prices?.usd_etched),
+    eur: num(raw.prices?.eur) ?? num(raw.prices?.eur_foil),
+    tix: num(raw.prices?.tix),
+    image: raw.image_uris?.normal ?? raw.card_faces?.[0]?.image_uris?.normal,
+    scryfallUri: raw.scryfall_uri,
+  };
+}
+
+const detailsCache = new Map<string, CardDetails>();
+
+/**
+ * Tudo o que a janela de informações mostra: textos de cada face, legalidades, preços e outras
+ * impressões. Cartas com arte própria/MPCFill usam a impressão oficial mais recente pelo nome.
+ */
+export async function getCardDetails(card: Pick<Card, 'id' | 'name' | 'oracleId'>, printId?: string): Promise<CardDetails> {
+  const id = printId ?? (isUuid(card.id) ? card.id : undefined);
+  const key = id ?? `n:${card.name}`;
+  const hit = detailsCache.get(key);
+  if (hit) return hit;
+  const raw: any = id
+    ? await sfFetch(`/cards/${id}`)
+    : await sfFetch(`/cards/named?exact=${encodeURIComponent(card.name.split(' // ')[0])}`).catch(() => sfFetch(`/cards/named?fuzzy=${encodeURIComponent(card.name)}`));
+  const facesRaw: any[] = raw.card_faces?.length ? raw.card_faces : [raw];
+  const faces: DetailFace[] = facesRaw.map((f) => ({
+    name: f.name,
+    manaCost: f.mana_cost || undefined,
+    typeLine: f.type_line ?? raw.type_line,
+    oracleText: f.oracle_text,
+    flavorText: f.flavor_text,
+    power: f.power,
+    toughness: f.toughness,
+    loyalty: f.loyalty,
+    defense: f.defense,
+    image: f.image_uris?.normal ?? (f === raw ? raw.image_uris?.normal : undefined) ?? raw.image_uris?.normal,
+  }));
+  let prints: DetailPrint[] = [];
+  let totalPrints = 0;
+  if (raw.oracle_id) {
+    try {
+      const r: any = await sfFetch(`/cards/search?q=${encodeURIComponent(`oracleid:${raw.oracle_id}`)}&unique=prints&order=released&dir=desc&include_extras=true`);
+      prints = (r.data ?? []).map(toDetailPrint);
+      totalPrints = r.total_cards ?? prints.length;
+    } catch {
+      /* sem outras impressões */
+    }
+  }
+  const details: CardDetails = {
+    id: raw.id,
+    name: raw.name,
+    faces,
+    artist: raw.artist ?? facesRaw[0]?.artist,
+    legalities: raw.legalities ?? {},
+    print: toDetailPrint(raw),
+    prints,
+    totalPrints,
+    scryfallUri: raw.scryfall_uri,
+    setIcon: undefined,
+  };
+  detailsCache.set(key, details);
+  return details;
+}

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown,
+  ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown, Info,
   MoreVertical, Pencil, Plus, Printer, Search, Tag as TagIcon, Trash2, Upload,
 } from 'lucide-react';
 import type { ColorMatchMode, Deck, DeckCard, DeckCategory, DeckGroupMode } from '../../types/models.ts';
@@ -14,7 +14,7 @@ import { CardThumb, ColorPips, Dropdown, formatUsd, Loading, ManaCost, QtyContro
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls } from '../common/selection.tsx';
 import { useFitsViewport, usePersistent } from '../common/hooks.ts';
-import { openAddCard, openArtPicker, openExport, openImport } from '../launchers.tsx';
+import { openAddCard, openArtPicker, openCardInfo, openExport, openImport } from '../launchers.tsx';
 import { DeckFormModal } from './DeckFormModal.tsx';
 import { CoverEditorModal } from './CoverEditorModal.tsx';
 import { DeckTokens } from './DeckTokens.tsx';
@@ -146,6 +146,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
         <img src={frontImage(dc.card, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={dc.card.name} />
         {dc.quantity > 1 && <span className="qty-badge">{dc.quantity}×</span>}
         <div className="card-tile-actions">
+          <button className="btn btn-secondary btn-icon btn-sm" title="Informações" onClick={() => openCardInfo(dc.card, { foil: dc.isFoil || dc.card.isFoil })}><Info size={15} /></button>
           <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={onArt}><ImageIcon size={15} /></button>
           <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para proxies" onClick={() => toProxy([dc])}><Printer size={15} /></button>
           <button className="btn btn-secondary btn-icon btn-sm" title="Remover" onClick={() => setCard(dc.instanceId, null)}><Trash2 size={15} /></button>
@@ -245,7 +246,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
 
           {(info.hasCommander || cmdCards.length > 0) && (
             <DeckPart
-              title={cmdCards.length > 1 ? 'Comandantes' : 'Comandante'}
+              title="Comandante"
               count={cmdCards.length || undefined}
               closed={isCollapsed(PART_CMD)}
               onToggle={() => toggleGroup(PART_CMD)}
@@ -264,7 +265,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
           )}
 
           <DeckPart
-            title="Deck principal"
+            title="Deck"
             count={mainQty}
             extra={q || colors.length ? 'filtrado' : undefined}
             closed={isCollapsed(PART_MAIN)}
@@ -329,6 +330,7 @@ function CardMenu({ dc, onArt, onProxy, onMove, onRemove }: { dc: DeckCard; onAr
     <Dropdown trigger={(_o, t) => <button className="btn btn-ghost btn-icon btn-sm" onClick={t} aria-label="Ações"><MoreVertical size={16} /></button>}>
       {(close) => (
         <>
+          <button className="menu-item" onClick={() => { close(); openCardInfo(dc.card, { foil: dc.isFoil || dc.card.isFoil }); }}><Info size={16} /> Informações</button>
           <button className="menu-item" onClick={() => { close(); onArt(); }}><ImageIcon size={16} /> Trocar arte</button>
           <button className="menu-item" onClick={() => { close(); onProxy(); }}><Printer size={16} /> Mandar para proxies</button>
           <div className="menu-label">Mover para</div>

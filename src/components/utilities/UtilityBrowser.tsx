@@ -1,16 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Check, Image as ImageIcon, Layers, Printer, Search, Sparkles, X } from 'lucide-react';
+import { Check, Image as ImageIcon, Info, Printer, Search, Sparkles, X } from 'lucide-react';
 import type { TokenCard, UtilityCategory } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { previewProps, toast } from '../../state/ui.tsx';
 import { searchUtilities, UTILITY_CATEGORIES, type SearchResult } from '../../services/scryfall.ts';
-import { uid } from '../../services/normalize.ts';
-import { backImage, frontImage, matchesColorFilter, sameArt, type ColorFilterValue } from '../../types/cardRules.ts';
+import { backImage, frontImage, matchesColorFilter, type ColorFilterValue } from '../../types/cardRules.ts';
 import { Empty, Loading, useDebounced } from '../common/bits.tsx';
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls, SelectBox, useSelection } from '../common/selection.tsx';
-import { pickDeck } from '../common/DeckPicker.tsx';
-import { openArtPicker } from '../launchers.tsx';
+import { openArtPicker, openCardInfo } from '../launchers.tsx';
 
 type Kind = UtilityCategory | 'all';
 const KIND_LABELS: Record<Kind, string> = {
@@ -38,26 +36,9 @@ export function UtilityBrowser({ mode, onPick }: Props) {
     store.addToProxies(cards.map((c) => ({ card: c, quantity: 1 })));
     toast(`${cards.length} item(ns) na fila de impressão.`);
   };
-  const toDeck = (cards: TokenCard[]) =>
-    pickDeck({
-      title: 'Adicionar às fichas do deck',
-      showCategory: false,
-      onPick: (deckId) => {
-        store.updateDeck(deckId, (d) => {
-          const tokens = d.tokens.slice();
-          for (const c of cards) {
-            const i = tokens.findIndex((t) => sameArt(t.card, c));
-            if (i >= 0) tokens[i] = { ...tokens[i], quantity: tokens[i].quantity + 1 };
-            else tokens.push({ instanceId: uid('dt'), card: c, quantity: 1 });
-          }
-          return { ...d, tokens };
-        });
-        toast(`${cards.length} item(ns) adicionados às fichas do deck.`);
-      },
-    });
   const togglePick = (c: TokenCard) => setPicked((p) => (p.some((x) => x.id === c.id) ? p.filter((x) => x.id !== c.id) : [...p, c]));
 
-  const tileProps: TileGridProps = { mode, picked, onTogglePick: togglePick, onPrint: toProxies, onDeck: toDeck, colors };
+  const tileProps: TileGridProps = { mode, picked, onTogglePick: togglePick, onPrint: toProxies, colors };
 
   return (
     <div className={`util ${mode === 'pick' ? 'util-pick' : ''}`}>
@@ -97,7 +78,6 @@ interface TileGridProps {
   picked: TokenCard[];
   onTogglePick: (c: TokenCard) => void;
   onPrint: (c: TokenCard[]) => void;
-  onDeck: (c: TokenCard[]) => void;
   colors: ColorFilterValue[];
 }
 
@@ -163,7 +143,7 @@ function Results({ kind, query, tile }: { kind: Kind; query: string; tile: TileG
   );
 }
 
-function TileGrid({ cards, mode, picked, onTogglePick, onPrint, onDeck, colors }: TileGridProps & { cards: TokenCard[] }) {
+function TileGrid({ cards, mode, picked, onTogglePick, onPrint, colors }: TileGridProps & { cards: TokenCard[] }) {
   const { prefs } = useStore();
   const [overrides, setOverrides] = useState<Record<string, TokenCard>>({});
   const visible = useMemo(() => cards.map((c) => overrides[c.id] ?? c).filter((c) => matchesColorFilter(c, colors, 'exact')), [cards, overrides, colors]);
@@ -195,11 +175,11 @@ function TileGrid({ cards, mode, picked, onTogglePick, onPrint, onDeck, colors }
                 <img src={frontImage(c, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={c.name} />
                 <SelectBox checked={isPicked} onClick={(e) => (mode === 'pick' ? onTogglePick(c) : sel.toggle(c.id, e))} />
                 <div className="card-tile-actions">
+                  <button className="btn btn-secondary btn-icon btn-sm" title="Informações" onClick={(e) => { e.stopPropagation(); openCardInfo(c); }}><Info size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={(e) => { e.stopPropagation(); changeArt(i); }}><ImageIcon size={15} /></button>
                   {mode === 'tab' && (
                     <>
                       <button className="btn btn-secondary btn-icon btn-sm" title="Adicionar à fila de impressão" onClick={() => onPrint([c])}><Printer size={15} /></button>
-                      <button className="btn btn-secondary btn-icon btn-sm" title="Adicionar às fichas de um deck" onClick={() => onDeck([c])}><Layers size={15} /></button>
                     </>
                   )}
                 </div>
@@ -219,7 +199,6 @@ function TileGrid({ cards, mode, picked, onTogglePick, onPrint, onDeck, colors }
           <strong>{sel.count} selecionado(s)</strong>
           <div className="spacer" />
           <button className="btn btn-secondary btn-sm" onClick={() => { onPrint(selected()); sel.clear(); }}><Printer size={15} /> Imprimir</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => { onDeck(selected()); sel.clear(); }}><Layers size={15} /> Ao deck</button>
           <button className="btn btn-ghost btn-icon btn-sm" onClick={sel.clear} aria-label="Limpar seleção"><X size={16} /></button>
         </div>
       )}

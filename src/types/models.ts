@@ -149,7 +149,10 @@ export interface DeckToken {
 export interface DeckCover {
   image?: string;
   zoom: number; // 1–3
-  positionY: number; // 0–100 %
+  /** Posição horizontal do recorte, 0–100 % (50 = centro). */
+  positionX: number;
+  /** Posição vertical do recorte, 0–100 %. */
+  positionY: number;
 }
 
 export type DeckFormat =

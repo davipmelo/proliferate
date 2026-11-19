@@ -82,7 +82,10 @@
   .util-input .input { height: 44px; }
   .util-explore { flex-direction: column; align-items: flex-start; }
   .commander-slot .cmd-img { max-width: 200px; }
-  .hand-card { width: 44%; }
+  .hand-row { flex-wrap: wrap; gap: 8px; min-height: 0; }
+  .hand-card { flex: 0 0 calc(33% - 8px); }
+  .hand-card-img { width: 100%; }
+  .hand-info { opacity: 1; }
   .poster-layout { grid-template-columns: 1fr; }
   .field-row { grid-template-columns: 1fr 1fr; }
 }

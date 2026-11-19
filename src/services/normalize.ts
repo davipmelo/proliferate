@@ -188,6 +188,7 @@ export function normalizeDeck(raw: Any): Deck {
     cover: {
       image: coverRaw.image ?? raw?.coverImage ?? raw?.coverImageUrl ?? undefined,
       zoom: clamp(num(coverRaw.zoom ?? raw?.coverZoom, 1), 1, 3),
+      positionX: clamp(num(coverRaw.positionX, 50), 0, 100),
       positionY: clamp(num(coverRaw.positionY ?? raw?.coverPosition, 30), 0, 100),
     },
     tags: arr<string>(raw?.tags).map(String),

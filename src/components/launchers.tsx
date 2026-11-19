@@ -12,6 +12,7 @@ const ExportModal = lazy(() => import('./io/ExportModal.tsx'));
 const BackupModal = lazy(() => import('./io/BackupModal.tsx'));
 const AuthModal = lazy(() => import('./auth/AuthModal.tsx'));
 const UtilityPickerModal = lazy(() => import('./utilities/UtilityPickerModal.tsx'));
+const CardInfoModal = lazy(() => import('./common/CardInfoModal.tsx'));
 
 function ModalFallback() {
   return createPortal(
@@ -85,6 +86,15 @@ export function openUtilityPicker(opts: { title?: string; onPick: (cards: TokenC
   openModal((close) => (
     <Suspense fallback={<ModalFallback />}>
       <UtilityPickerModal {...opts} onClose={close} />
+    </Suspense>
+  ));
+}
+
+/** Janela de informações da carta (dados do Scryfall). */
+export function openCardInfo(card: Card, opts: { foil?: boolean } = {}): void {
+  openModal((close) => (
+    <Suspense fallback={<ModalFallback />}>
+      <CardInfoModal card={card} foil={opts.foil ?? card.isFoil} onClose={close} />
     </Suspense>
   ));
 }

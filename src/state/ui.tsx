@@ -75,6 +75,9 @@ export function openModal(render: ModalRender): () => void {
   const id = ++modalId;
   const close = () => modals.set((m) => m.filter((x) => x.id !== id));
   modals.set((m) => [...m, { id, render }]);
+  // O elemento sob o mouse fica coberto pelo modal e não recebe mouseleave: some com o zoom.
+  hidePreview();
+  requestAnimationFrame(() => hidePreview());
   return close;
 }
 
@@ -188,8 +191,8 @@ function PreviewLayer() {
   const top = Math.max(8, Math.min(window.innerHeight - h - 8, p.y - h / 2));
   return (
     <div className="card-preview" style={{ left: Math.max(8, left), top }}>
-      <img src={p.url} alt="" />
-      {p.back && <img src={p.back} alt="" />}
+      <img src={p.url} alt="" referrerPolicy="no-referrer" />
+      {p.back && <img src={p.back} alt="" referrerPolicy="no-referrer" />}
     </div>
   );
 }

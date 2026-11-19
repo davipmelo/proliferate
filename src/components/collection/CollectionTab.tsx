@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Download, Image as ImageIcon, Layers, Library, MoreVertical, Printer, Search, Trash2, X } from 'lucide-react';
+import { Download, Image as ImageIcon, Info, Library, MoreVertical, Printer, Search, Trash2, X } from 'lucide-react';
 import type { ColorMatchMode } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, previewProps, toast } from '../../state/ui.tsx';
@@ -11,8 +11,7 @@ import { CardThumb, Dropdown, Empty, formatUsd, ManaCost, ViewToggle } from '../
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls, SelectBox, useSelection } from '../common/selection.tsx';
 import { usePersistent, useProgressive } from '../common/hooks.ts';
-import { pickDeck } from '../common/DeckPicker.tsx';
-import { openArtPicker, openImport } from '../launchers.tsx';
+import { openArtPicker, openCardInfo, openImport } from '../launchers.tsx';
 import { StatsPanel } from '../stats/StatsPanel.tsx';
 
 const SORTS: SortKey[] = ['name', 'quantity', 'cmc', 'type', 'set', 'rarity', 'price'];
@@ -65,16 +64,6 @@ export default function CollectionTab() {
     store.addToProxies(entries.map((e) => ({ card: e.card, quantity: e.quantity })));
     toast(`${entries.reduce((s, e) => s + e.quantity, 0)} carta(s) na fila de impressão.`);
   };
-
-  const toDeck = (entries: CollectionEntry[]) =>
-    pickDeck({
-      title: 'Adicionar a outro deck',
-      onPick: (deckId, category) => {
-        for (const e of entries) store.addCardToDeck(deckId, e.card, { quantity: 1, category, isFoil: e.isFoil });
-        toast(`${entries.length} carta(s) adicionada(s) ao deck.`);
-        sel.clear();
-      },
-    });
 
 
   return (
@@ -151,7 +140,7 @@ export default function CollectionTab() {
               <span className="col-price small muted hide-mobile">{formatUsd(e.card.priceUsd)}</span>
               <span className="col-qty tabular">{e.quantity}×</span>
               <div className="list-actions" onClick={(ev) => ev.stopPropagation()}>
-                <EntryMenu onArt={() => changeArt(e)} onProxy={() => toProxies([e])} onDeck={() => toDeck([e])} onRemove={() => remove([e])} />
+                <EntryMenu onInfo={() => openCardInfo(e.card, { foil: e.isFoil })} onArt={() => changeArt(e)} onProxy={() => toProxies([e])} onRemove={() => remove([e])} />
               </div>
             </div>
           ))}
@@ -165,9 +154,9 @@ export default function CollectionTab() {
                 <SelectBox checked={sel.isSelected(e.key)} onClick={(ev) => sel.toggle(e.key, ev)} />
                 {e.quantity > 1 && <span className="qty-badge" style={{ left: 'auto', right: 7 }}>{e.quantity}×</span>}
                 <div className="card-tile-actions">
+                  <button className="btn btn-secondary btn-icon btn-sm" title="Informações" onClick={() => openCardInfo(e.card, { foil: e.isFoil })}><Info size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte (em todos os decks)" onClick={() => changeArt(e)}><ImageIcon size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Adicionar à fila de impressão" onClick={() => toProxies([e])}><Printer size={15} /></button>
-                  <button className="btn btn-secondary btn-icon btn-sm" title="Adicionar a outro deck" onClick={() => toDeck([e])}><Layers size={15} /></button>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Remover dos decks" onClick={() => remove([e])}><Trash2 size={15} /></button>
                 </div>
               </div>
@@ -189,7 +178,6 @@ export default function CollectionTab() {
           <span className="small subtle hide-mobile">Shift+clique seleciona um intervalo</span>
           <div className="spacer" />
           <button className="btn btn-secondary btn-sm" onClick={() => toProxies(selectedEntries())}><Printer size={15} /> Imprimir</button>
-          <button className="btn btn-secondary btn-sm" onClick={() => toDeck(selectedEntries())}><Layers size={15} /> A outro deck</button>
           <button className="btn btn-danger btn-sm" onClick={() => remove(selectedEntries())}><Trash2 size={15} /> Remover dos decks</button>
           <button className="btn btn-ghost btn-icon btn-sm" onClick={sel.clear} aria-label="Limpar seleção"><X size={16} /></button>
         </div>
@@ -214,14 +202,14 @@ function DeckChips({ entry }: { entry: CollectionEntry }) {
   );
 }
 
-function EntryMenu({ onArt, onProxy, onDeck, onRemove }: { onArt: () => void; onProxy: () => void; onDeck: () => void; onRemove: () => void }) {
+function EntryMenu({ onInfo, onArt, onProxy, onRemove }: { onInfo: () => void; onArt: () => void; onProxy: () => void; onRemove: () => void }) {
   return (
     <Dropdown trigger={(_o, t) => <button className="btn btn-ghost btn-icon btn-sm" onClick={t} aria-label="Ações"><MoreVertical size={16} /></button>}>
       {(close) => (
         <>
+          <button className="menu-item" onClick={() => { close(); onInfo(); }}><Info size={16} /> Informações</button>
           <button className="menu-item" onClick={() => { close(); onArt(); }}><ImageIcon size={16} /> Trocar arte (em todos os decks)</button>
           <button className="menu-item" onClick={() => { close(); onProxy(); }}><Printer size={16} /> Adicionar à impressão</button>
-          <button className="menu-item" onClick={() => { close(); onDeck(); }}><Layers size={16} /> Adicionar a outro deck</button>
           <div className="menu-sep" />
           <button className="menu-item danger" onClick={() => { close(); onRemove(); }}><Trash2 size={16} /> Remover dos decks</button>
         </>
