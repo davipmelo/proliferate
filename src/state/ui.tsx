@@ -169,9 +169,16 @@ function PreviewLayer() {
     const r = () => setVw(window.innerWidth);
     window.addEventListener('resize', r);
     window.addEventListener('scroll', hidePreview, true);
+    // Qualquer clique, troca de aba ou tecla fecha o preview (a linha sob o mouse pode ter sumido).
+    window.addEventListener('pointerdown', hidePreview, true);
+    window.addEventListener('keydown', hidePreview, true);
+    window.addEventListener('proliferate:tab', hidePreview);
     return () => {
       window.removeEventListener('resize', r);
       window.removeEventListener('scroll', hidePreview, true);
+      window.removeEventListener('pointerdown', hidePreview, true);
+      window.removeEventListener('keydown', hidePreview, true);
+      window.removeEventListener('proliferate:tab', hidePreview);
     };
   }, []);
   if (!p.url) return null;

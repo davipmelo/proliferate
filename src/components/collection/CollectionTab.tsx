@@ -51,7 +51,7 @@ export default function CollectionTab() {
     const decks = new Set(entries.flatMap((e) => e.decks.map((d) => d.deckName)));
     const ok = await confirmDialog({
       title: entries.length === 1 ? 'Remover dos decks?' : `Remover ${entries.length} cartas dos decks?`,
-      message: <p>{entries.length === 1 ? <b>{entries[0].card.name}</b> : `${total} cópia(s)`} sairá(ão) de {decks.size} deck(s): {[...decks].join(', ')}. A coleção mostra só o que está nos decks.</p>,
+      message: <p>{entries.length === 1 ? <b>{entries[0].card.name}</b> : `${total} cópias`} {total === 1 ? 'sairá' : 'sairão'} de {decks.size === 1 ? 'um deck' : `${decks.size} decks`}: {[...decks].join(', ')}. A coleção mostra só o que está nos decks.</p>,
       confirmLabel: 'Remover dos decks',
       danger: true,
     });
