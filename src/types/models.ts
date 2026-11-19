@@ -241,6 +241,8 @@ export interface Preferences {
   /** Efeito visual de foil nas grades. */
   showFoil: boolean;
   proxySettings: ProxySettings;
+  /** Versão do formato das configurações de proxy (migração para o novo padrão). */
+  proxySettingsVersion?: number;
   lastTab: TabId;
 }
 

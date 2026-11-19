@@ -1,7 +1,7 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown,
-  MoreVertical, Pencil, Plus, Printer, Search, Trash2, Upload,
+  MoreVertical, Pencil, Plus, Printer, Search, Tag as TagIcon, Trash2, Upload,
 } from 'lucide-react';
 import type { ColorMatchMode, Deck, DeckCard, DeckCategory, DeckGroupMode } from '../../types/models.ts';
 import { CATEGORY_LABELS } from '../../types/models.ts';
@@ -13,12 +13,13 @@ import { compareBy, matchesText, SORT_LABELS, type SortKey } from '../../service
 import { CardThumb, ColorPips, Dropdown, formatUsd, Loading, ManaCost, QtyControl, ViewToggle } from '../common/bits.tsx';
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls } from '../common/selection.tsx';
-import { usePersistent } from '../common/hooks.ts';
+import { useFitsViewport, usePersistent } from '../common/hooks.ts';
 import { openAddCard, openArtPicker, openExport, openImport } from '../launchers.tsx';
 import { DeckFormModal } from './DeckFormModal.tsx';
 import { CoverEditorModal } from './CoverEditorModal.tsx';
 import { DeckTokens } from './DeckTokens.tsx';
 import { DeckPart } from './DeckPart.tsx';
+import { TagPill, TagSelect } from './TagSelect.tsx';
 import { coverStyle, deckColors, deckCount, deckCoverImage, deckTarget, deckValue } from './deckUtils.ts';
 
 const DeckCharts = lazy(() => import('./DeckCharts.tsx'));
@@ -162,6 +163,9 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
   const nonLand = deck.cards.filter((c) => c.category === 'main' || c.category === 'commander' || c.category === 'partner').filter((c) => !isLand(c.card));
   const avgCmc = nonLand.length ? nonLand.reduce((s, c) => s + c.card.cmc * c.quantity, 0) / nonLand.reduce((s, c) => s + c.quantity, 0) : 0;
   const details = prefs.showDetails;
+  const setDeckTags = (tags: string[]) => store.updateDeck(deck.id, (d) => ({ ...d, tags }));
+  const sideRef = useRef<HTMLElement>(null);
+  const sideFits = useFitsViewport(sideRef);
 
   return (
     <div>
@@ -196,7 +200,12 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
           <div className="row-wrap">
             <span className="badge badge-accent">{info.label}</span>
             <ColorPips colors={deckColors(deck)} />
-            {deck.tags.map((id) => data.tags.find((t) => t.id === id)).filter(Boolean).map((t) => <span key={t!.id} className="tag-pill"><span className="tag-dot" style={{ background: t!.color }} />{t!.name}</span>)}
+            <span className="hero-tags">
+              {deck.tags.map((id) => data.tags.find((t) => t.id === id)).filter(Boolean).map((t) => (
+                <TagPill key={t!.id} tag={t!} onRemove={() => setDeckTags(deck.tags.filter((x) => x !== t!.id))} />
+              ))}
+              <TagSelect value={deck.tags} onChange={setDeckTags} trigger={(_o, toggle) => <button className="hero-tag-add" onClick={toggle}><TagIcon size={12} /> {deck.tags.length ? 'Tags' : 'Adicionar tag'}</button>} />
+            </span>
           </div>
           <h1>{deck.name}</h1>
           {deck.description && <p className="small muted deck-desc">{deck.description}</p>}
@@ -305,7 +314,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
           <DeckTokens deck={deck} view={view} gridSize={prefs.gridSize} details={details} closed={isCollapsed(PART_TOKENS)} onToggle={() => toggleGroup(PART_TOKENS)} />
         </div>
 
-        <aside className="editor-side">
+        <aside className={`editor-side ${sideFits ? 'is-sticky' : ''}`} ref={sideRef}>
           <Suspense fallback={<div className="section"><Loading text="Carregando gráficos…" /></div>}>
             <DeckCharts deck={deck} />
           </Suspense>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crop, Layers, MoreVertical, Pencil, Plus, Printer, Search, Tags, Trash2, Download, X } from 'lucide-react';
+import { Crop, Layers, MoreVertical, Pencil, Printer, Search, Tags, Trash2, Download, X } from 'lucide-react';
 import type { ColorMatchMode, Deck } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, openModal, toast } from '../../state/ui.tsx';
@@ -10,7 +10,7 @@ import { ColorPips, Dropdown, Empty, formatUsd, ViewToggle } from '../common/bit
 import { usePersistent } from '../common/hooks.ts';
 import { openImport } from '../launchers.tsx';
 import { DeckFormModal } from './DeckFormModal.tsx';
-import { TagManagerModal } from './TagManagerModal.tsx';
+import { TagPills, TagSelect, type TagMatch } from './TagSelect.tsx';
 import { CoverEditorModal } from './CoverEditorModal.tsx';
 import { StatsPanel } from '../stats/StatsPanel.tsx';
 import { coverStyle, deckColors, deckCount, deckCoverImage, deckTarget, deckValue } from './deckUtils.ts';
@@ -28,6 +28,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
   const { data, prefs, setPrefs } = store;
   const [q, setQ] = useState('');
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [tagMatch, setTagMatch] = usePersistent<TagMatch>('decks-tag-match', 'all');
   const [colors, setColors] = useState<ColorFilterValue[]>([]);
   const [colorMode, setColorMode] = usePersistent<ColorMatchMode>('decks-color-mode', 'identity');
   const [formatFilter, setFormatFilter] = useState('');
@@ -58,7 +59,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
           hits.set(d.id, hit.card.name);
         }
       }
-      if (!tagFilter.every((t) => d.tags.includes(t))) return false;
+      if (tagFilter.length && !(tagMatch === 'all' ? tagFilter.every((t) => d.tags.includes(t)) : tagFilter.some((t) => d.tags.includes(t)))) return false;
       if (formatFilter && formatInfo(d.format).id !== formatFilter) return false;
       if (status !== 'all') {
         const n = deckCount(d);
@@ -84,9 +85,8 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
       progress: (a, b) => progress(b) - progress(a) || a.name.localeCompare(b.name),
     };
     return { decks: l.sort(by[sort]), cardHits: hits };
-  }, [data.decks, q, tagFilter, formatFilter, status, colors, colorMode, sort]);
+  }, [data.decks, q, tagFilter, tagMatch, formatFilter, status, colors, colorMode, sort]);
 
-  const create = () => openModal((close) => <DeckFormModal onClose={close} onSaved={(id) => onOpen(id)} />);
   const edit = (d: Deck) => openModal((close) => <DeckFormModal deck={d} onClose={close} />);
   const cover = (d: Deck) => openModal((close) => <CoverEditorModal deck={d} onClose={close} />);
   const print = (d: Deck) => {
@@ -102,13 +102,16 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
     }
   };
 
-  const tagById = new Map(data.tags.map((t) => [t.id, t]));
-  const Tags_ = ({ d }: { d: Deck }) => (
-    <>
-      {d.tags.map((id) => tagById.get(id)).filter(Boolean).map((t) => (
-        <span key={t!.id} className="tag-pill"><span className="tag-dot" style={{ background: t!.color }} />{t!.name}</span>
-      ))}
-    </>
+  const setDeckTags = (d: Deck, tags: string[]) => store.updateDeck(d.id, (x) => ({ ...x, tags }));
+  const TagButton = ({ d, cls }: { d: Deck; cls: string }) => (
+    <TagSelect
+      value={d.tags}
+      onChange={(t) => setDeckTags(d, t)}
+      align="right"
+      trigger={(open, toggle) => (
+        <button className={`${cls} ${open ? 'active' : ''}`} title="Tags do deck" aria-label="Tags do deck" onClick={toggle}><Tags size={15} /></button>
+      )}
+    />
   );
 
   const Actions = ({ d }: { d: Deck }) => (
@@ -132,8 +135,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
           <h1>Decks</h1>
           <p className="desc">{data.decks.length} deck(s). Abra um deck para editar, ver gráficos, fichas e gerar pôster.</p>
         </div>
-        <button className="btn btn-secondary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> <span className="hide-mobile">Importar deck</span></button>
-        <button className="btn btn-primary" onClick={create}><Plus size={16} /> Novo deck</button>
+        <button className="btn btn-primary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> Importar deck</button>
       </div>
 
       {data.decks.length > 0 && <StatsPanel kind="decks" teaser={<><span>{data.decks.length} decks</span><span>{formatUsd(data.decks.reduce((s2, d) => s2 + deckValue(d), 0))}</span></>} />}
@@ -156,21 +158,11 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
           </select>
           <div className="spacer" />
           {view === 'grid' && <input type="range" min={230} max={480} step={10} value={cardW} onChange={(e) => setCardW(Number(e.target.value))} aria-label="Tamanho dos decks" title="Tamanho dos decks" style={{ width: 110 }} />}
-          <button className="btn btn-ghost btn-sm" onClick={() => openModal((c) => <TagManagerModal onClose={c} />)}><Tags size={16} /> Tags</button>
           <ViewToggle value={view} onChange={(v) => setPrefs({ decksView: v })} />
         </div>
         <div className="toolbar">
           <ColorFilter value={colors} onChange={setColors} mode={colorMode} onModeChange={setColorMode} />
-          {data.tags.length > 0 && <span className="toolbar-sep hide-mobile" />}
-          {data.tags.length > 0 && (
-            <div className="chips-scroll deck-tag-chips">
-              {data.tags.map((t) => (
-                <button key={t.id} className={`chip ${tagFilter.includes(t.id) ? 'active' : ''}`} onClick={() => setTagFilter((f) => (f.includes(t.id) ? f.filter((x) => x !== t.id) : [...f, t.id]))}>
-                  <span className="tag-dot" style={{ background: t.color }} /> {t.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <TagSelect mode="filter" value={tagFilter} onChange={setTagFilter} match={tagMatch} onMatch={setTagMatch} placeholder="Filtrar por tags" />
           <div className="spacer" />
           <span className="small subtle">{decks.length === data.decks.length ? `${decks.length} deck(s)` : `${decks.length} de ${data.decks.length} decks`}</span>
           {filtersOn && <button className="btn btn-ghost btn-xs" onClick={clearFilters}><X size={13} /> Limpar filtros</button>}
@@ -178,8 +170,8 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
       </div>
 
       {data.decks.length === 0 ? (
-        <Empty icon={<Layers size={40} />} title="Nenhum deck ainda" action={<div className="row-wrap" style={{ justifyContent: 'center' }}><button className="btn btn-secondary" onClick={create}><Plus size={16} /> Criar deck</button><button className="btn btn-secondary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> Importar lista</button></div>}>
-          Crie um deck do zero, cole uma lista ou importe do Arena/Moxfield/LigaMagic.
+        <Empty icon={<Layers size={40} />} title="Nenhum deck ainda" action={<button className="btn btn-primary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> Importar deck</button>}>
+          Cole uma lista do Arena, Moxfield ou LigaMagic — ou comece um deck vazio e adicione as cartas depois.
         </Empty>
       ) : decks.length === 0 ? (
         <Empty icon={<Search size={36} />} title="Nenhum deck encontrado" action={filtersOn ? <button className="btn btn-secondary" onClick={clearFilters}><X size={16} /> Limpar filtros</button> : undefined}>Ajuste a busca ou os filtros.</Empty>
@@ -199,7 +191,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                     {cardHits.has(d.id) ? <span className="ellipsis deck-hit">contém <b>{cardHits.get(d.id)}</b></span> : d.commander && <span className="ellipsis">{d.commander.name}{d.partner ? ` & ${d.partner.name}` : ''}</span>}
                   </div>
                 </div>
-                <div className="deck-row-tags hide-mobile"><Tags_ d={d} /></div>
+                <div className="deck-row-tags hide-mobile"><TagPills ids={d.tags} max={2} /></div>
                 <div className="deck-row-count hide-mobile">
                   <span className="tabular"><b className={count === target ? 'success-text' : count > target ? 'warning-text' : ''}>{count}</b><span className="subtle"> / {target}</span></span>
                   <div className="progress"><div style={{ width: `${Math.min(100, (count / target) * 100)}%`, background: count === target ? 'var(--success)' : undefined }} /></div>
@@ -208,6 +200,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                 <div className="deck-row-date hide-mobile subtle small">{relativeDate(d.updatedAt)}</div>
                 <div className="list-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="btn btn-ghost btn-icon btn-sm hide-mobile" title="Mandar deck para impressão" onClick={() => print(d)}><Printer size={16} /></button>
+                  <TagButton d={d} cls="btn btn-ghost btn-icon btn-sm hide-mobile" />
                   <button className="btn btn-ghost btn-icon btn-sm hide-mobile" title="Editar" onClick={() => edit(d)}><Pencil size={16} /></button>
                   <Actions d={d} />
                 </div>
@@ -232,6 +225,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                 </div>
                 <div className="deck-card-actions" onClick={(e) => e.stopPropagation()}>
                   <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para impressão" onClick={() => print(d)}><Printer size={15} /></button>
+                  <TagButton d={d} cls="btn btn-secondary btn-icon btn-sm" />
                   <button className="btn btn-secondary btn-icon btn-sm" title="Ajustar capa" onClick={() => cover(d)}><Crop size={15} /></button>
                   <Actions d={d} />
                 </div>
@@ -245,7 +239,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                     <div className="progress grow"><div style={{ width: `${Math.min(100, (count / target) * 100)}%`, background: count === target ? 'var(--success)' : undefined }} /></div>
                     <span className="tabular subtle">{count}/{target}</span>
                   </div>
-                  {d.tags.length > 0 && <div className="row-wrap" style={{ gap: 4 }}><Tags_ d={d} /></div>}
+                  {d.tags.length > 0 && <div className="row"><TagPills ids={d.tags} max={3} /></div>}
                 </div>
               </div>
             );

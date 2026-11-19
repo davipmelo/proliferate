@@ -48,9 +48,13 @@ const SET_NUM = /\s+[([]([A-Za-z0-9]{2,6})(?:[\]):\s-]+([A-Za-z0-9★†-]+))?[\
 const FOIL = /\s*(\*F\*|\*E\*|\(foil\)|\[foil\]|\bfoil\b)\s*/gi;
 
 /** Faz o parse de uma única linha de carta. */
-export function parseLine(raw: string): Omit<ParsedEntry, 'section' | 'line'> | null {
+export function parseLine(raw: string): (Omit<ParsedEntry, 'section' | 'line'> & { commander?: boolean }) | null {
   let line = raw.replace(/\t/g, ' ').replace(/\s+/g, ' ').trim();
   if (!line) return null;
+  // Marcas de comandante: *CMDR* (Moxfield/MTGO), [Commander] / [Commander{top}] (Archidekt), (Commander).
+  const CMDR = /\s*(\*CMDR\*|\[commanders?(\{[^\]]*\})?\]|\(commanders?\))\s*/i;
+  const commander = CMDR.test(line);
+  if (commander) line = line.replace(CMDR, ' ').trim();
   // Remove marcações extras do Archidekt/Moxfield: [Categoria], ^Tag^, #tags
   line = line.replace(/\s+\^[^^]*\^/g, '').replace(/\s+#\S+/g, '').replace(/\s*\[[^\]]*\{[^\]]*\]\s*$/, '');
   let foil = false;
@@ -82,7 +86,7 @@ export function parseLine(raw: string): Omit<ParsedEntry, 'section' | 'line'> | 
   // Remove categoria no final ("[Ramp]") e espaços extras.
   line = line.replace(/\s*\[[^\]]+\]\s*$/, '').trim();
   if (!line || quantity <= 0) return null;
-  return { quantity, name: line, set, number, foil: foil || undefined };
+  return { quantity, name: line, set, number, foil: foil || undefined, ...(commander ? { commander: true } : {}) };
 }
 
 function splitCsvLine(line: string): string[] {
@@ -174,7 +178,8 @@ export function parseDeckList(text: string): ParseResult {
     if (parsed.set && parsed.number) format = format === 'simple' ? 'moxfield' : format;
     let sec2: ParsedSection = section;
     if (!sectionExplicit && sawBlankAfterMain && section === 'main') sec2 = 'sideboard';
-    entries.push({ ...parsed, section: sec2, line: i + 1 });
+    const { commander, ...rest } = parsed;
+    entries.push({ ...rest, section: commander ? 'commander' : sec2, line: i + 1 });
   });
   // Lista com acentos/termos em PT → provavelmente LigaMagic.
   if (format === 'simple' && entries.some((e) => /[ãõçáéíóúâêô]/i.test(e.name))) format = 'ligamagic';

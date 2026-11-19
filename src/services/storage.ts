@@ -1,6 +1,7 @@
 // Persistência no localStorage (dados empacotados + preferências).
 import type { AppData, Preferences, ProxySettings } from '../types/models.ts';
 import { normalizeAppData, packAppData, unpackAppData } from './normalize.ts';
+import { PROXY_PRESETS } from './proxyLayout.ts';
 
 const DATA_KEY = 'proliferate:data:v2';
 const PREFS_KEY = 'proliferate:prefs:v2';
@@ -8,26 +9,10 @@ const META_KEY = 'proliferate:meta:v2';
 /** Chaves de versões antigas que tentamos migrar no primeiro uso. */
 const LEGACY_KEYS = ['proliferate-data', 'mtg-manager-data', 'dms-mtg-data'];
 
-export const DEFAULT_PROXY_SETTINGS: ProxySettings = {
-  cutLines: true,
-  cutLineColor: '#9a9a9a',
-  cutLineWidth: 0.2,
-  cutLineStyle: 'solid',
-  cropMarks: true,
-  cropMarkColor: '#000000',
-  cropMarkWidth: 0.25,
-  cropMarkLength: 8,
-  rulers: false,
-  cornerCrosses: false,
-  crossColor: '#000000',
-  crossWidth: 0.25,
-  crossSize: 1.5,
-  crossShape: 'plus',
-  crossScope: 'all',
-  cornerFill: 'black',
-  footer: true,
-  trimBleed: true,
-};
+/** Padrão = preset Guilhotina (rodapé ligado, sem recorte de sangria). */
+export const DEFAULT_PROXY_SETTINGS: ProxySettings = { ...PROXY_PRESETS[0].values, footer: true, trimBleed: false };
+/** Versão das configurações de proxy; ao subir, as preferências salvas voltam ao padrão. */
+export const PROXY_SETTINGS_VERSION = 2;
 
 export const DEFAULT_PREFS: Preferences = {
   decksView: 'list',
@@ -39,6 +24,7 @@ export const DEFAULT_PREFS: Preferences = {
   deckGroupMode: 'none',
   showFoil: true,
   proxySettings: DEFAULT_PROXY_SETTINGS,
+  proxySettingsVersion: PROXY_SETTINGS_VERSION,
   lastTab: 'decks',
 };
 
@@ -91,7 +77,14 @@ export function saveData(data: AppData): void {
 export function loadPrefs(): Preferences {
   try {
     const p = JSON.parse(safeGet(PREFS_KEY) || '{}');
-    return { ...DEFAULT_PREFS, ...p, proxySettings: { ...DEFAULT_PROXY_SETTINGS, ...(p.proxySettings ?? {}) } };
+    // Configurações de proxy de uma versão anterior voltam ao novo padrão (Guilhotina).
+    const fresh = (p.proxySettingsVersion ?? 0) < PROXY_SETTINGS_VERSION;
+    return {
+      ...DEFAULT_PREFS,
+      ...p,
+      proxySettings: fresh ? DEFAULT_PROXY_SETTINGS : { ...DEFAULT_PROXY_SETTINGS, ...(p.proxySettings ?? {}) },
+      proxySettingsVersion: PROXY_SETTINGS_VERSION,
+    };
   } catch {
     return DEFAULT_PREFS;
   }

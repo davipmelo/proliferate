@@ -161,42 +161,53 @@ export function lineStyle(s: ProxySettings, kind: Line['kind']): { color: string
 export interface ProxyPreset {
   id: 'guillotine' | 'craft-knife' | 'minimal' | 'eco';
   label: string;
-  hint: string;
-  /** O estilo das cruzes é preferência do usuário e não faz parte dos presets. */
-  values: Omit<ProxySettings, 'footer' | 'trimBleed' | 'crossColor' | 'crossWidth' | 'crossSize' | 'crossShape' | 'crossScope'>;
+  values: Omit<ProxySettings, 'footer' | 'trimBleed'>;
 }
+
+const NO_CROSS = { cornerCrosses: false, crossColor: '#000000', crossWidth: 0.25, crossSize: 1.5, crossShape: 'plus', crossScope: 'all' } as const;
 
 export const PROXY_PRESETS: ProxyPreset[] = [
   {
     id: 'guillotine',
     label: 'Guilhotina',
-    hint: 'Linhas finas atravessando a folha',
-    values: { cutLines: true, cutLineColor: '#9a9a9a', cutLineWidth: 0.2, cutLineStyle: 'solid', cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.25, cropMarkLength: 8, rulers: false, cornerCrosses: false, cornerFill: 'black' },
+    values: {
+      cutLines: false, cutLineColor: '#9a9a9a', cutLineWidth: 0.2, cutLineStyle: 'solid',
+      cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.15, cropMarkLength: 8,
+      rulers: false,
+      cornerCrosses: true, crossColor: '#808080', crossWidth: 0.15, crossSize: 2.5, crossShape: 'plus', crossScope: 'all',
+      cornerFill: 'black',
+    },
   },
   {
     id: 'craft-knife',
     label: 'Estilete Manual',
-    hint: 'Marcas longas, réguas e cruzes',
-    values: { cutLines: true, cutLineColor: '#555555', cutLineWidth: 0.3, cutLineStyle: 'dashed', cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.35, cropMarkLength: 12, rulers: true, cornerCrosses: true, cornerFill: 'black' },
+    values: { cutLines: true, cutLineColor: '#555555', cutLineWidth: 0.3, cutLineStyle: 'dashed', cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.35, cropMarkLength: 12, rulers: true, cornerCrosses: true, crossColor: '#000000', crossWidth: 0.3, crossSize: 1.5, crossShape: 'plus', crossScope: 'all', cornerFill: 'black' },
   },
   {
     id: 'minimal',
     label: 'Minimalista',
-    hint: 'Só marcas curtas nas margens',
-    values: { cutLines: false, cutLineColor: '#9a9a9a', cutLineWidth: 0.15, cutLineStyle: 'solid', cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.2, cropMarkLength: 5, rulers: false, cornerCrosses: false, cornerFill: 'none' },
+    values: { cutLines: false, cutLineColor: '#9a9a9a', cutLineWidth: 0.15, cutLineStyle: 'solid', cropMarks: true, cropMarkColor: '#000000', cropMarkWidth: 0.2, cropMarkLength: 5, rulers: false, ...NO_CROSS, cornerFill: 'none' },
   },
   {
     id: 'eco',
     label: 'Econômico',
-    hint: 'Cantos brancos, linhas pontilhadas',
-    values: { cutLines: true, cutLineColor: '#bbbbbb', cutLineWidth: 0.15, cutLineStyle: 'dotted', cropMarks: true, cropMarkColor: '#777777', cropMarkWidth: 0.15, cropMarkLength: 6, rulers: false, cornerCrosses: false, cornerFill: 'white' },
+    values: { cutLines: true, cutLineColor: '#bbbbbb', cutLineWidth: 0.15, cutLineStyle: 'dotted', cropMarks: true, cropMarkColor: '#777777', cropMarkWidth: 0.15, cropMarkLength: 6, rulers: false, ...NO_CROSS, cornerFill: 'white' },
   },
+];
+
+/** Chaves que só importam quando o recurso correspondente está ligado. */
+const DEPENDENT: [keyof ProxySettings, (keyof ProxySettings)[]][] = [
+  ['cutLines', ['cutLineColor', 'cutLineWidth', 'cutLineStyle']],
+  ['cropMarks', ['cropMarkColor', 'cropMarkWidth', 'cropMarkLength']],
+  ['cornerCrosses', ['crossColor', 'crossWidth', 'crossSize', 'crossShape', 'crossScope']],
 ];
 
 /** Detecta qual preset corresponde aos valores atuais (ou null = personalizado). */
 export function detectPreset(s: ProxySettings): ProxyPreset['id'] | null {
   for (const p of PROXY_PRESETS) {
+    const ignored = new Set(DEPENDENT.filter(([flag]) => !p.values[flag as keyof ProxyPreset['values']]).flatMap(([, keys]) => keys));
     const match = (Object.keys(p.values) as (keyof ProxyPreset['values'])[]).every((k) => {
+      if (ignored.has(k)) return true;
       const a = p.values[k];
       const b = s[k];
       return typeof a === 'number' ? Math.abs(a - (b as number)) < 1e-6 : String(a).toLowerCase() === String(b).toLowerCase();

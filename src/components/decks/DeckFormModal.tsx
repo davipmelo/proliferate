@@ -10,7 +10,8 @@ import { exportDeck } from '../../services/exporters.ts';
 import { normalizeDeck } from '../../services/normalize.ts';
 import { Modal } from '../common/Modal.tsx';
 import { CommanderPicker } from './CommanderPicker.tsx';
-import { buildDeckCards, detectCommanderFromList } from './deckBuild.ts';
+import { assignCommanders, buildDeckCards } from './deckBuild.ts';
+import { TagSelect } from './TagSelect.tsx';
 
 interface Props {
   deck?: Deck;
@@ -51,27 +52,14 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
           const parsed = parseDeckList(list);
           const { resolved, unresolved: un } = await resolveEntries(mergeEntries(parsed.entries), (m) => setBusy(m));
           unresolved = un.map((u) => u.name);
-          // Comandante/parceiro informados na lista.
-          const cmdEntries = resolved.filter((r) => r.entry.section === 'commander');
-          if (!cmd && cmdEntries[0]) cmd = cmdEntries[0].card;
-          if (!ptn && cmdEntries[1]) ptn = cmdEntries[1].card;
-          const ptnEntry = resolved.find((r) => r.entry.section === 'partner');
-          if (!ptn && ptnEntry) ptn = ptnEntry.card;
-          // Sem comandante: a primeira carta da lista pode ser o comandante.
-          let consumed: Card[] = [];
-          if (!cmd && info.hasCommander) {
-            const d = detectCommanderFromList(resolved);
-            if (d.commander) {
-              cmd = d.commander;
-              ptn = ptn ?? d.partner;
-              consumed = [d.commander, ...(d.partner ? [d.partner] : [])];
-              toast(`Comandante detectado: ${d.commander.name}${d.partner ? ` + ${d.partner.name}` : ''}.`, 'info', 5000);
-            }
+          // Comandante/parceiro: seções da lista, marcas *CMDR* ou dedução (1ª/última carta, sideboard do MTGO).
+          const asg = assignCommanders(resolved, { commander: cmd, partner: ptn, hasCommander: info.hasCommander });
+          if ((asg.detected.commander || asg.detected.partner) && (asg.commander !== cmd || asg.partner !== ptn)) {
+            toast(`Detectado na lista: ${[asg.detected.commander && asg.commander?.name, asg.detected.partner && asg.partner?.name].filter(Boolean).join(' + ')}.`, 'info', 5000);
           }
-          cards = buildDeckCards(
-            resolved.filter((r) => r.entry.section !== 'commander' && r.entry.section !== 'partner' && !consumed.includes(r.card)),
-            deck?.cards ?? [],
-          );
+          cmd = asg.commander;
+          ptn = asg.partner;
+          cards = buildDeckCards(asg.rest, deck?.cards ?? []);
         } catch (e: any) {
           setBusy(null);
           return toast(e?.message ?? 'Falha ao ler a lista.', 'error');
@@ -132,22 +120,14 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
       {info.hasCommander && (
         <div className="field-row">
           <CommanderPicker label="Comandante" value={commander} onChange={setCommander} />
-          <CommanderPicker label="Parceiro (opcional)" value={partner} onChange={setPartner} />
+          <CommanderPicker label="Parceiro (opcional)" value={partner} onChange={setPartner} placeholder="Parceiro ou Background" />
         </div>
       )}
       <div className="field"><label>Descrição</label><textarea className="textarea" style={{ minHeight: 70 }} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Estratégia, combos, observações…" /></div>
-      {store.data.tags.length > 0 && (
-        <div className="field">
-          <label>Tags</label>
-          <div className="chips">
-            {store.data.tags.map((t) => (
-              <button type="button" key={t.id} className={`chip ${tags.includes(t.id) ? 'active' : ''}`} onClick={() => setTags((x) => (x.includes(t.id) ? x.filter((y) => y !== t.id) : [...x, t.id]))}>
-                <span className="tag-dot" style={{ background: t.color }} />{t.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="field">
+        <label>Tags</label>
+        <TagSelect value={tags} onChange={setTags} placeholder="Escolher ou criar tags" />
+      </div>
       <div className="field">
         <label>{deck ? 'Lista do deck' : 'Colar lista (opcional)'}</label>
         <textarea className="textarea mono" style={{ minHeight: 180 }} value={list} onChange={(e) => setList(e.target.value)} placeholder={'1 Sol Ring (C21) 263\n4 Lightning Bolt\n1 Anel Solar\n\nSideboard\n2 Pyroblast'} />

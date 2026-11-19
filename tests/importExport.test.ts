@@ -127,7 +127,11 @@ test('proxyLayout: margens centralizadas, páginas sem sobras vazias e presets',
   assert.equal(paginate([]).length, 0);
   assert.equal(detectPreset(DEFAULT_PROXY_SETTINGS), 'guillotine');
   for (const p of PROXY_PRESETS) assert.equal(detectPreset({ ...DEFAULT_PROXY_SETTINGS, ...p.values }), p.id);
-  assert.equal(detectPreset({ ...DEFAULT_PROXY_SETTINGS, cutLineWidth: 0.55 }), null);
-  const lines = sheetLines({ ...DEFAULT_PROXY_SETTINGS, cropMarks: false });
+  assert.equal(detectPreset({ ...DEFAULT_PROXY_SETTINGS, cropMarkWidth: 0.55 }), null);
+  assert.equal(detectPreset({ ...DEFAULT_PROXY_SETTINGS, cutLineWidth: 0.55 }), 'guillotine', 'estilo da linha de corte não importa com ela desligada');
+  // Só linhas de corte (4 verticais + 4 horizontais).
+  const lines = sheetLines({ ...DEFAULT_PROXY_SETTINGS, cutLines: true, cropMarks: false, cornerCrosses: false });
   assert.equal(lines.length, 8);
+  // Padrão (Guilhotina): sem linhas de corte, 16 marcas de enquadramento + 16 cruzes (2 traços cada).
+  assert.equal(sheetLines(DEFAULT_PROXY_SETTINGS).length, 16 + 32);
 });

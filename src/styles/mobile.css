@@ -69,8 +69,7 @@
   .editor-side { position: static; }
   .proxy-layout { grid-template-columns: 1fr; }
   .proxy-layout > * { grid-column: 1 !important; grid-row: auto !important; }
-  .proxy-col { position: static; max-height: none; height: auto; }
-  .proxy-queue { max-height: 360px; }
+  .proxy-col.is-sticky { position: static; }
   .deck-groups.list-mode { columns: 1; }
   .deck-row-art { width: 76px; height: 48px; }
   .deck-row { gap: 12px; }

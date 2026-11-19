@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { AppData, Card, Deck, DeckCard, DeckCategory, DeckTag, Preferences, ProxyItem, TokenCard } from '../types/models.ts';
 import { sameArt } from '../types/cardRules.ts';
 import { deriveCollection, mapEntryInDecks, type CollectionEntry } from '../services/collection.ts';
-import { DEFAULT_PREFS, loadData, loadMeta, loadPrefs, QuotaError, saveData, saveMeta, savePrefs } from '../services/storage.ts';
+import { DEFAULT_PREFS, PROXY_SETTINGS_VERSION, loadData, loadMeta, loadPrefs, QuotaError, saveData, saveMeta, savePrefs } from '../services/storage.ts';
 import { normalizeDeck, uid } from '../services/normalize.ts';
 import { toast } from './ui.tsx';
 
@@ -102,7 +102,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       localChange.current = true;
     }
     setData(next);
-    if (opts?.prefs) setPrefsState((p) => ({ ...p, ...opts.prefs, proxySettings: { ...p.proxySettings, ...(opts.prefs?.proxySettings ?? {}) } }));
+    if (opts?.prefs) {
+      // Configurações de proxy remotas de versões antigas não sobrescrevem o novo padrão.
+      const { proxySettings: remoteProxy, proxySettingsVersion: remoteVer, ...rest } = opts.prefs;
+      const useRemote = (remoteVer ?? 0) >= PROXY_SETTINGS_VERSION;
+      setPrefsState((p) => ({ ...p, ...rest, proxySettings: useRemote ? { ...p.proxySettings, ...(remoteProxy ?? {}) } : p.proxySettings }));
+    }
   }, []);
 
   const setPrefs = useCallback((p: Partial<Preferences>) => {

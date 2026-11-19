@@ -29,3 +29,25 @@ export function usePersistent<T>(key: string, initial: T): [T, (v: T) => void] {
     },
   ];
 }
+
+/**
+ * O elemento cabe inteiro na janela (descontando o topo fixo)? Usado para deixar colunas laterais
+ * fixas só quando não precisariam de rolagem própria.
+ */
+export function useFitsViewport(ref: React.RefObject<HTMLElement | null>, margin = 96): boolean {
+  const [fits, setFits] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setFits(window.innerWidth > 768 && el.scrollHeight + margin <= window.innerHeight);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    window.addEventListener('resize', check);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', check);
+    };
+  }, [ref, margin]);
+  return fits;
+}

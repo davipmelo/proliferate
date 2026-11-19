@@ -54,3 +54,19 @@ test('mapEntryInDecks troca a arte ou remove de todos os decks', () => {
   const noCmd = mapEntryInDecks(data.decks, cmdKey, () => null);
   assert.equal(noCmd[0].commander, undefined, 'remover o comandante atualiza o deck');
 });
+
+test('arte fica coerente entre coleção e decks nos dois sentidos', () => {
+  // Coleção → decks: trocar a arte do comandante atualiza a carta e o campo commander do deck.
+  const cmdKey = entryKey(data.decks[0].commander!, false);
+  const viaCollection = mapEntryInDecks(data.decks, cmdKey, (c) => ({ ...c, id: 'atx-alt', images: { normal: 'alt.jpg' } }));
+  assert.equal(viaCollection[0].commander?.id, 'atx-alt');
+  assert.equal(viaCollection[0].cards.find((c) => c.category === 'commander')?.card.id, 'atx-alt');
+  assert.ok(deriveCollection(viaCollection).some((e) => e.card.id === 'atx-alt'));
+  assert.ok(!deriveCollection(viaCollection).some((e) => e.card.id === 'atx'));
+  // Deck → coleção: trocar a arte de uma cópia em um deck aparece na coleção como essa arte.
+  const decks = data.decks.map((d) => (d.id !== 'd2' ? d : { ...d, cards: d.cards.map((c) => (c.card.id === 'sol' && !c.isFoil ? { ...c, card: { ...c.card, id: 'sol-alt' } } : c)) }));
+  const col = deriveCollection(decks);
+  const alt = col.find((e) => e.card.id === 'sol-alt')!;
+  assert.deepEqual(alt.decks.map((d) => [d.deckName, d.quantity]), [['Burn', 2]]);
+  assert.equal(col.find((e) => e.card.id === 'sol' && !e.isFoil)?.quantity, 1, 'a cópia do outro deck mantém a arte dela');
+});

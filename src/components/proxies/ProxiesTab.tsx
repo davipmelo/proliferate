@@ -15,7 +15,7 @@ import { CardSearch } from '../common/CardSearch.tsx';
 import { pickDeck } from '../common/DeckPicker.tsx';
 import { openArtPicker } from '../launchers.tsx';
 import { Sheet } from './Sheet.tsx';
-import { usePersistent } from '../common/hooks.ts';
+import { useFitsViewport, usePersistent } from '../common/hooks.ts';
 
 const MM_PX = 96 / 25.4;
 const ZOOM_MIN = 0.4;
@@ -32,6 +32,11 @@ export default function ProxiesTab() {
   const [zoom, setZoomRaw] = usePersistent<number>('proxy-zoom', 1);
   const setZoom = (z: number) => setZoomRaw(Math.round(Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z)) * 100) / 100);
   const [queueQ, setQueueQ] = useState('');
+  // Colunas laterais sem rolagem própria: só ficam fixas na tela quando cabem inteiras nela.
+  const leftRef = useRef<HTMLElement>(null);
+  const rightRef = useRef<HTMLElement>(null);
+  const leftFits = useFitsViewport(leftRef);
+  const rightFits = useFitsViewport(rightRef);
 
   // Fila sempre em ordem alfabética (a ordem das folhas não muda).
   const sortedQueue = useMemo(
@@ -168,7 +173,7 @@ export default function ProxiesTab() {
       </div>
 
       <div className="proxy-layout">
-        <aside className="proxy-col proxy-col-left">
+        <aside className={`proxy-col proxy-col-left ${leftFits ? 'is-sticky' : ''}`} ref={leftRef}>
           <div className="section" style={{ flex: 1 }}>
             <div className="section-title" style={{ fontSize: 'var(--fs-md)', marginBottom: 4 }}>
               Fila de impressão
@@ -212,14 +217,13 @@ export default function ProxiesTab() {
           </div>
         </aside>
 
-        <aside className="proxy-col proxy-col-right">
+        <aside className={`proxy-col proxy-col-right ${rightFits ? 'is-sticky' : ''}`} ref={rightRef}>
           <div className="section proxy-settings" style={{ flex: 1 }}>
             <div className="section-title" style={{ fontSize: 'var(--fs-md)' }}>Predefinições {!preset && <span className="badge">Personalizado</span>}</div>
             <div className="preset-grid">
               {PROXY_PRESETS.map((p) => (
                 <button key={p.id} className={`preset ${preset === p.id ? 'active' : ''}`} onClick={() => set(p.values)}>
                   <b>{p.label}</b>
-                  <small>{p.hint}</small>
                 </button>
               ))}
             </div>

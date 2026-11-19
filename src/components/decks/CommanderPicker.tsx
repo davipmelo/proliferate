@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Image as ImageIcon, X } from 'lucide-react';
 import type { Card } from '../../types/models.ts';
 import { getCardByName } from '../../services/scryfall.ts';
@@ -9,14 +9,14 @@ import { Spinner } from '../common/bits.tsx';
 import { openArtPicker } from '../launchers.tsx';
 
 /** Busca de comandante/parceiro com autocomplete e escolha de arte. */
-export function CommanderPicker({ label, value, onChange }: { label: string; value?: Card; onChange: (c: Card | undefined) => void }) {
+export function CommanderPicker({ label, value, onChange, placeholder = 'Buscar carta lendária…' }: { label: ReactNode; value?: Card; onChange: (c: Card | undefined) => void; placeholder?: string }) {
   const [loading, setLoading] = useState(false);
   const pick = async (name: string) => {
     setLoading(true);
     try {
       const c = await getCardByName(name);
       if (!c) return toast('Carta não encontrada.', 'error');
-      if (!/legendary|lendári/i.test(c.typeLine) && !/can be your commander/i.test(c.oracleText ?? '')) toast('Atenção: essa carta não é lendária.', 'info');
+      if (!/legendary|lendári|background/i.test(c.typeLine) && !/can be your commander/i.test(c.oracleText ?? '')) toast('Atenção: essa carta não é lendária.', 'info');
       onChange(c);
     } finally {
       setLoading(false);
@@ -24,7 +24,7 @@ export function CommanderPicker({ label, value, onChange }: { label: string; val
   };
   return (
     <div className="field">
-      <label>{label}</label>
+      <label className="row" style={{ gap: 6 }}>{label}</label>
       {value ? (
         <div className="row section" style={{ padding: 8 }}>
           <img src={frontImage(value, 'small')} alt="" className="list-thumb" {...previewProps(frontImage(value, 'normal'))} />
@@ -37,7 +37,7 @@ export function CommanderPicker({ label, value, onChange }: { label: string; val
         </div>
       ) : (
         <div className="row">
-          <div className="grow"><CardSearch onSelect={pick} placeholder="Buscar carta lendária…" clearOnSelect /></div>
+          <div className="grow"><CardSearch onSelect={pick} placeholder={placeholder} clearOnSelect /></div>
           {loading && <Spinner />}
         </div>
       )}

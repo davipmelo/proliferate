@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Download, Image as ImageIcon, Layers, Library, MoreVertical, Plus, Printer, Search, Trash2, X } from 'lucide-react';
+import { Download, Image as ImageIcon, Layers, Library, MoreVertical, Printer, Search, Trash2, X } from 'lucide-react';
 import type { ColorMatchMode } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, previewProps, toast } from '../../state/ui.tsx';
@@ -12,7 +12,7 @@ import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls, SelectBox, useSelection } from '../common/selection.tsx';
 import { usePersistent, useProgressive } from '../common/hooks.ts';
 import { pickDeck } from '../common/DeckPicker.tsx';
-import { openAddCard, openArtPicker, openImport } from '../launchers.tsx';
+import { openArtPicker, openImport } from '../launchers.tsx';
 import { StatsPanel } from '../stats/StatsPanel.tsx';
 
 const SORTS: SortKey[] = ['name', 'quantity', 'cmc', 'type', 'set', 'rarity', 'price'];
@@ -76,7 +76,6 @@ export default function CollectionTab() {
       },
     });
 
-  const add = () => (data.decks.length ? openAddCard() : toast('Crie um deck primeiro — a coleção mostra as cartas dos seus decks.', 'info', 5000));
 
   return (
     <div>
@@ -86,7 +85,6 @@ export default function CollectionTab() {
           <p className="desc">Todas as cartas dos seus decks, agrupadas pela mesma arte. Alterar os decks atualiza a coleção.</p>
         </div>
         <button className="btn btn-secondary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> <span className="hide-mobile">Importar deck</span></button>
-        <button className="btn btn-primary" onClick={add}><Plus size={16} /> Adicionar carta</button>
       </div>
 
       <div className="stats">
