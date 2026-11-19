@@ -126,7 +126,7 @@ export default function CollectionTab() {
       </div>
 
       <div className="stats">
-        <div className="stat"><div className="label">Total de cartas</div><div className="value">{summary.total}</div><div className="hint">{summary.unique} itens distintos</div></div>
+        <div className="stat"><div className="label">Total de cartas</div><div className="value">{summary.total}</div><div className="hint">{summary.unique} {summary.unique === 1 ? 'item distinto' : 'itens distintos'}</div></div>
         <div className="stat"><div className="label">Disponíveis</div><div className="value accent">{summary.available}</div><div className="hint">livres para novos decks</div></div>
         <div className="stat"><div className="label">Em uso</div><div className="value">{summary.inUse}</div><div className="hint">em {data.decks.length} deck(s)</div></div>
         <div className="stat"><div className="label">Valor estimado</div><div className="value">{formatUsd(summary.value)}</div><div className="hint">preços do Scryfall</div></div>
@@ -152,7 +152,7 @@ export default function CollectionTab() {
       <div className="toolbar">
         <ColorFilter value={colors} onChange={setColors} mode={mode} onModeChange={setMode} />
         <div className="spacer" />
-        <span className="small subtle">{filtered.length} itens</span>
+        <span className="small subtle">{filtered.length} {filtered.length === 1 ? 'item' : 'itens'}</span>
         {filtered.length > 0 && (
           <button className="btn btn-ghost btn-xs" onClick={sel.count === filtered.length ? sel.clear : sel.selectAll}>
             {sel.count === filtered.length ? 'Desmarcar tudo' : 'Selecionar tudo'}

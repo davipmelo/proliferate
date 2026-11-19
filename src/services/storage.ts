@@ -105,6 +105,9 @@ export interface SyncMeta {
   updatedAt: number;
   lastSyncedHash?: string;
   lastSyncedRevision?: number;
+  /** Conta (uid) com a qual os dados locais foram sincronizados pela última vez. */
+  uid?: string;
+  prefsSyncedAt?: number;
 }
 
 export function loadMeta(): SyncMeta {

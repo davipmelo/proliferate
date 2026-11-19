@@ -87,9 +87,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!localChange.current) return;
     localChange.current = false;
-    const rev = revision + 1;
+    const meta = loadMeta();
+    const rev = meta.revision + 1;
     setRevision(rev);
-    saveMeta({ ...loadMeta(), revision: rev, updatedAt: Date.now() });
+    saveMeta({ ...meta, revision: rev, updatedAt: Date.now() });
     listeners.forEach((l) => l(data, prefsRef.current, rev));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);

@@ -86,7 +86,7 @@
 .sheets { display: flex; flex-direction: column; align-items: center; gap: var(--space-4); }
 .sheet-wrap { width: 100%; max-width: 640px; }
 .sheet-label { font-size: var(--fs-xs); color: var(--text-3); margin-bottom: 4px; display: flex; justify-content: space-between; }
-.sheet-scale { position: relative; width: 100%; aspect-ratio: 210 / 297; }
+.sheet-scale { position: relative; width: 100%; aspect-ratio: 210 / 297; overflow: hidden; box-shadow: var(--shadow-md); }
 .preset-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .preset { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 8px 10px; border-radius: var(--radius-sm); border: var(--border-width) solid var(--border-strong); background: var(--surface-2); color: var(--text); font: inherit; cursor: pointer; text-align: left; }
 .preset small { color: var(--text-3); font-size: var(--fs-xs); }
@@ -114,3 +114,6 @@
 
 /* Auth */
 .auth-switch { display: flex; gap: 4px; }
+
+/* Itens de grade não devem forçar largura mínima (evita rolagem horizontal no mobile). */
+.proxy-layout > *, .editor-layout > *, .poster-layout > *, .field-row > * { min-width: 0; }
