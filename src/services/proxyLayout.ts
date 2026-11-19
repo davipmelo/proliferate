@@ -109,17 +109,42 @@ export function sheetLines(s: ProxySettings, rowsUsed = ROWS): Line[] {
     }
   }
   if (s.cornerCrosses) {
-    const c = 1.5;
-    for (const x of xs)
-      for (const y of ys) {
-        lines.push({ x1: x - c, y1: y, x2: x + c, y2: y, kind: 'cross' });
-        lines.push({ x1: x, y1: y - c, x2: x, y2: y + c, kind: 'cross' });
-      }
+    const c = s.crossSize ?? 1.5;
+    const shape = s.crossShape ?? 'plus';
+    const scope = s.crossScope ?? 'all';
+    const lastX = xs.length - 1;
+    const lastY = ys.length - 1;
+    xs.forEach((x, i) =>
+      ys.forEach((y, j) => {
+        const outer = i === 0 || i === lastX || j === 0 || j === lastY;
+        if ((scope === 'outer' && !outer) || (scope === 'inner' && outer)) return;
+        lines.push(...crossLines(x, y, c, shape));
+      }),
+    );
   }
   return lines;
 }
 
-export function lineStyle(s: ProxySettings, kind: Line['kind']): { color: string; width: number; dash?: number[] } {
+/** Segmentos de uma cruz de canto centrada em (x, y). */
+export function crossLines(x: number, y: number, c: number, shape: ProxySettings['crossShape']): Line[] {
+  const L = (x1: number, y1: number, x2: number, y2: number): Line => ({ x1, y1, x2, y2, kind: 'cross' });
+  if (shape === 'x') {
+    const d = c * 0.75;
+    return [L(x - d, y - d, x + d, y + d), L(x - d, y + d, x + d, y - d)];
+  }
+  if (shape === 'hollow') {
+    // Cruz vazada: deixa o ponto exato do corte visível.
+    const g = Math.max(0.35, c * 0.3);
+    return [L(x - c, y, x - g, y), L(x + g, y, x + c, y), L(x, y - c, x, y - g), L(x, y + g, x, y + c)];
+  }
+  if (shape === 'dot') {
+    // Ponto: um traço curtíssimo com ponta arredondada vira um círculo do tamanho da espessura.
+    return [L(x - 0.01, y, x + 0.01, y)];
+  }
+  return [L(x - c, y, x + c, y), L(x, y - c, x, y + c)];
+}
+
+export function lineStyle(s: ProxySettings, kind: Line['kind']): { color: string; width: number; dash?: number[]; round?: boolean } {
   if (kind === 'cut') {
     const w = s.cutLineWidth;
     const dash = s.cutLineStyle === 'dashed' ? [3, 2] : s.cutLineStyle === 'dotted' ? [w, w * 2.5] : undefined;
@@ -127,7 +152,8 @@ export function lineStyle(s: ProxySettings, kind: Line['kind']): { color: string
   }
   if (kind === 'crop') return { color: s.cropMarkColor, width: s.cropMarkWidth };
   if (kind === 'ruler') return { color: '#9a9a9a', width: 0.12 };
-  return { color: s.cropMarkColor, width: Math.max(0.15, s.cropMarkWidth) };
+  if (s.crossShape === 'dot') return { color: s.crossColor ?? s.cropMarkColor, width: Math.max(0.4, (s.crossSize ?? 1.5) * 0.8), round: true };
+  return { color: s.crossColor ?? s.cropMarkColor, width: Math.max(0.1, s.crossWidth ?? 0.25) };
 }
 
 // ---------- Presets ----------
@@ -136,7 +162,8 @@ export interface ProxyPreset {
   id: 'guillotine' | 'craft-knife' | 'minimal' | 'eco';
   label: string;
   hint: string;
-  values: Omit<ProxySettings, 'footer' | 'trimBleed'>;
+  /** O estilo das cruzes é preferência do usuário e não faz parte dos presets. */
+  values: Omit<ProxySettings, 'footer' | 'trimBleed' | 'crossColor' | 'crossWidth' | 'crossSize' | 'crossShape' | 'crossScope'>;
 }
 
 export const PROXY_PRESETS: ProxyPreset[] = [

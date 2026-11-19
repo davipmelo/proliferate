@@ -253,11 +253,14 @@ export async function getPrints(card: Pick<Card, 'oracleId' | 'name'>, force = f
 
 // ---------- Utilitários ----------
 
+// Consultas validadas contra o Scryfall. Cartas auxiliares (Poison Counter, Experience, Monarch,
+// Day // Night, Bounty…) vêm dos sets de fichas (st:token) com tipo "Card", e nem todas têm layout
+// de ficha — por isso o filtro usa o tipo de set em vez do layout.
 export const UTILITY_CATEGORIES: { id: UtilityCategory; label: string; query: string }[] = [
-  { id: 'token', label: 'Fichas', query: 't:token -t:emblem -t:card' },
+  { id: 'token', label: 'Fichas', query: '(t:token or (st:token (t:creature or t:artifact or t:enchantment or t:land))) -t:emblem -t:card -t:boss -t:event' },
   { id: 'plane', label: 'Planos', query: '(t:plane or t:phenomenon)' },
   { id: 'emblem', label: 'Emblemas', query: 't:emblem' },
-  { id: 'counter', label: 'Marcadores', query: 't:card (layout:token or layout:double_faced_token) -t:dungeon -name:checklist -name:championships -name:bounty -name:punchcard' },
+  { id: 'counter', label: 'Marcadores', query: '((t:card st:token) or (st:token (t:boss or t:event))) -t:dungeon -t:emblem -name:checklist -name:"god pack"' },
   { id: 'dungeon', label: 'Masmorras', query: 't:dungeon -t:creature' },
   { id: 'scheme', label: 'Esquemas', query: 't:scheme' },
   { id: 'conspiracy', label: 'Conspirações', query: 't:conspiracy' },
@@ -272,12 +275,12 @@ export function utilityQuery(cat: UtilityCategory): string {
 export function detectUtilityType(card: Pick<Card, 'typeLine' | 'layout'>): UtilityCategory {
   const t = card.typeLine.toLowerCase();
   if (t.includes('emblem')) return 'emblem';
-  if (t.includes('plane') || t.includes('phenomenon')) return 'plane';
+  if (/\bplane\b/.test(t) || t.includes('phenomenon')) return 'plane';
   if (t.includes('dungeon')) return 'dungeon';
   if (t.includes('scheme')) return 'scheme';
   if (t.includes('conspiracy')) return 'conspiracy';
   if (t.includes('attraction')) return 'attraction';
-  if (/^card\b/.test(t)) return 'counter';
+  if (/^card\b/.test(t) || /^(boss|event)\b/.test(t)) return 'counter';
   return 'token';
 }
 
@@ -286,7 +289,8 @@ export async function searchUtilities(
   text: string,
   opts: { order?: string; page?: string; colors?: string } = {},
 ): Promise<SearchResult<TokenCard>> {
-  const base = cat === 'all' ? `(${UTILITY_CATEGORIES.map((c) => c.query).join(' or ')})` : utilityQuery(cat);
+  // Cada categoria entre parênteses: sem isso o "or" mistura os filtros negativos de categorias vizinhas.
+  const base = cat === 'all' ? `(${UTILITY_CATEGORIES.map((c) => `(${c.query})`).join(' or ')})` : `(${utilityQuery(cat)})`;
   const q = [base, text.trim(), opts.colors ? `c=${opts.colors}` : ''].filter(Boolean).join(' ');
   const r = await searchCards(q, { unique: 'art', order: opts.order ?? 'name', extras: true, page: opts.page });
   return { ...r, items: r.items.map((c) => ({ ...c, utilityType: detectUtilityType(c) })) };

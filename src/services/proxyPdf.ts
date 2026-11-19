@@ -81,7 +81,10 @@ export async function generateProxyPdf(slots: Slot[], s: ProxySettings, onProgre
       doc.setDrawColor(st.color);
       doc.setLineWidth(st.width);
       doc.setLineDashPattern(st.dash ?? [], 0);
-      doc.line(l.x1, l.y1, l.x2, l.y2);
+      if (st.round) {
+        doc.setFillColor(st.color);
+        doc.circle((l.x1 + l.x2) / 2, (l.y1 + l.y2) / 2, st.width / 2, 'F');
+      } else doc.line(l.x1, l.y1, l.x2, l.y2);
     }
     doc.setLineDashPattern([], 0);
     if (s.footer) {

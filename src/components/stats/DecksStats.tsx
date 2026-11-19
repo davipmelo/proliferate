@@ -1,87 +1,86 @@
 import { useMemo } from 'react';
 import { useStore } from '../../state/store.tsx';
-import { computeCardStats, computeDecksExtras } from '../../services/stats.ts';
+import { computeDecksExtras, type Ranked } from '../../services/stats.ts';
 import { TYPE_LABELS, type MainType } from '../../types/cardRules.ts';
 import { openDeck } from '../../state/nav.ts';
 import { formatUsd } from '../common/bits.tsx';
-import { BarList, Columns, Kpi, MANA_COLORS, RARITY_COLORS, Stacked, VizCard } from './viz.tsx';
+import { BarList, Columns, Kpi, MANA_COLORS, VizCard } from './viz.tsx';
+import { deckCount, deckTarget } from '../decks/deckUtils.ts';
 
-const CURVE_LABELS = ['0', '1', '2', '3', '4', '5', '6', '7+'];
+const COLOR_COUNT_LABELS = ['Incolor', 'Mono', '2 cores', '3 cores', '4 cores', '5 cores'];
+const ACTIVITY_LABELS = ['7 dias', '30 dias', '90 dias', '1 ano', 'Mais'];
+const open = (r: Ranked) => openDeck(r.key);
+const dec = (n: number, d = 1) => n.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
 
+/** Estatísticas sobre os decks como um todo (não sobre cartas individuais). */
 export default function DecksStats() {
   const { data } = useStore();
-  const entries = useMemo(
-    () => data.decks.flatMap((d) => d.cards.filter((c) => c.category !== 'sideboard' && c.category !== 'maybeboard').map((c) => ({ card: c.card, quantity: c.quantity }))),
-    [data.decks],
-  );
-  const s = useMemo(() => computeCardStats(entries), [entries]);
-  const x = useMemo(() => computeDecksExtras(data.decks), [data.decks]);
+  const tagNames = useMemo(() => new Map(data.tags.map((t) => [t.id, t.name])), [data.tags]);
+  const x = useMemo(() => computeDecksExtras(data.decks, tagNames), [data.decks, tagNames]);
   if (!data.decks.length) return <p className="viz-empty">Crie decks para ver as estatísticas.</p>;
+
+  const tagColor = new Map(data.tags.map((t) => [t.id, t.color]));
+  const pctComplete = Math.round((x.complete / x.decks) * 100);
+  // Progresso relativo à meta de cada formato (100% = completo).
+  const progress: Ranked[] = data.decks
+    .map((d) => {
+      const n = deckCount(d);
+      const t = deckTarget(d);
+      return { key: d.id, label: d.name, value: Math.round((n / t) * 100), extra: `${n}/${t}` };
+    })
+    .sort((a, b) => b.value - a.value || a.label.localeCompare(b.label));
 
   return (
     <>
       <div className="kpi-row">
-        <Kpi label="Decks" value={x.decks} hint={`${x.complete} completo(s) na meta`} />
-        <Kpi label="Cartas nos decks" value={s.total.toLocaleString('pt-BR')} hint={`${s.unique} cartas diferentes`} />
-        <Kpi label="Valor total" value={formatUsd(s.value)} hint={`média ${formatUsd(x.avgValue)} por deck`} accent />
-        <Kpi label="Fichas" value={data.decks.reduce((n, d) => n + d.tokens.reduce((m, t) => m + t.quantity, 0), 0)} hint="em todos os decks" />
-        <Kpi label="Custo médio" value={s.avgCmc.toFixed(2)} hint="sem terrenos" />
-        <Kpi label="Terrenos" value={s.total ? `${Math.round((s.lands / s.total) * 100)}%` : '—'} hint={`${s.lands} no total`} />
+        <Kpi label="Decks" value={x.decks} hint={`${x.complete} completo(s) · ${pctComplete}%`} />
+        <Kpi label="Valor total" value={formatUsd(x.avgValue * x.decks)} hint={`média ${formatUsd(x.avgValue)} por deck`} accent />
+        <Kpi label="Custo médio" value={dec(x.avgCmc, 2)} hint="média entre os decks" />
+        <Kpi label="Terrenos" value={dec(x.avgLands)} hint="por deck, em média" />
+        <Kpi label="Cores" value={dec(x.avgColors)} hint="por deck, em média" />
+        <Kpi label="Fichas" value={dec(x.avgTokens)} hint="por deck, em média" />
       </div>
       <div className="viz-grid">
-        <VizCard title="Cartas por deck" hint="sem sideboard">
-          <BarList items={x.sizes} color={() => 'var(--text-3)'} />
+        <VizCard title="Decks mais valiosos" hint="clique para abrir" wide>
+          <BarList items={x.priciest} format={(n) => formatUsd(n)} color={() => 'var(--accent)'} onSelect={open} />
         </VizCard>
         <VizCard title="Formatos">
           <BarList items={x.formats} color={() => 'var(--accent)'} />
         </VizCard>
-        <VizCard title="Identidade dos decks">
+        <VizCard title="Identidade dos decks" hint="guildas e clãs">
           <BarList items={x.identities} color={() => 'var(--mana-m)'} />
         </VizCard>
-        <VizCard title="Cores" hint="cartas não terreno de todos os decks">
-          <BarList items={(['W', 'U', 'B', 'R', 'G', 'M', 'C'] as const).map((k) => ({ key: k, label: MANA_COLORS[k].label, value: s.colors[k] })).filter((i) => i.value)} color={(r) => MANA_COLORS[r.key].color} />
+        <VizCard title="Cores mais jogadas" hint="decks que usam cada cor">
+          <BarList items={x.colorPresence} color={(r) => MANA_COLORS[r.key].color} format={(n) => `${n} deck${n === 1 ? '' : 's'}`} max={x.decks} />
         </VizCard>
-        <VizCard title="Curva de mana combinada">
-          <Columns values={s.curve} labels={CURVE_LABELS} color="var(--accent)" />
+        <VizCard title="Número de cores">
+          <Columns values={x.colorCount} labels={COLOR_COUNT_LABELS} color="var(--mana-m)" />
         </VizCard>
-        <VizCard title="Tipos de carta">
-          <BarList items={s.types.map((t) => ({ ...t, label: TYPE_LABELS[t.key as MainType] }))} color={() => 'var(--text-3)'} />
+        <VizCard title="Progresso" hint="em relação à meta do formato">
+          <BarList items={progress} max={100} format={(n) => `${n}%`} color={(r) => (r.value === 100 ? 'var(--success)' : r.value > 100 ? 'var(--warning)' : 'var(--accent)')} onSelect={open} />
         </VizCard>
-        <VizCard title="Raridade">
-          <Stacked parts={s.rarity.map((r) => ({ label: r.label, value: r.value, color: RARITY_COLORS[r.key] ?? RARITY_COLORS.unknown }))} />
+        <VizCard title="Custo médio por deck" hint="sem terrenos">
+          <BarList items={x.avgCmcByDeck} format={(n) => dec(n, 2)} color={() => 'var(--info)'} onSelect={open} />
         </VizCard>
-        <VizCard title="Decks mais valiosos" wide>
-          <ul className="bar-list">
-            {x.priciest.map((d) => {
-              const max = x.priciest[0]?.value || 1;
-              return (
-                <li key={d.key}>
-                  <button className="bar-row as-link" onClick={() => openDeck(d.key)}>
-                    <div className="bar-label"><span className="ellipsis">{d.label}</span><span className="bar-value"><em>{d.extra}</em>{formatUsd(d.value)}</span></div>
-                    <div className="bar-track"><div className="bar-fill" style={{ width: `${(d.value / max) * 100}%`, background: 'var(--accent)' }} /></div>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+        <VizCard title="Terrenos por deck">
+          <BarList items={x.landsByDeck} color={() => 'var(--success)'} onSelect={open} />
         </VizCard>
-        <VizCard title="Staples" hint="cartas em mais de um deck">
-          <BarList items={x.staples} card format={(n) => `${n} decks`} color={() => 'var(--info)'} empty="Nenhuma carta repetida entre decks." />
-        </VizCard>
-        <VizCard title="Cartas mais caras usadas" hint="preço unitário">
-          <BarList items={s.topValue} card format={(n) => formatUsd(n)} color={() => 'var(--accent)'} />
-        </VizCard>
-        <VizCard title="Tribos">
-          <BarList items={s.tribes} color={() => 'var(--success)'} empty="Nenhuma criatura." />
-        </VizCard>
-        <VizCard title="Habilidades em destaque">
-          <BarList items={s.keywords} color={() => 'var(--info)'} />
+        <VizCard title="Deck médio" hint="cartas por tipo, em média">
+          <BarList items={x.composition.map((t) => ({ ...t, label: TYPE_LABELS[t.key as MainType] }))} format={(n) => dec(n)} color={() => 'var(--text-3)'} />
         </VizCard>
         {x.commanders.length > 0 && (
           <VizCard title="Comandantes">
             <BarList items={x.commanders} card color={() => 'var(--mana-m)'} />
           </VizCard>
         )}
+        {x.tags.length > 0 && (
+          <VizCard title="Tags">
+            <BarList items={x.tags} color={(r) => tagColor.get(r.key) ?? 'var(--text-3)'} />
+          </VizCard>
+        )}
+        <VizCard title="Atividade" hint="última edição">
+          <Columns values={x.activity} labels={ACTIVITY_LABELS} color="var(--accent)" />
+        </VizCard>
       </div>
     </>
   );

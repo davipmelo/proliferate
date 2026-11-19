@@ -11,3 +11,9 @@ export function openDeck(deckId: string): void {
   goToTab('decks');
   window.dispatchEvent(new CustomEvent('proliferate:open-deck', { detail: deckId }));
 }
+
+/** Fecha o deck aberto e volta para a lista de decks. */
+export function closeDeck(): void {
+  sessionStorage.removeItem('proliferate:open-deck');
+  window.dispatchEvent(new CustomEvent('proliferate:open-deck', { detail: null }));
+}

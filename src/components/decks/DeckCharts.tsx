@@ -3,8 +3,6 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip, type
 import { Bar } from 'react-chartjs-2';
 import type { Deck } from '../../types/models.ts';
 import { isLand, mainType, TYPE_LABELS, TYPE_ORDER } from '../../types/cardRules.ts';
-import { formatUsd } from '../common/bits.tsx';
-import { deckValue } from './deckUtils.ts';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -108,11 +106,6 @@ export default function DeckCharts({ deck }: { deck: Deck }) {
             />
           </div>
         ) : <p className="small subtle">Sem dados.</p>}
-        <hr className="divider" />
-        <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span className="small muted">Valor total estimado</span>
-          <b>{formatUsd(deckValue(deck))}</b>
-        </div>
       </div>
     </>
   );

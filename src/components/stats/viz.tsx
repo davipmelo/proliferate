@@ -30,25 +30,29 @@ export function Kpi({ label, value, hint, accent }: { label: string; value: Reac
 const fmt = (n: number) => n.toLocaleString('pt-BR');
 
 /** Lista ordenada com barra proporcional e valor visível. */
-export function BarList({ items, format = fmt, color, empty = 'Sem dados.', card }: { items: Ranked[]; format?: (n: number) => string; color?: (r: Ranked) => string; empty?: string; card?: boolean }) {
+export function BarList({ items, format = fmt, color, empty = 'Sem dados.', card, onSelect, max: maxProp }: { items: Ranked[]; format?: (n: number) => string; color?: (r: Ranked) => string; empty?: string; card?: boolean; onSelect?: (r: Ranked) => void; max?: number }) {
   if (!items.length) return <p className="viz-empty">{empty}</p>;
-  const max = Math.max(...items.map((i) => i.value), 1);
+  const max = maxProp ?? Math.max(...items.map((i) => i.value), 1);
   return (
     <ul className="bar-list">
       {items.map((i) => (
         <li key={i.key} title={`${i.label}: ${format(i.value)}`}>
           {card && i.card && <CardChip card={i.card} />}
-          <div className="bar-row">
+          <Row className={`bar-row ${onSelect ? 'as-link' : ''}`} onClick={onSelect ? () => onSelect(i) : undefined}>
             <div className="bar-label">
               <span className="ellipsis">{i.label}</span>
               <span className="bar-value">{i.extra && <em>{i.extra}</em>}{format(i.value)}</span>
             </div>
-            <div className="bar-track"><div className="bar-fill" style={{ width: `${(i.value / max) * 100}%`, background: color?.(i) }} /></div>
-          </div>
+            <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(100, (i.value / max) * 100)}%`, background: color?.(i) }} /></div>
+          </Row>
         </li>
       ))}
     </ul>
   );
+}
+
+function Row({ className, onClick, children }: { className: string; onClick?: () => void; children: ReactNode }) {
+  return onClick ? <button className={className} onClick={onClick}>{children}</button> : <div className={className}>{children}</div>;
 }
 
 function CardChip({ card }: { card: Card }) {

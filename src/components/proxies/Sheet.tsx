@@ -27,7 +27,7 @@ export function Sheet({ slots, settings, page, total, scale, eager }: { slots: S
       <svg className="overlay" viewBox={`0 0 ${PAGE_W} ${PAGE_H}`} xmlns="http://www.w3.org/2000/svg">
         {lines.map((l, i) => {
           const st = lineStyle(settings, l.kind);
-          return <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={st.color} strokeWidth={st.width} strokeDasharray={st.dash?.join(' ')} strokeLinecap="butt" />;
+          return <line key={i} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} stroke={st.color} strokeWidth={st.width} strokeDasharray={st.dash?.join(' ')} strokeLinecap={st.round ? 'round' : 'butt'} />;
         })}
       </svg>
       {settings.footer && <div className="footer">{footerText(page, total, slots.length)}</div>}

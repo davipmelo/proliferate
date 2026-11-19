@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Crop, Layers, MoreVertical, Pencil, Plus, Printer, Search, Tags, Trash2, Download } from 'lucide-react';
-import type { Deck } from '../../types/models.ts';
+import { Crop, Layers, MoreVertical, Pencil, Plus, Printer, Search, Tags, Trash2, Download, X } from 'lucide-react';
+import type { ColorMatchMode, Deck } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, openModal, toast } from '../../state/ui.tsx';
-import { formatInfo } from '../../types/formats.ts';
+import { FORMAT_LIST, formatInfo } from '../../types/formats.ts';
+import { matchesColorFilter, type ColorFilterValue } from '../../types/cardRules.ts';
+import { ColorFilter } from '../common/ColorFilter.tsx';
 import { ColorPips, Dropdown, Empty, formatUsd, ViewToggle } from '../common/bits.tsx';
 import { usePersistent } from '../common/hooks.ts';
 import { openImport } from '../launchers.tsx';
@@ -13,31 +15,76 @@ import { CoverEditorModal } from './CoverEditorModal.tsx';
 import { StatsPanel } from '../stats/StatsPanel.tsx';
 import { coverStyle, deckColors, deckCount, deckCoverImage, deckTarget, deckValue } from './deckUtils.ts';
 
-type DeckSort = 'updated' | 'name' | 'format' | 'count';
+type DeckSort = 'updated' | 'name' | 'format' | 'count' | 'value' | 'colors' | 'progress';
+type DeckStatus = 'all' | 'complete' | 'incomplete' | 'over';
+
+const SORT_LABELS: Record<DeckSort, string> = {
+  updated: 'Recentes', name: 'Nome', format: 'Formato', count: 'Nº de cartas', value: 'Valor', colors: 'Nº de cores', progress: 'Progresso',
+};
+const STATUS_LABELS: Record<DeckStatus, string> = { all: 'Todos os status', complete: 'Completos', incomplete: 'Incompletos', over: 'Acima da meta' };
 
 export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
   const store = useStore();
   const { data, prefs, setPrefs } = store;
   const [q, setQ] = useState('');
   const [tagFilter, setTagFilter] = useState<string[]>([]);
+  const [colors, setColors] = useState<ColorFilterValue[]>([]);
+  const [colorMode, setColorMode] = usePersistent<ColorMatchMode>('decks-color-mode', 'identity');
+  const [formatFilter, setFormatFilter] = useState('');
+  const [status, setStatus] = useState<DeckStatus>('all');
   const [sort, setSort] = usePersistent<DeckSort>('deck-sort', 'updated');
+  const [cardW, setCardW] = usePersistent<number>('decks-grid-size', 310);
   const view = prefs.decksView;
+  const formatsInUse = useMemo(() => FORMAT_LIST.filter((f) => data.decks.some((d) => formatInfo(d.format).id === f.id)), [data.decks]);
+  const filtersOn = !!(q || tagFilter.length || colors.length || formatFilter || status !== 'all');
+  const clearFilters = () => {
+    setQ('');
+    setTagFilter([]);
+    setColors([]);
+    setFormatFilter('');
+    setStatus('all');
+  };
 
-  const decks = useMemo(() => {
-    const needle = q.toLowerCase();
-    const l = data.decks.filter(
-      (d) =>
-        (!needle || `${d.name} ${d.description} ${d.commander?.name ?? ''} ${formatInfo(d.format).label}`.toLowerCase().includes(needle)) &&
-        tagFilter.every((t) => d.tags.includes(t)),
-    );
+  // Busca também pelas cartas do deck (mostra qual carta casou).
+  const { decks, cardHits } = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const hits = new Map<string, string>();
+    const l = data.decks.filter((d) => {
+      if (needle) {
+        const own = `${d.name} ${d.description} ${d.commander?.name ?? ''} ${d.partner?.name ?? ''} ${formatInfo(d.format).label}`.toLowerCase().includes(needle);
+        if (!own) {
+          const hit = d.cards.find((c) => c.card.name.toLowerCase().includes(needle) || c.card.namePt?.toLowerCase().includes(needle));
+          if (!hit) return false;
+          hits.set(d.id, hit.card.name);
+        }
+      }
+      if (!tagFilter.every((t) => d.tags.includes(t))) return false;
+      if (formatFilter && formatInfo(d.format).id !== formatFilter) return false;
+      if (status !== 'all') {
+        const n = deckCount(d);
+        const t = deckTarget(d);
+        if (status === 'complete' && n !== t) return false;
+        if (status === 'incomplete' && n >= t) return false;
+        if (status === 'over' && n <= t) return false;
+      }
+      if (colors.length) {
+        const id = deckColors(d);
+        if (!matchesColorFilter({ colors: id, colorIdentity: id }, colors, colorMode)) return false;
+      }
+      return true;
+    });
+    const progress = (d: Deck) => deckCount(d) / deckTarget(d);
     const by: Record<DeckSort, (a: Deck, b: Deck) => number> = {
       updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
       name: (a, b) => a.name.localeCompare(b.name),
       format: (a, b) => a.format.localeCompare(b.format) || a.name.localeCompare(b.name),
       count: (a, b) => deckCount(b) - deckCount(a),
+      value: (a, b) => deckValue(b) - deckValue(a),
+      colors: (a, b) => deckColors(b).length - deckColors(a).length || a.name.localeCompare(b.name),
+      progress: (a, b) => progress(b) - progress(a) || a.name.localeCompare(b.name),
     };
-    return l.sort(by[sort]);
-  }, [data.decks, q, tagFilter, sort]);
+    return { decks: l.sort(by[sort]), cardHits: hits };
+  }, [data.decks, q, tagFilter, formatFilter, status, colors, colorMode, sort]);
 
   const create = () => openModal((close) => <DeckFormModal onClose={close} onSaved={(id) => onOpen(id)} />);
   const edit = (d: Deck) => openModal((close) => <DeckFormModal deck={d} onClose={close} />);
@@ -91,35 +138,51 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
 
       {data.decks.length > 0 && <StatsPanel kind="decks" teaser={<><span>{data.decks.length} decks</span><span>{formatUsd(data.decks.reduce((s2, d) => s2 + deckValue(d), 0))}</span></>} />}
 
-      <div className="toolbar">
-        <div className="input-icon"><Search size={16} /><input className="input" placeholder="Buscar decks…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
-        <select className="select select-sm" style={{ width: 'auto' }} value={sort} onChange={(e) => setSort(e.target.value as DeckSort)} aria-label="Ordenar">
-          <option value="updated">Recentes</option>
-          <option value="name">Nome</option>
-          <option value="format">Formato</option>
-          <option value="count">Nº de cartas</option>
-        </select>
-        <div className="spacer" />
-        <button className="btn btn-ghost btn-sm" onClick={() => openModal((c) => <TagManagerModal onClose={c} />)}><Tags size={16} /> Tags</button>
-        <ViewToggle value={view} onChange={(v) => setPrefs({ decksView: v })} />
-      </div>
-      {data.tags.length > 0 && (
-        <div className="chips-scroll" style={{ marginBottom: 12 }}>
-          {data.tags.map((t) => (
-            <button key={t.id} className={`chip ${tagFilter.includes(t.id) ? 'active' : ''}`} onClick={() => setTagFilter((f) => (f.includes(t.id) ? f.filter((x) => x !== t.id) : [...f, t.id]))}>
-              <span className="tag-dot" style={{ background: t.color }} /> {t.name}
-            </button>
-          ))}
-          {tagFilter.length > 0 && <button className="btn btn-ghost btn-xs" onClick={() => setTagFilter([])}>Limpar</button>}
+      <div className="panel-bar">
+        <div className="toolbar">
+          <div className="input-icon">
+            <Search size={16} />
+            <input className="input" placeholder="Buscar decks, comandantes ou cartas…" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
+          <select className="select select-sm" style={{ width: 'auto' }} value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)} aria-label="Filtrar por formato">
+            <option value="">Todos os formatos</option>
+            {formatsInUse.map((f) => <option key={f.id} value={f.id}>{f.label}</option>)}
+          </select>
+          <select className="select select-sm" style={{ width: 'auto' }} value={status} onChange={(e) => setStatus(e.target.value as DeckStatus)} aria-label="Filtrar por status">
+            {(Object.keys(STATUS_LABELS) as DeckStatus[]).map((k) => <option key={k} value={k}>{STATUS_LABELS[k]}</option>)}
+          </select>
+          <select className="select select-sm" style={{ width: 'auto' }} value={sort} onChange={(e) => setSort(e.target.value as DeckSort)} aria-label="Ordenar">
+            {(Object.keys(SORT_LABELS) as DeckSort[]).map((k) => <option key={k} value={k}>Ordenar: {SORT_LABELS[k]}</option>)}
+          </select>
+          <div className="spacer" />
+          {view === 'grid' && <input type="range" min={230} max={480} step={10} value={cardW} onChange={(e) => setCardW(Number(e.target.value))} aria-label="Tamanho dos decks" title="Tamanho dos decks" style={{ width: 110 }} />}
+          <button className="btn btn-ghost btn-sm" onClick={() => openModal((c) => <TagManagerModal onClose={c} />)}><Tags size={16} /> Tags</button>
+          <ViewToggle value={view} onChange={(v) => setPrefs({ decksView: v })} />
         </div>
-      )}
+        <div className="toolbar">
+          <ColorFilter value={colors} onChange={setColors} mode={colorMode} onModeChange={setColorMode} />
+          {data.tags.length > 0 && <span className="toolbar-sep hide-mobile" />}
+          {data.tags.length > 0 && (
+            <div className="chips-scroll deck-tag-chips">
+              {data.tags.map((t) => (
+                <button key={t.id} className={`chip ${tagFilter.includes(t.id) ? 'active' : ''}`} onClick={() => setTagFilter((f) => (f.includes(t.id) ? f.filter((x) => x !== t.id) : [...f, t.id]))}>
+                  <span className="tag-dot" style={{ background: t.color }} /> {t.name}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="spacer" />
+          <span className="small subtle">{decks.length === data.decks.length ? `${decks.length} deck(s)` : `${decks.length} de ${data.decks.length} decks`}</span>
+          {filtersOn && <button className="btn btn-ghost btn-xs" onClick={clearFilters}><X size={13} /> Limpar filtros</button>}
+        </div>
+      </div>
 
       {data.decks.length === 0 ? (
         <Empty icon={<Layers size={40} />} title="Nenhum deck ainda" action={<div className="row-wrap" style={{ justifyContent: 'center' }}><button className="btn btn-secondary" onClick={create}><Plus size={16} /> Criar deck</button><button className="btn btn-secondary" onClick={() => openImport({ target: 'new-deck' })}><Download size={16} /> Importar lista</button></div>}>
           Crie um deck do zero, cole uma lista ou importe do Arena/Moxfield/LigaMagic.
         </Empty>
       ) : decks.length === 0 ? (
-        <Empty icon={<Search size={36} />} title="Nenhum deck encontrado" />
+        <Empty icon={<Search size={36} />} title="Nenhum deck encontrado" action={filtersOn ? <button className="btn btn-secondary" onClick={clearFilters}><X size={16} /> Limpar filtros</button> : undefined}>Ajuste a busca ou os filtros.</Empty>
       ) : view === 'list' ? (
         <div className="list deck-list">
           {decks.map((d) => {
@@ -133,7 +196,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                   <div className="list-title"><span className="deck-row-name">{d.name}</span><ColorPips colors={deckColors(d)} /></div>
                   <div className="list-sub">
                     <span className="badge">{formatInfo(d.format).label}</span>
-                    {d.commander && <span className="ellipsis">{d.commander.name}{d.partner ? ` & ${d.partner.name}` : ''}</span>}
+                    {cardHits.has(d.id) ? <span className="ellipsis deck-hit">contém <b>{cardHits.get(d.id)}</b></span> : d.commander && <span className="ellipsis">{d.commander.name}{d.partner ? ` & ${d.partner.name}` : ''}</span>}
                   </div>
                 </div>
                 <div className="deck-row-tags hide-mobile"><Tags_ d={d} /></div>
@@ -153,7 +216,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
           })}
         </div>
       ) : (
-        <div className="deck-cards">
+        <div className="deck-cards" style={{ ['--deck-w' as string]: `${cardW}px` }}>
           {decks.map((d) => {
             const img = deckCoverImage(d);
             const count = deckCount(d);
@@ -175,7 +238,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
                 <div className="deck-card-body">
                   <div className="row small">
                     <ColorPips colors={deckColors(d)} />
-                    <span className="grow ellipsis subtle">{d.commander?.name ?? `${d.cards.length} cartas distintas`}</span>
+                    {cardHits.has(d.id) ? <span className="grow ellipsis deck-hit">contém <b>{cardHits.get(d.id)}</b></span> : <span className="grow ellipsis subtle">{d.commander?.name ?? `${d.cards.length} cartas distintas`}</span>}
                     <b className="tabular">{formatUsd(deckValue(d))}</b>
                   </div>
                   <div className="row small">

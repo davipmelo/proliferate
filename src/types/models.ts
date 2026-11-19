@@ -220,6 +220,11 @@ export interface ProxySettings {
   cropMarkLength: number; // 5–16 mm
   rulers: boolean;
   cornerCrosses: boolean;
+  crossColor: string;
+  crossWidth: number; // mm
+  crossSize: number; // tamanho de cada braço, mm
+  crossShape: 'plus' | 'x' | 'hollow' | 'dot';
+  crossScope: 'all' | 'outer' | 'inner';
   cornerFill: 'black' | 'white' | 'none';
   footer: boolean;
   trimBleed: boolean;

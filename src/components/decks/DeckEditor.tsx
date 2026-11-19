@@ -18,11 +18,16 @@ import { openAddCard, openArtPicker, openExport, openImport } from '../launchers
 import { DeckFormModal } from './DeckFormModal.tsx';
 import { CoverEditorModal } from './CoverEditorModal.tsx';
 import { DeckTokens } from './DeckTokens.tsx';
+import { DeckPart } from './DeckPart.tsx';
 import { coverStyle, deckColors, deckCount, deckCoverImage, deckTarget, deckValue } from './deckUtils.ts';
 
 const DeckCharts = lazy(() => import('./DeckCharts.tsx'));
 const PosterModal = lazy(() => import('./PosterModal.tsx'));
 const SampleHandModal = lazy(() => import('./SampleHandModal.tsx'));
+
+const PART_CMD = 'part-commander';
+const PART_MAIN = 'part-main';
+const PART_TOKENS = 'part-tokens';
 
 const SORTS: SortKey[] = ['name', 'quantity', 'cmc', 'type', 'set', 'rarity', 'price'];
 const GROUP_LABELS: Record<DeckGroupMode, string> = { none: 'Não agrupar', type: 'Agrupar por tipo', cmc: 'Agrupar por custo de mana' };
@@ -87,7 +92,6 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
   const ordered = useMemo(() => groups.flatMap((g) => g.cards), [groups]);
   const isCollapsed = (k: string) => collapsed.includes(k);
   const toggleGroup = (k: string) => setCollapsed(isCollapsed(k) ? collapsed.filter((x) => x !== k) : [...collapsed, k]);
-  const allCollapsed = groups.length > 0 && groups.every((g) => isCollapsed(g.key));
 
   const setCard = (instanceId: string, patch: Partial<DeckCard> | null) =>
     store.updateDeck(deck.id, (d) => {
@@ -115,6 +119,45 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
   const openHand = () => openModal((c) => <Suspense fallback={null}><SampleHandModal deck={deck} onClose={c} /></Suspense>);
 
   const cmdCards = deck.cards.filter((c) => c.category === 'commander' || c.category === 'partner');
+  const mainTotal = deck.cards.filter((c) => c.category !== 'commander' && c.category !== 'partner').length;
+  const mainQty = filtered.reduce((s, c) => s + c.quantity, 0);
+  const allKeys = [PART_CMD, PART_MAIN, PART_TOKENS, ...(groups.length > 1 ? groups.map((g) => g.key) : [])];
+  const allCollapsed = allKeys.every((k) => isCollapsed(k));
+
+  const renderRow = (dc: DeckCard, onArt: () => void) => (
+    <div key={dc.instanceId} className={`list-row ${details ? '' : 'compact'}`}>
+      <CardThumb card={dc.card} />
+      <div className="list-main">
+        <div className="list-title"><span>{dc.card.name}</span>{dc.isFoil && <span className="badge badge-accent">Foil</span>}<ManaCost cost={dc.card.manaCost} /></div>
+        {details && <div className="list-sub"><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>}
+      </div>
+      {details && <div className="list-meta hide-mobile"><span className="deck-price small subtle tabular">{formatUsd(dc.card.priceUsd)}</span></div>}
+      <div className="list-actions">
+        <QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} />
+        <CardMenu dc={dc} onArt={onArt} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} />
+      </div>
+    </div>
+  );
+
+  const renderTile = (dc: DeckCard, onArt: () => void) => (
+    <div key={dc.instanceId} className="card-tile">
+      <div className={`card-img-wrap ${(dc.isFoil || dc.card.isFoil) && prefs.showFoil ? 'foil' : ''}`} {...previewProps(frontImage(dc.card, 'normal'), backImage(dc.card))}>
+        <img src={frontImage(dc.card, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={dc.card.name} />
+        {dc.quantity > 1 && <span className="qty-badge">{dc.quantity}×</span>}
+        <div className="card-tile-actions">
+          <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={onArt}><ImageIcon size={15} /></button>
+          <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para proxies" onClick={() => toProxy([dc])}><Printer size={15} /></button>
+          <button className="btn btn-secondary btn-icon btn-sm" title="Remover" onClick={() => setCard(dc.instanceId, null)}><Trash2 size={15} /></button>
+        </div>
+      </div>
+      {details && (
+        <div className="card-tile-info">
+          <span className="name">{dc.card.name}</span>
+          <span className="meta"><QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} /><span className="tabular">{formatUsd(dc.card.priceUsd)}</span></span>
+        </div>
+      )}
+    </div>
+  );
   const cover = deckCoverImage(deck);
   const nonLand = deck.cards.filter((c) => c.category === 'main' || c.category === 'commander' || c.category === 'partner').filter((c) => !isLand(c.card));
   const avgCmc = nonLand.length ? nonLand.reduce((s, c) => s + c.card.cmc * c.quantity, 0) / nonLand.reduce((s, c) => s + c.quantity, 0) : 0;
@@ -171,7 +214,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
       </div>
 
       <div className="editor-layout">
-        <div style={{ minWidth: 0 }}>
+        <div className="deck-parts">
           <div className="panel-bar">
             <div className="toolbar">
               <div className="input-icon"><Search size={16} /><input className="input" placeholder="Buscar no deck…" value={q} onChange={(e) => setQ(e.target.value)} /></div>
@@ -182,115 +225,90 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
                 {SORTS.map((s) => <option key={s} value={s}>Ordenar: {SORT_LABELS[s]}</option>)}
               </select>
               <div className="spacer" />
-              {groups.length > 1 && (
-                <button className="btn btn-ghost btn-icon btn-sm" title={allCollapsed ? 'Expandir todos os grupos' : 'Recolher todos os grupos'} onClick={() => setCollapsed(allCollapsed ? [] : groups.map((g) => g.key))}>
-                  {allCollapsed ? <ChevronsUpDown size={16} /> : <ChevronsDownUp size={16} />}
-                </button>
-              )}
+              <button className="btn btn-ghost btn-icon btn-sm" title={allCollapsed ? 'Expandir tudo' : 'Recolher tudo'} onClick={() => setCollapsed(allCollapsed ? [] : allKeys)}>
+                {allCollapsed ? <ChevronsUpDown size={16} /> : <ChevronsDownUp size={16} />}
+              </button>
               <GridControls size={prefs.gridSize} onSize={view === 'grid' ? (n) => setPrefs({ gridSize: n }) : undefined} details={details} onDetails={(b) => setPrefs({ showDetails: b })} foil={view === 'grid' ? prefs.showFoil : undefined} onFoil={(b) => setPrefs({ showFoil: b })} />
               <ViewToggle value={view} onChange={(v) => setPrefs({ deckEditorView: v })} />
             </div>
             <div className="toolbar"><ColorFilter value={colors} onChange={setColors} mode={mode} onModeChange={setMode} /></div>
           </div>
 
-          {groups.length === 0 && (
-            <div className="empty">
-              <h3>{deck.cards.length ? 'Nenhuma carta com esses filtros' : 'Deck vazio'}</h3>
-              {!deck.cards.length && <div className="row-wrap" style={{ justifyContent: 'center' }}><button className="btn btn-secondary" onClick={() => openAddCard({ deckId: deck.id })}><Plus size={16} /> Adicionar carta</button><button className="btn btn-secondary" onClick={() => openImport({ target: 'existing-deck', deckId: deck.id })}><Download size={16} /> Colar lista</button></div>}
-            </div>
+          {(info.hasCommander || cmdCards.length > 0) && (
+            <DeckPart
+              title={cmdCards.length > 1 ? 'Comandantes' : 'Comandante'}
+              count={cmdCards.length || undefined}
+              closed={isCollapsed(PART_CMD)}
+              onToggle={() => toggleGroup(PART_CMD)}
+            >
+              {cmdCards.length === 0 ? (
+                <div className="part-empty">
+                  <span className="small subtle">Nenhum comandante definido.</span>
+                  <button className="btn btn-secondary btn-sm" onClick={() => openModal((c) => <DeckFormModal deck={deck} onClose={c} />)}><Pencil size={15} /> Escolher comandante</button>
+                </div>
+              ) : view === 'list' ? (
+                <div className="list"><div className="group-rows two-col">{cmdCards.map((dc, i) => renderRow(dc, () => changeArt(cmdCards, i)))}</div></div>
+              ) : (
+                <div className="card-grid" style={{ ['--card-w' as string]: `${prefs.gridSize}px` }}>{cmdCards.map((dc, i) => renderTile(dc, () => changeArt(cmdCards, i)))}</div>
+              )}
+            </DeckPart>
           )}
 
-          <div className={`deck-groups ${view === 'list' ? 'list-mode' : ''} ${groups.length === 1 && view === 'list' ? 'single' : ''}`}>
-            {groups.map((g) => {
-              const closed = isCollapsed(g.key);
-              const qty = g.cards.reduce((s, c) => s + c.quantity, 0);
-              const header = (
-                <button className={`group-header ${closed ? 'closed' : ''}`} onClick={() => toggleGroup(g.key)} aria-expanded={!closed}>
-                  <ChevronDown size={15} className="group-chev" />
-                  <span>{g.label}</span>
-                  <span className="count">{qty}</span>
-                  <span className="spacer" />
-                  <span className="group-value">{formatUsd(g.cards.reduce((s, c) => s + (c.card.priceUsd ?? 0) * c.quantity, 0))}</span>
-                </button>
-              );
-              return (
-                <section key={g.key} className={`deck-group ${closed ? 'closed' : ''}`}>
-                  {view === 'list' ? (
-                    <div className="list">
-                      {header}
-                      {!closed && (
-                        <div className={`group-rows ${groups.length === 1 ? 'two-col' : ''}`}>
-                          {g.cards.map((dc) => (
-                            <div key={dc.instanceId} className={`list-row ${details ? '' : 'compact'}`}>
-                              <CardThumb card={dc.card} />
-                              <div className="list-main">
-                                <div className="list-title"><span>{dc.card.name}</span>{dc.isFoil && <span className="badge badge-accent">Foil</span>}<ManaCost cost={dc.card.manaCost} /></div>
-                                {details && <div className="list-sub"><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>}
-                              </div>
-                              {details && <div className="list-meta hide-mobile"><span className="deck-price small subtle tabular">{formatUsd(dc.card.priceUsd)}</span></div>}
-                              <div className="list-actions">
-                                <QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} />
-                                <CardMenu dc={dc} onArt={() => changeArt(ordered, ordered.indexOf(dc))} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <>
-                      {header}
-                      {!closed && (
-                        <div className="card-grid" style={{ ['--card-w' as string]: `${prefs.gridSize}px`, marginTop: 10 }}>
-                          {g.cards.map((dc) => (
-                            <div key={dc.instanceId} className="card-tile">
-                              <div className={`card-img-wrap ${(dc.isFoil || dc.card.isFoil) && prefs.showFoil ? 'foil' : ''}`} {...previewProps(frontImage(dc.card, 'normal'), backImage(dc.card))}>
-                                <img src={frontImage(dc.card, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={dc.card.name} />
-                                {dc.quantity > 1 && <span className="qty-badge">{dc.quantity}×</span>}
-                                <div className="card-tile-actions">
-                                  <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={() => changeArt(ordered, ordered.indexOf(dc))}><ImageIcon size={15} /></button>
-                                  <button className="btn btn-secondary btn-icon btn-sm" title="Mandar para proxies" onClick={() => toProxy([dc])}><Printer size={15} /></button>
-                                  <button className="btn btn-secondary btn-icon btn-sm" title="Remover" onClick={() => setCard(dc.instanceId, null)}><Trash2 size={15} /></button>
-                                </div>
-                              </div>
-                              {details && (
-                                <div className="card-tile-info">
-                                  <span className="name">{dc.card.name}</span>
-                                  <span className="meta"><QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} /><span className="tabular">{formatUsd(dc.card.priceUsd)}</span></span>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </section>
-              );
-            })}
-          </div>
+          <DeckPart
+            title="Deck principal"
+            count={mainQty}
+            extra={q || colors.length ? 'filtrado' : undefined}
+            closed={isCollapsed(PART_MAIN)}
+            onToggle={() => toggleGroup(PART_MAIN)}
+            actions={<button className="btn btn-secondary btn-sm" onClick={() => openAddCard({ deckId: deck.id })}><Plus size={15} /> Adicionar</button>}
+          >
+            {groups.length === 0 && (
+              <div className="part-empty">
+                <span className="small subtle">{mainTotal ? 'Nenhuma carta com esses filtros.' : 'Deck vazio.'}</span>
+                {!mainTotal && <div className="row-wrap"><button className="btn btn-secondary btn-sm" onClick={() => openAddCard({ deckId: deck.id })}><Plus size={15} /> Adicionar carta</button><button className="btn btn-secondary btn-sm" onClick={() => openImport({ target: 'existing-deck', deckId: deck.id })}><Download size={15} /> Colar lista</button></div>}
+              </div>
+            )}
+
+            <div className={`deck-groups ${view === 'list' ? 'list-mode' : ''} ${groups.length === 1 && view === 'list' ? 'single' : ''}`}>
+              {groups.map((g) => {
+                const single = groups.length === 1;
+                const open = single || !isCollapsed(g.key);
+                const qty = g.cards.reduce((s, c) => s + c.quantity, 0);
+                const header = single ? null : (
+                  <button className={`group-header ${open ? '' : 'closed'}`} onClick={() => toggleGroup(g.key)} aria-expanded={open}>
+                    <ChevronDown size={15} className="group-chev" />
+                    <span>{g.label}</span>
+                    <span className="count">{qty}</span>
+                    <span className="spacer" />
+                    <span className="group-value">{formatUsd(g.cards.reduce((s, c) => s + (c.card.priceUsd ?? 0) * c.quantity, 0))}</span>
+                  </button>
+                );
+                return (
+                  <section key={g.key} className={`deck-group ${open ? '' : 'closed'}`}>
+                    {view === 'list' ? (
+                      <div className="list">
+                        {header}
+                        {open && <div className={`group-rows ${single ? 'two-col' : ''}`}>{g.cards.map((dc) => renderRow(dc, () => changeArt(ordered, ordered.indexOf(dc))))}</div>}
+                      </div>
+                    ) : (
+                      <>
+                        {header}
+                        {open && <div className="card-grid" style={{ ['--card-w' as string]: `${prefs.gridSize}px`, marginTop: single ? 0 : 10 }}>{g.cards.map((dc) => renderTile(dc, () => changeArt(ordered, ordered.indexOf(dc))))}</div>}
+                      </>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          </DeckPart>
+
+          <DeckTokens deck={deck} view={view} gridSize={prefs.gridSize} details={details} closed={isCollapsed(PART_TOKENS)} onToggle={() => toggleGroup(PART_TOKENS)} />
         </div>
 
         <aside className="editor-side">
-          {cmdCards.length > 0 && (
-            <div className="section commander-panel">
-              <div className="section-title" style={{ fontSize: 'var(--fs-md)' }}>{cmdCards.length > 1 ? 'Comandantes' : 'Comandante'}</div>
-              <div className={`commander-slot n${cmdCards.length}`}>
-                {cmdCards.map((c, i) => (
-                  <div key={c.instanceId} className="cmd">
-                    <div className={`cmd-img ${(c.isFoil || c.card.isFoil) && prefs.showFoil ? 'foil' : ''}`}>
-                      <img src={frontImage(c.card, 'normal')} alt={c.card.name} loading="lazy" onClick={() => changeArt(cmdCards, i)} title="Trocar arte" {...previewProps(frontImage(c.card, 'large'), backImage(c.card))} />
-                    </div>
-                    <span className="small subtle ellipsis" style={{ maxWidth: '100%' }}>{c.card.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
           <Suspense fallback={<div className="section"><Loading text="Carregando gráficos…" /></div>}>
             <DeckCharts deck={deck} />
           </Suspense>
-          <DeckTokens deck={deck} />
         </aside>
       </div>
     </div>

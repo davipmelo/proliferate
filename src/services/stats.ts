@@ -37,6 +37,7 @@ export interface CardStats {
   mostCopies: Ranked[];
   legendary: number;
   doubleFaced: number;
+  power: number[]; // força das criaturas 0..7+
 }
 
 const COLOR_PAIRS: Record<string, string> = {
@@ -84,6 +85,7 @@ function bump(map: Map<string, { value: number; label: string; card?: Card }>, k
 export function computeCardStats(entries: Entry[]): CardStats {
   const colors = { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0, M: 0 };
   const curve = new Array(8).fill(0);
+  const power = new Array(8).fill(0);
   const identities = new Map();
   const types = new Map();
   const rarity = new Map();
@@ -139,6 +141,8 @@ export function computeCardStats(entries: Entry[]): CardStats {
     if (/\bCreature\b/i.test(frontType(card.typeLine))) {
       const sub = (card.typeLine.split('//')[0].split('—')[1] ?? '').trim();
       for (const s of sub.split(/\s+/).filter(Boolean)) bump(tribes, s, s, q);
+      const pw = parseInt(card.power ?? card.cardFaces?.[0]?.power ?? '', 10);
+      if (Number.isFinite(pw) && pw >= 0) power[Math.min(7, pw)] += q;
     }
     const text = `${card.oracleText ?? ''} ${(card.cardFaces ?? []).map((f) => f.oracleText ?? '').join(' ')}`;
     for (const [kw, label] of KEYWORDS) {
@@ -185,6 +189,7 @@ export function computeCardStats(entries: Entry[]): CardStats {
       .map((x) => ({ key: x.card.name, label: x.card.name, value: x.qty, card: x.card })),
     legendary,
     doubleFaced,
+    power,
   };
 }
 
@@ -198,16 +203,44 @@ export interface DecksExtras {
   complete: number; // decks com a contagem da meta
   sizes: Ranked[]; // cartas por deck
   commanders: Ranked[];
+  /** Custo médio (sem terrenos) de cada deck. */
+  avgCmcByDeck: Ranked[];
+  /** Média dos custos médios dos decks. */
+  avgCmc: number;
+  /** Terrenos de cada deck. */
+  landsByDeck: Ranked[];
+  avgLands: number;
+  /** Quantos decks usam cada cor (W U B R G). */
+  colorPresence: Ranked[];
+  /** Decks por número de cores: incolor, mono, 2…5. */
+  colorCount: number[];
+  avgColors: number;
+  /** Composição média de um deck por tipo de carta. */
+  composition: Ranked[];
+  tags: Ranked[];
+  /** Decks por última edição: ≤7 dias, ≤30, ≤90, ≤365, mais. */
+  activity: number[];
+  avgTokens: number;
 }
 
-export function computeDecksExtras(decks: Deck[]): DecksExtras {
+const COLOR_ORDER = ['W', 'U', 'B', 'R', 'G'] as const;
+const COLOR_LABEL: Record<string, string> = { W: 'Branco', U: 'Azul', B: 'Preto', R: 'Vermelho', G: 'Verde' };
+
+export function computeDecksExtras(decks: Deck[], tagNames: Map<string, string> = new Map(), now = Date.now()): DecksExtras {
   const formats = new Map();
   const identities = new Map();
   const staples = new Map();
   const commanders = new Map();
-  let valueSum = 0, complete = 0;
+  const tags = new Map();
+  const presence: Record<string, number> = { W: 0, U: 0, B: 0, R: 0, G: 0 };
+  const colorCount = new Array(6).fill(0);
+  const typeTotals = new Map<string, number>();
+  const activity = new Array(5).fill(0);
+  let valueSum = 0, complete = 0, cmcSum = 0, cmcDecks = 0, landSum = 0, colorSum = 0, tokenSum = 0;
   const sizes: Ranked[] = [];
   const priciest: Ranked[] = [];
+  const avgCmcByDeck: Ranked[] = [];
+  const landsByDeck: Ranked[] = [];
   for (const d of decks) {
     const info = formatInfo(d.format);
     bump(formats, d.format, info.label, 1);
@@ -218,11 +251,41 @@ export function computeDecksExtras(decks: Deck[]): DecksExtras {
     valueSum += value;
     priciest.push({ key: d.id, label: d.name, value, extra: info.label });
     sizes.push({ key: d.id, label: d.name, value: count, extra: `meta ${info.target}` });
+
     const idSrc = d.commander ? [d.commander, ...(d.partner ? [d.partner] : [])] : counted.map((c) => c.card);
     const id = [...new Set(idSrc.flatMap((c) => c.colorIdentity ?? []))];
     const idName = identityName(id);
     bump(identities, idName, idName, 1);
+    for (const c of id) if (c in presence) presence[c]++;
+    colorCount[Math.min(5, id.length)]++;
+    colorSum += id.length;
+
     if (d.commander) bump(commanders, d.commander.name, d.commander.name, 1, d.commander);
+    for (const t of d.tags) bump(tags, t, tagNames.get(t) ?? t, 1);
+    tokenSum += d.tokens.reduce((s, t) => s + t.quantity, 0);
+
+    let lands = 0, cmc = 0, spells = 0;
+    for (const c of counted) {
+      const t = mainType(c.card.typeLine);
+      typeTotals.set(t, (typeTotals.get(t) ?? 0) + c.quantity);
+      if (isLand(c.card)) lands += c.quantity;
+      else {
+        cmc += c.card.cmc * c.quantity;
+        spells += c.quantity;
+      }
+    }
+    landSum += lands;
+    landsByDeck.push({ key: d.id, label: d.name, value: lands, extra: count ? `${Math.round((lands / count) * 100)}%` : undefined });
+    if (spells) {
+      const avg = cmc / spells;
+      avgCmcByDeck.push({ key: d.id, label: d.name, value: Math.round(avg * 100) / 100, extra: info.label });
+      cmcSum += avg;
+      cmcDecks++;
+    }
+
+    const age = (now - Date.parse(d.updatedAt)) / 864e5;
+    activity[!Number.isFinite(age) ? 4 : age <= 7 ? 0 : age <= 30 ? 1 : age <= 90 ? 2 : age <= 365 ? 3 : 4]++;
+
     const seen = new Set<string>();
     for (const c of counted) {
       if (isBasicLand(c.card) || seen.has(c.card.name)) continue;
@@ -230,6 +293,7 @@ export function computeDecksExtras(decks: Deck[]): DecksExtras {
       bump(staples, c.card.name, c.card.name, 1, c.card);
     }
   }
+  const n = decks.length || 1;
   return {
     decks: decks.length,
     formats: rank(formats, 9),
@@ -240,5 +304,16 @@ export function computeDecksExtras(decks: Deck[]): DecksExtras {
     complete,
     sizes: sizes.sort((a, b) => b.value - a.value),
     commanders: rank(commanders, 5),
+    avgCmcByDeck: avgCmcByDeck.sort((a, b) => b.value - a.value),
+    avgCmc: cmcDecks ? cmcSum / cmcDecks : 0,
+    landsByDeck: landsByDeck.sort((a, b) => b.value - a.value),
+    avgLands: landSum / n,
+    colorPresence: COLOR_ORDER.map((c) => ({ key: c, label: COLOR_LABEL[c], value: presence[c] })).filter((x) => x.value > 0),
+    colorCount,
+    avgColors: colorSum / n,
+    composition: TYPE_ORDER.filter((t) => typeTotals.get(t)).map((t) => ({ key: t, label: t, value: Math.round(((typeTotals.get(t) ?? 0) / n) * 10) / 10 })),
+    tags: rank(tags, 8),
+    activity,
+    avgTokens: tokenSum / n,
   };
 }
