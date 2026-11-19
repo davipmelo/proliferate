@@ -23,7 +23,12 @@ test('isDoubleFaced: layouts de dupla face real', () => {
   for (const layout of ['split', 'adventure', 'flip', 'aftermath', 'saga', 'class', 'case', 'prototype', 'normal']) {
     assert.ok(!isDoubleFaced(card({ layout, cardFaces: [{ name: 'A' }, { name: 'B' }] })), layout);
   }
-  assert.ok(isDoubleFaced(card({ layout: 'normal', backImage: 'data:x' })));
+  // Verso próprio só vale para dupla face real ou carta sem layout conhecido (arte própria/MPCFill).
+  assert.ok(isDoubleFaced(card({ backImage: 'data:x' })), 'sem layout: verso próprio vale');
+  assert.ok(isDoubleFaced(card({ layout: 'transform', cardFaces: faces, backImage: 'data:x' })));
+  for (const layout of ['normal', 'adventure', 'split', 'flip', 'saga']) {
+    assert.ok(!isDoubleFaced(card({ layout, backImage: 'data:x', cardFaces: [{ name: 'A' }, { name: 'B' }] })), `${layout} com verso guardado não é dupla face`);
+  }
 });
 
 test('sameArt: oficiais por id, customizadas pela URL', () => {
@@ -66,4 +71,20 @@ test('mainType reconhece tipos em português e Kindred/Tribal', () => {
   assert.equal(mainType('Mágica Instantânea'), 'Instant');
   assert.equal(mainType('Kindred Enchantment — Elf'), 'Enchantment');
   assert.equal(mainType('Proxy Alter MPCFill'), 'Other');
+});
+
+test('verso inválido em carta de face única é descartado e não vai para a impressão', async () => {
+  const { normalizeCard } = await import('../src/services/normalize.ts');
+  const { expandQueue } = await import('../src/services/proxyLayout.ts');
+  const { backImage } = await import('../src/types/cardRules.ts');
+  // Omen/aventura (ex.: Scavenger Regent) com um "verso" salvo por engano.
+  const omen = normalizeCard({ id: 'mpc-abc', name: 'Scavenger Regent // Exude Toxin', layout: 'adventure', typeLine: 'Creature — Dragon // Sorcery — Omen', images: { normal: 'f.jpg' }, backImage: 'b.jpg', artSource: 'mpcfill', cardFaces: [{ name: 'Scavenger Regent' }, { name: 'Exude Toxin' }] });
+  assert.equal(omen.backImage, undefined);
+  assert.equal(backImage({ ...omen, backImage: 'b.jpg' }), undefined, 'mesmo com dado antigo, não há verso');
+  const slots = expandQueue([{ id: 'p1', card: { ...omen, backImage: 'b.jpg' }, quantity: 2 }]);
+  assert.equal(slots.length, 2, 'só frentes');
+  assert.ok(slots.every((s) => s.face === 'front'));
+  // Dupla face real continua com frente + verso.
+  const dfc = normalizeCard({ id: 'd', name: 'Delver // Aberration', layout: 'transform', images: { normal: 'f.jpg' }, cardFaces: [{ name: 'A', images: { normal: 'a.jpg' } }, { name: 'B', images: { normal: 'b.jpg' } }] });
+  assert.equal(expandQueue([{ id: 'p2', card: dfc, quantity: 1 }]).length, 2);
 });

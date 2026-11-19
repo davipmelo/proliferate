@@ -15,10 +15,20 @@ export const SINGLE_FACE_MULTI_LAYOUTS = new Set([
   'split', 'adventure', 'flip', 'aftermath', 'saga', 'class', 'case', 'prototype',
 ]);
 
+/**
+ * A carta pode ter verso próprio? Só layouts de dupla face real — ou cartas sem layout conhecido
+ * (artes próprias/MPCFill sem dados do Scryfall). Aventuras, omens, split etc. têm uma face só,
+ * mesmo que algum dado antigo tenha guardado um "verso".
+ */
+export function canHaveBack(card: Pick<Card, 'layout'>): boolean {
+  return !card.layout || DOUBLE_FACED_LAYOUTS.has(card.layout);
+}
+
 /** A carta tem verso físico distinto? */
 export function isDoubleFaced(card: Pick<Card, 'layout' | 'cardFaces' | 'backImage'>): boolean {
+  if (!canHaveBack(card)) return false;
   if (card.backImage) return true;
-  if (!card.layout || !DOUBLE_FACED_LAYOUTS.has(card.layout)) return false;
+  if (!card.layout) return false;
   // meld: a parte tem verso (metade do resultado); battle pode ser só frente em alguns casos
   if (card.layout === 'meld') return true;
   return (card.cardFaces?.length ?? 0) >= 2 && !!card.cardFaces?.[1]?.images?.normal;
@@ -30,8 +40,8 @@ export function frontImage(card: Card, size: keyof CardImages = 'normal'): strin
 }
 
 export function backImage(card: Card, size: keyof CardImages = 'normal'): string | undefined {
-  if (card.backImage) return card.backImage;
   if (!isDoubleFaced(card)) return undefined;
+  if (card.backImage) return card.backImage;
   if (card.layout === 'meld' && card.meld?.role === 'meld_part') {
     return card.meld.resultImages?.[size] || card.meld.resultImages?.normal;
   }

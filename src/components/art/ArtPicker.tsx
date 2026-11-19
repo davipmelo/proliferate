@@ -30,7 +30,7 @@ export default function ArtPicker({ cards: initialCards, start = 0, title, token
   const [face, setFace] = useState<Face>('front');
   const [hover, setHover] = useState<string | null>(null);
   const card = cards[index];
-  const dfc = isDoubleFaced(card) || (card.cardFaces?.length ?? 0) > 1 && card.layout !== undefined && ['transform', 'modal_dfc', 'double_faced_token', 'reversible_card', 'battle'].includes(card.layout);
+  const dfc = isDoubleFaced(card);
 
   const apply = useCallback(
     (next: Card) => {

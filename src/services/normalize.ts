@@ -5,6 +5,7 @@ import type {
 } from '../types/models.ts';
 import { CONDITIONS, DECK_CATEGORIES } from '../types/models.ts';
 import { FORMATS } from '../types/formats.ts';
+import { canHaveBack } from '../types/cardRules.ts';
 
 let counter = 0;
 export function uid(prefix = 'id'): string {
@@ -86,6 +87,8 @@ export function normalizeCard(raw: Any | undefined | null): Card {
     backImage: r.backImage ?? undefined,
     hasBleed: r.hasBleed ?? undefined,
   };
+  // Verso guardado em carta de face única (aventura, omen, split…) é dado inválido: descarta.
+  if (card.backImage && !canHaveBack(card)) card.backImage = undefined;
   // Remove chaves indefinidas para economizar espaço.
   for (const k of Object.keys(card) as (keyof Card)[]) if (card[k] === undefined) delete card[k];
   return card;

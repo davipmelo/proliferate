@@ -1,6 +1,6 @@
 // Integração com o MPCFill (artes da comunidade) via proxy CORS (Cloudflare Worker).
 import type { Card, CardPrint } from '../types/models.ts';
-import { frontName, normalizeName } from '../types/cardRules.ts';
+import { canHaveBack, frontName, normalizeName } from '../types/cardRules.ts';
 
 const DEFAULT_PROXY = 'https://mpcfill-proxy.anancinho.workers.dev';
 
@@ -146,7 +146,8 @@ export function cardWithMpcArt(base: Card, print: CardPrint, back?: CardPrint): 
     setCode: 'mpc',
     collectorNumber: print.dpi ? `${print.dpi} DPI` : undefined,
     hasBleed: true,
-    backImage: back?.images.normal ?? (base.backImage && base.artSource === 'mpcfill' ? base.backImage : undefined),
+    // Verso só para cartas de dupla face (um "verso" num pedido para carta de face única é o cardback).
+    backImage: canHaveBack(base) ? back?.images.normal ?? (base.backImage && base.artSource === 'mpcfill' ? base.backImage : undefined) : undefined,
   };
 }
 

@@ -1,6 +1,6 @@
 // Reparo de cartas com dados incompletos (ex.: importadas do MPCFill pelo v1 com tipo "Proxy Alter MPCFill").
 import type { AppData, Card } from '../types/models.ts';
-import { frontName, normalizeName } from '../types/cardRules.ts';
+import { canHaveBack, frontName, normalizeName } from '../types/cardRules.ts';
 
 const FAKE_TYPE = /^(proxy alter|verso de carta|mpcfill)/i;
 const CARDBACK = /^verso de carta|cardback/i;
@@ -26,7 +26,7 @@ export function mergeOfficial(card: Card, official: Card): Card {
           id: card.id,
           images: card.images,
           artSource: card.artSource ?? (card.id.startsWith('custom-') ? 'custom' : 'mpcfill'),
-          backImage: card.backImage,
+          backImage: canHaveBack(official) ? card.backImage : undefined,
           hasBleed: card.hasBleed,
           setName: card.setName ?? official.setName,
           setCode: card.setCode ?? official.setCode,
