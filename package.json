@@ -1,0 +1,31 @@
+{
+  "name": "proliferate",
+  "private": true,
+  "version": "2.0.0",
+  "description": "Proliferate V2 — coleção, decks, utilitários e proxies de Magic: The Gathering",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.ts\"",
+    "typecheck": "tsc -b"
+  },
+  "dependencies": {
+    "chart.js": "^4.6.1",
+    "firebase": "^13.4.0",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.75.0",
+    "react": "^19.3.1",
+    "react-chartjs-2": "^5.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

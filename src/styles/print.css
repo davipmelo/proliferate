@@ -1,0 +1,30 @@
+/* Impressão pelo navegador: somente as folhas A4 em escala 100%. */
+#print-root { display: none; }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.printing #root,
+  body.printing .toasts,
+  body.printing .modal-backdrop,
+  body.printing .card-preview { display: none !important; }
+  body.printing #print-root { display: block; }
+  #print-root .a4 {
+    position: relative !important;
+    transform: none !important;
+    box-shadow: none !important;
+    page-break-after: always;
+    break-after: page;
+  }
+  #print-root .a4:last-child { page-break-after: auto; break-after: auto; }
+}
