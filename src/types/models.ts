@@ -121,13 +121,6 @@ export interface CollectionItem {
   dateAdded: string;
 }
 
-/** Campos calculados para um item da coleção. */
-export interface CollectionUsage {
-  inUse: number;
-  available: number;
-  decks: { deckId: string; deckName: string; quantity: number }[];
-}
-
 export type DeckCategory = 'commander' | 'partner' | 'companion' | 'main' | 'sideboard' | 'maybeboard';
 export const DECK_CATEGORIES: DeckCategory[] = ['commander', 'partner', 'companion', 'main', 'sideboard', 'maybeboard'];
 export const CATEGORY_LABELS: Record<DeckCategory, string> = {
@@ -144,7 +137,6 @@ export interface DeckCard {
   card: Card;
   quantity: number;
   category: DeckCategory;
-  collectionItemId?: string;
   isFoil?: boolean;
 }
 

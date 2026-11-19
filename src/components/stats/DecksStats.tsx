@@ -15,10 +15,7 @@ export default function DecksStats() {
     [data.decks],
   );
   const s = useMemo(() => computeCardStats(entries), [entries]);
-  const x = useMemo(
-    () => computeDecksExtras(data.decks, new Set(data.collection.map((i) => i.card.id)), new Set(data.collection.map((i) => i.card.name))),
-    [data.decks, data.collection],
-  );
+  const x = useMemo(() => computeDecksExtras(data.decks), [data.decks]);
   if (!data.decks.length) return <p className="viz-empty">Crie decks para ver as estatísticas.</p>;
 
   return (
@@ -27,11 +24,14 @@ export default function DecksStats() {
         <Kpi label="Decks" value={x.decks} hint={`${x.complete} completo(s) na meta`} />
         <Kpi label="Cartas nos decks" value={s.total.toLocaleString('pt-BR')} hint={`${s.unique} cartas diferentes`} />
         <Kpi label="Valor total" value={formatUsd(s.value)} hint={`média ${formatUsd(x.avgValue)} por deck`} accent />
-        <Kpi label="Da coleção" value={`${Math.round(x.ownedPct * 100)}%`} hint="das cartas você já possui" />
+        <Kpi label="Fichas" value={data.decks.reduce((n, d) => n + d.tokens.reduce((m, t) => m + t.quantity, 0), 0)} hint="em todos os decks" />
         <Kpi label="Custo médio" value={s.avgCmc.toFixed(2)} hint="sem terrenos" />
         <Kpi label="Terrenos" value={s.total ? `${Math.round((s.lands / s.total) * 100)}%` : '—'} hint={`${s.lands} no total`} />
       </div>
       <div className="viz-grid">
+        <VizCard title="Cartas por deck" hint="sem sideboard">
+          <BarList items={x.sizes} color={() => 'var(--text-3)'} />
+        </VizCard>
         <VizCard title="Formatos">
           <BarList items={x.formats} color={() => 'var(--accent)'} />
         </VizCard>

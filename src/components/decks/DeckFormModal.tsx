@@ -83,7 +83,7 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
     const prevCmd = deck?.cards.find((c) => c.category === 'commander');
     const prevPtn = deck?.cards.find((c) => c.category === 'partner');
     const keep = (c: Card | undefined, prev: typeof prevCmd, category: 'commander' | 'partner') =>
-      c ? [{ instanceId: prev?.instanceId ?? `dc-${category}-${Date.now().toString(36)}`, card: c, quantity: 1, category, collectionItemId: prev && prev.card.name === c.name ? prev.collectionItemId : undefined }] : [];
+      c ? [{ instanceId: prev?.instanceId ?? `dc-${category}-${Date.now().toString(36)}`, card: c, quantity: 1, category }] : [];
     const base = {
       name: name.trim(),
       format,

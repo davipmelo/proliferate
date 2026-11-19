@@ -218,7 +218,7 @@ export class SyncEngine {
             next = choice === 'merge' ? mergeData(legacy, data) : choice === 'local' ? data : legacy;
           }
           this.host.apply(next, meta.revision);
-          this.host.notify(`Dados do Proliferate v1 importados: ${legacy.collection.length} itens na coleção e ${legacy.decks.length} deck(s). O v1 não foi alterado.`, 'success');
+          this.host.notify(`Dados do Proliferate v1 importados: ${legacy.decks.length} deck(s). O v1 não foi alterado.`, 'success');
           const np = packAppData(next);
           return this.push(np, await sha256Hex(JSON.stringify(np)), null);
         }

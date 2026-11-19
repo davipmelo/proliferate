@@ -49,7 +49,7 @@ export function openAddCard(opts: { deckId?: string; initialName?: string } = {}
   ));
 }
 
-export function openImport(opts: { deckId?: string; target?: 'collection' | 'new-deck' | 'existing-deck' } = {}): void {
+export function openImport(opts: { deckId?: string; target?: 'new-deck' | 'existing-deck' } = {}): void {
   openModal((close) => (
     <Suspense fallback={<ModalFallback />}>
       <ImportModal {...opts} onClose={close} />

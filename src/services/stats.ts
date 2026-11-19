@@ -1,5 +1,5 @@
 // Estatísticas de conjuntos de cartas (coleção, decks) — lógica pura.
-import type { Card, CollectionItem, CollectionUsage, Deck } from '../types/models.ts';
+import type { Card, Deck } from '../types/models.ts';
 import { frontType, isBasicLand, isLand, mainType, TYPE_ORDER, type MainType } from '../types/cardRules.ts';
 import { formatInfo } from '../types/formats.ts';
 
@@ -188,39 +188,6 @@ export function computeCardStats(entries: Entry[]): CardStats {
   };
 }
 
-export interface CollectionExtras {
-  foil: number;
-  free: number;
-  inUse: number;
-  languages: Ranked[];
-  conditions: Ranked[];
-  recent: number; // adicionadas nos últimos 30 dias
-}
-
-export function computeCollectionExtras(items: CollectionItem[], usage: Map<string, CollectionUsage>, now = Date.now()): CollectionExtras {
-  const langs = new Map();
-  const conds = new Map();
-  const LANG: Record<string, string> = { en: 'Inglês', pt: 'Português', es: 'Espanhol', ja: 'Japonês', de: 'Alemão', fr: 'Francês', it: 'Italiano', ko: 'Coreano', ru: 'Russo', zhs: 'Chinês' };
-  let foil = 0, inUse = 0, total = 0, recent = 0;
-  for (const i of items) {
-    total += i.quantity;
-    if (i.isFoil) foil += i.quantity;
-    inUse += Math.min(i.quantity, usage.get(i.id)?.inUse ?? 0);
-    bump(langs, i.language, LANG[i.language] ?? i.language.toUpperCase(), i.quantity);
-    bump(conds, i.condition, i.condition, i.quantity);
-    if (now - Date.parse(i.dateAdded) < 30 * 864e5) recent += i.quantity;
-  }
-  const condOrder = ['NM', 'SP', 'MP', 'HP', 'DMG'];
-  return {
-    foil,
-    inUse,
-    free: total - inUse,
-    languages: rank(langs, 6),
-    conditions: rank(conds, 5).sort((a, b) => condOrder.indexOf(a.key) - condOrder.indexOf(b.key)),
-    recent,
-  };
-}
-
 export interface DecksExtras {
   decks: number;
   formats: Ranked[];
@@ -229,16 +196,17 @@ export interface DecksExtras {
   priciest: Ranked[];
   avgValue: number;
   complete: number; // decks com a contagem da meta
-  ownedPct: number; // % das cartas dos decks que existem na coleção
+  sizes: Ranked[]; // cartas por deck
   commanders: Ranked[];
 }
 
-export function computeDecksExtras(decks: Deck[], ownedIds: Set<string>, ownedNames: Set<string>): DecksExtras {
+export function computeDecksExtras(decks: Deck[]): DecksExtras {
   const formats = new Map();
   const identities = new Map();
   const staples = new Map();
   const commanders = new Map();
-  let valueSum = 0, complete = 0, cardTotal = 0, owned = 0;
+  let valueSum = 0, complete = 0;
+  const sizes: Ranked[] = [];
   const priciest: Ranked[] = [];
   for (const d of decks) {
     const info = formatInfo(d.format);
@@ -249,6 +217,7 @@ export function computeDecksExtras(decks: Deck[], ownedIds: Set<string>, ownedNa
     const value = d.cards.filter((c) => c.category !== 'maybeboard').reduce((s, c) => s + (c.card.priceUsd ?? 0) * c.quantity, 0);
     valueSum += value;
     priciest.push({ key: d.id, label: d.name, value, extra: info.label });
+    sizes.push({ key: d.id, label: d.name, value: count, extra: `meta ${info.target}` });
     const idSrc = d.commander ? [d.commander, ...(d.partner ? [d.partner] : [])] : counted.map((c) => c.card);
     const id = [...new Set(idSrc.flatMap((c) => c.colorIdentity ?? []))];
     const idName = identityName(id);
@@ -256,8 +225,6 @@ export function computeDecksExtras(decks: Deck[], ownedIds: Set<string>, ownedNa
     if (d.commander) bump(commanders, d.commander.name, d.commander.name, 1, d.commander);
     const seen = new Set<string>();
     for (const c of counted) {
-      cardTotal += c.quantity;
-      if (c.collectionItemId || ownedIds.has(c.card.id) || ownedNames.has(c.card.name)) owned += c.quantity;
       if (isBasicLand(c.card) || seen.has(c.card.name)) continue;
       seen.add(c.card.name);
       bump(staples, c.card.name, c.card.name, 1, c.card);
@@ -271,7 +238,7 @@ export function computeDecksExtras(decks: Deck[], ownedIds: Set<string>, ownedNa
     priciest: priciest.sort((a, b) => b.value - a.value).slice(0, 5),
     avgValue: decks.length ? valueSum / decks.length : 0,
     complete,
-    ownedPct: cardTotal ? owned / cardTotal : 0,
+    sizes: sizes.sort((a, b) => b.value - a.value),
     commanders: rank(commanders, 5),
   };
 }

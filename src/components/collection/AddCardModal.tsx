@@ -26,7 +26,7 @@ export default function AddCardModal({ deckId, initialName, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [qty, setQty] = useState(1);
   const [foil, setFoil] = useState(false);
-  const [dest, setDest] = useState<string>(deckId ?? 'collection');
+  const [dest, setDest] = useState<string>(deckId ?? store.data.decks[0]?.id ?? '');
   const [category, setCategory] = useState<DeckCategory>('main');
   const [filter, setFilter] = useState('');
   const [added, setAdded] = useState(0);
@@ -70,14 +70,10 @@ export default function AddCardModal({ deckId, initialName, onClose }: Props) {
 
   const add = (closeAfter: boolean) => {
     if (!chosen) return;
-    if (dest === 'collection') {
-      store.addToCollection(chosen, { quantity: qty, isFoil: foil });
-      toast(`${qty}× ${chosen.name} adicionada(s) à coleção.`);
-    } else {
-      store.addCardToDeck(dest, chosen, { quantity: qty, category, isFoil: foil });
-      const deck = store.data.decks.find((d) => d.id === dest);
-      toast(`${qty}× ${chosen.name} → ${deck?.name ?? 'deck'} (e coleção).`);
-    }
+    if (!dest) return toast('Escolha um deck.', 'error');
+    store.addCardToDeck(dest, chosen, { quantity: qty, category, isFoil: foil });
+    const deck = store.data.decks.find((d) => d.id === dest);
+    toast(`${qty}× ${chosen.name} → ${deck?.name ?? 'deck'}.`);
     setAdded((a) => a + qty);
     if (closeAfter) onClose();
     else {
@@ -91,7 +87,7 @@ export default function AddCardModal({ deckId, initialName, onClose }: Props) {
 
   return (
     <Modal
-      title={deckId ? 'Adicionar carta ao deck' : 'Adicionar carta'}
+      title="Adicionar carta ao deck"
       onClose={onClose}
       size="lg"
       footer={
@@ -125,13 +121,12 @@ export default function AddCardModal({ deckId, initialName, onClose }: Props) {
                 <input className="input" type="number" min={1} value={qty} onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))} />
               </div>
               <div className="field">
-                <label>Destino</label>
+                <label>Deck</label>
                 <select className="select" value={dest} onChange={(e) => setDest(e.target.value)}>
-                  <option value="collection">Só coleção</option>
-                  {store.data.decks.map((d) => <option key={d.id} value={d.id}>Deck: {d.name}</option>)}
+                  {store.data.decks.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
               </div>
-              {dest !== 'collection' && (
+              {(
                 <div className="field">
                   <label>Categoria</label>
                   <select className="select" value={category} onChange={(e) => setCategory(e.target.value as DeckCategory)}>
@@ -142,7 +137,7 @@ export default function AddCardModal({ deckId, initialName, onClose }: Props) {
             </div>
             <div className="row-wrap">
               <label className="check"><input type="checkbox" checked={foil} onChange={(e) => setFoil(e.target.checked)} /> Foil</label>
-              {dest !== 'collection' && <span className="small subtle">Também será registrada na coleção, vinculada ao deck.</span>}
+<span className="small subtle">A coleção é atualizada automaticamente.</span>
             </div>
             <div className="row">
               <span className="label grow">Edição / arte ({prints.length})</span>

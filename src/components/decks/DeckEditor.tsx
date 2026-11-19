@@ -1,17 +1,15 @@
 import { lazy, Suspense, useMemo, useState } from 'react';
 import {
-  ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown, Library,
-  MoreVertical, Pencil, Plus, Printer, Search, ShoppingCart, Trash2, Upload,
+  ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown,
+  MoreVertical, Pencil, Plus, Printer, Search, Trash2, Upload,
 } from 'lucide-react';
-import type { CollectionUsage, ColorMatchMode, Deck, DeckCard, DeckCategory, DeckGroupMode } from '../../types/models.ts';
+import type { ColorMatchMode, Deck, DeckCard, DeckCategory, DeckGroupMode } from '../../types/models.ts';
 import { CATEGORY_LABELS } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
 import { confirmDialog, openModal, previewProps, toast } from '../../state/ui.tsx';
 import { formatInfo } from '../../types/formats.ts';
 import { backImage, frontImage, isLand, mainType, matchesColorFilter, TYPE_LABELS, TYPE_ORDER, type ColorFilterValue, type MainType } from '../../types/cardRules.ts';
-import { deckCardAvailability, findCollectionItemFor } from '../../services/usage.ts';
 import { compareBy, matchesText, SORT_LABELS, type SortKey } from '../../services/sorting.ts';
-import { uid } from '../../services/normalize.ts';
 import { CardThumb, ColorPips, Dropdown, formatUsd, Loading, ManaCost, QtyControl, ViewToggle } from '../common/bits.tsx';
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls } from '../common/selection.tsx';
@@ -26,7 +24,7 @@ const DeckCharts = lazy(() => import('./DeckCharts.tsx'));
 const PosterModal = lazy(() => import('./PosterModal.tsx'));
 const SampleHandModal = lazy(() => import('./SampleHandModal.tsx'));
 
-const SORTS: SortKey[] = ['name', 'quantity', 'available', 'cmc', 'type', 'set', 'rarity', 'price'];
+const SORTS: SortKey[] = ['name', 'quantity', 'cmc', 'type', 'set', 'rarity', 'price'];
 const GROUP_LABELS: Record<DeckGroupMode, string> = { none: 'Não agrupar', type: 'Agrupar por tipo', cmc: 'Agrupar por custo de mana' };
 
 interface Group {
@@ -63,7 +61,7 @@ function buildGroups(cards: DeckCard[], mode: DeckGroupMode): Group[] {
 
 export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void }) {
   const store = useStore();
-  const { data, prefs, setPrefs, usage } = store;
+  const { data, prefs, setPrefs } = store;
   const [q, setQ] = useState('');
   const [colors, setColors] = useState<ColorFilterValue[]>([]);
   const [mode, setMode] = usePersistent<ColorMatchMode>('deck-color-mode', 'identity');
@@ -80,10 +78,10 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
     return deck.cards
       .filter((c) => c.category !== 'commander' && c.category !== 'partner')
       .filter((c) => matchesText(c.card, q) && matchesColorFilter(c.card, colors, mode))
-      .map((c) => ({ dc: c, card: c.card, quantity: c.quantity, available: availOf(c, data.collection, usage) }))
+      .map((c) => ({ dc: c, card: c.card, quantity: c.quantity }))
       .sort(cmp)
       .map((x) => x.dc);
-  }, [deck.cards, q, colors, mode, sort, data.collection, usage]);
+  }, [deck.cards, q, colors, mode, sort]);
 
   const groups = useMemo(() => buildGroups(filtered, groupMode), [filtered, groupMode]);
   const ordered = useMemo(() => groups.flatMap((g) => g.cards), [groups]);
@@ -100,36 +98,11 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
     });
 
   const changeArt = (list: DeckCard[], start: number) =>
-    openArtPicker({ cards: list.map((c) => c.card), start, onSelect: (i, card) => setCard(list[i].instanceId, { card, collectionItemId: undefined }) });
+    openArtPicker({ cards: list.map((c) => c.card), start, onSelect: (i, card) => setCard(list[i].instanceId, { card }) });
 
   const toProxy = (cards: DeckCard[], label?: string) => {
     store.addToProxies(cards.map((c) => ({ card: c.card, quantity: c.quantity })));
     toast(`${cards.reduce((s, c) => s + c.quantity, 0)} carta(s)${label ? ` ${label}` : ''} na fila de impressão.`);
-  };
-
-  // Cartas que faltam na coleção (ou com cópias insuficientes).
-  const missing = useMemo(() => {
-    const out: { dc: DeckCard; qty: number }[] = [];
-    for (const dc of deck.cards) {
-      if (dc.category === 'maybeboard') continue;
-      const a = deckCardAvailability(dc, data.collection, usage);
-      if (a.status === 'missing') out.push({ dc, qty: dc.quantity });
-      else if (a.status === 'short') out.push({ dc, qty: Math.min(dc.quantity, a.inUse - a.owned) });
-    }
-    return out;
-  }, [deck.cards, data.collection, usage]);
-  const missingCount = missing.reduce((s, m) => s + m.qty, 0);
-
-  const addToCollection = (dc: DeckCard) => {
-    store.update((d) => {
-      const id = uid('col');
-      return {
-        ...d,
-        collection: [{ id, card: dc.card, quantity: dc.quantity, isFoil: !!dc.isFoil, condition: 'NM', language: 'en', tags: [], dateAdded: new Date().toISOString() }, ...d.collection],
-        decks: d.decks.map((dk) => (dk.id === deck.id ? { ...dk, cards: dk.cards.map((c) => (c.instanceId === dc.instanceId ? { ...c, collectionItemId: id } : c)) } : dk)),
-      };
-    });
-    toast(`${dc.card.name} registrada na coleção.`);
   };
 
   const remove = async () => {
@@ -163,7 +136,6 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
               <button className="menu-item only-mobile" onClick={() => { close(); openHand(); }}><Hand size={16} /> Mão de teste</button>
               <button className="menu-item only-mobile" onClick={() => { close(); toProxy(deck.cards.filter((c) => c.category !== 'maybeboard')); }}><Printer size={16} /> Imprimir deck</button>
               <button className="menu-item only-mobile" onClick={() => { close(); openPoster(); }}><ImageDown size={16} /> Gerar pôster</button>
-              <button className="menu-item" disabled={!missingCount} onClick={() => { close(); toProxy(missing.map((m) => ({ ...m.dc, quantity: m.qty })), 'que faltam na coleção'); }}><ShoppingCart size={16} /> Imprimir só o que falta ({missingCount})</button>
               <button className="menu-item" onClick={() => { close(); openImport({ target: 'existing-deck', deckId: deck.id }); }}><Download size={16} /> Importar lista para este deck</button>
               <button className="menu-item" onClick={() => { close(); openExport({ deck }); }}><Upload size={16} /> Exportar deck</button>
               <button className="menu-item" onClick={() => { close(); openModal((c) => <CoverEditorModal deck={deck} onClose={c} />); }}><Crop size={16} /> Ajustar capa</button>
@@ -193,10 +165,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
             </div>
             <div className="count-meter" style={{ minWidth: 0 }}><span className="label">Custo médio</span><span className="nums">{avgCmc.toFixed(2)}</span></div>
             <div className="count-meter" style={{ minWidth: 0 }}><span className="label">Valor estimado</span><span className="nums">{formatUsd(deckValue(deck))}</span></div>
-            <div className="count-meter" style={{ minWidth: 0 }}>
-              <span className="label">Na coleção</span>
-              <span className="nums">{missingCount ? <span className="warning-text">faltam {missingCount}</span> : <span className="success-text">completo</span>}</span>
-            </div>
+            <div className="count-meter" style={{ minWidth: 0 }}><span className="label">Fichas</span><span className="nums">{deck.tokens.reduce((s, t) => s + t.quantity, 0)}</span></div>
           </div>
         </div>
       </div>
@@ -256,12 +225,12 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
                               <CardThumb card={dc.card} />
                               <div className="list-main">
                                 <div className="list-title"><span>{dc.card.name}</span>{dc.isFoil && <span className="badge badge-accent">Foil</span>}<ManaCost cost={dc.card.manaCost} /></div>
-                                {details && <div className="list-sub"><span className="only-mobile"><AvailBadge dc={dc} /></span><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>}
+                                {details && <div className="list-sub"><span className="ellipsis">{dc.card.setName ?? ''}{dc.card.collectorNumber ? ` #${dc.card.collectorNumber}` : ''}</span></div>}
                               </div>
-                              <div className="list-meta hide-mobile"><AvailBadge dc={dc} />{details && <span className="deck-price small subtle tabular">{formatUsd(dc.card.priceUsd)}</span>}</div>
+                              {details && <div className="list-meta hide-mobile"><span className="deck-price small subtle tabular">{formatUsd(dc.card.priceUsd)}</span></div>}
                               <div className="list-actions">
                                 <QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} />
-                                <CardMenu dc={dc} onArt={() => changeArt(ordered, ordered.indexOf(dc))} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} onCollect={() => addToCollection(dc)} />
+                                <CardMenu dc={dc} onArt={() => changeArt(ordered, ordered.indexOf(dc))} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} />
                               </div>
                             </div>
                           ))}
@@ -287,7 +256,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
                               {details && (
                                 <div className="card-tile-info">
                                   <span className="name">{dc.card.name}</span>
-                                  <span className="meta"><QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} /><AvailBadge dc={dc} /></span>
+                                  <span className="meta"><QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} /><span className="tabular">{formatUsd(dc.card.priceUsd)}</span></span>
                                 </div>
                               )}
                             </div>
@@ -312,7 +281,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
                     <div className={`cmd-img ${(c.isFoil || c.card.isFoil) && prefs.showFoil ? 'foil' : ''}`}>
                       <img src={frontImage(c.card, 'normal')} alt={c.card.name} loading="lazy" onClick={() => changeArt(cmdCards, i)} title="Trocar arte" {...previewProps(frontImage(c.card, 'large'), backImage(c.card))} />
                     </div>
-                    <AvailBadge dc={c} />
+                    <span className="small subtle ellipsis" style={{ maxWidth: '100%' }}>{c.card.name}</span>
                   </div>
                 ))}
               </div>
@@ -328,29 +297,13 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
   );
 }
 
-function availOf(dc: DeckCard, collection: Parameters<typeof deckCardAvailability>[1], usage: Map<string, CollectionUsage>): number {
-  const a = deckCardAvailability(dc, collection, usage);
-  return a.owned - a.inUse;
-}
-
-function AvailBadge({ dc }: { dc: DeckCard }) {
-  const { data, usage } = useStore();
-  const a = deckCardAvailability(dc, data.collection, usage);
-  if (a.status === 'missing') return <span className="avail missing" title="Esta impressão não está na sua coleção">fora da coleção</span>;
-  if (a.status === 'short') return <span className="avail short" title={`Você tem ${a.owned}, mas ${a.inUse} cópias estão em uso nos decks`}>faltam {a.inUse - a.owned}</span>;
-  return <span className="avail ok" title={`${a.owned} na coleção · ${a.inUse} em uso nos decks`}>{a.owned} na coleção</span>;
-}
-
-function CardMenu({ dc, onArt, onProxy, onMove, onRemove, onCollect }: { dc: DeckCard; onArt: () => void; onProxy: () => void; onMove: (c: DeckCategory) => void; onRemove: () => void; onCollect: () => void }) {
-  const { data } = useStore();
-  const item = findCollectionItemFor(dc, data.collection);
+function CardMenu({ dc, onArt, onProxy, onMove, onRemove }: { dc: DeckCard; onArt: () => void; onProxy: () => void; onMove: (c: DeckCategory) => void; onRemove: () => void }) {
   return (
     <Dropdown trigger={(_o, t) => <button className="btn btn-ghost btn-icon btn-sm" onClick={t} aria-label="Ações"><MoreVertical size={16} /></button>}>
       {(close) => (
         <>
           <button className="menu-item" onClick={() => { close(); onArt(); }}><ImageIcon size={16} /> Trocar arte</button>
           <button className="menu-item" onClick={() => { close(); onProxy(); }}><Printer size={16} /> Mandar para proxies</button>
-          {!item && <button className="menu-item" onClick={() => { close(); onCollect(); }}><Library size={16} /> Registrar na coleção</button>}
           <div className="menu-label">Mover para</div>
           {(['main', 'sideboard', 'maybeboard', 'companion', 'commander', 'partner'] as DeckCategory[]).filter((c) => c !== dc.category).map((c) => (
             <button key={c} className="menu-item" onClick={() => { close(); onMove(c); }}><ArrowRightLeft size={16} /> {CATEGORY_LABELS[c]}</button>

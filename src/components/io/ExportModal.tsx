@@ -8,11 +8,11 @@ import { downloadText, slugify } from '../../services/image.ts';
 import { Modal } from '../common/Modal.tsx';
 
 export default function ExportModal({ deck, onClose }: { deck?: Deck; onClose: () => void }) {
-  const { data } = useStore();
+  const { data, collection } = useStore();
   const [scope, setScope] = useState<string>(deck?.id ?? (data.decks[0]?.id || 'collection'));
   const [fmt, setFmt] = useState<ExportFormat>('moxfield');
   const target = scope === 'collection' ? null : data.decks.find((d) => d.id === scope);
-  const text = useMemo(() => (target ? exportDeck(target, fmt) : exportCollection(data.collection, fmt)), [target, fmt, data.collection]);
+  const text = useMemo(() => (target ? exportDeck(target, fmt) : exportCollection(collection, fmt)), [target, fmt, collection]);
   const filename = `${slugify(target?.name ?? 'colecao')}-${fmt}.${EXPORT_EXT[fmt]}`;
 
   return (
@@ -32,7 +32,7 @@ export default function ExportModal({ deck, onClose }: { deck?: Deck; onClose: (
         <div className="field">
           <label>O que exportar</label>
           <select className="select" value={scope} onChange={(e) => setScope(e.target.value)}>
-            <option value="collection">Coleção inteira ({data.collection.length} itens)</option>
+            <option value="collection">Coleção inteira ({collection.length} artes)</option>
             {data.decks.map((d) => <option key={d.id} value={d.id}>Deck: {d.name}</option>)}
           </select>
         </div>

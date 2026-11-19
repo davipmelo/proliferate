@@ -22,7 +22,6 @@ export function buildDeckCards(resolved: ResolvedEntry[], existing: DeckCard[] =
         card,
         quantity: r.entry.quantity,
         category,
-        collectionItemId: prev?.collectionItemId,
         isFoil: r.entry.foil || prev?.isFoil || undefined,
       });
   }

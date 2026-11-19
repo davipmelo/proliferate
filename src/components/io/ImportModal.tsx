@@ -15,7 +15,7 @@ import { Modal } from '../common/Modal.tsx';
 import { CommanderPicker } from '../decks/CommanderPicker.tsx';
 import { buildDeckCards, detectCommanderFromList } from '../decks/deckBuild.ts';
 
-type Target = 'collection' | 'new-deck' | 'existing-deck';
+type Target = 'new-deck' | 'existing-deck';
 const FORMAT_NAMES: Record<string, string> = { arena: 'MTG Arena', moxfield: 'Moxfield', ligamagic: 'LigaMagic', simple: 'Lista simples', csv: 'CSV' };
 
 export default function ImportModal({ onClose, deckId, target: initialTarget }: { onClose: () => void; deckId?: string; target?: Target }) {
@@ -32,7 +32,7 @@ export default function ImportModal({ onClose, deckId, target: initialTarget }: 
         </div>
       }
     >
-      {tab === 'text' ? <TextImport onClose={onClose} deckId={deckId} initialTarget={initialTarget ?? (deckId ? 'existing-deck' : 'collection')} /> : <MpcImport onClose={onClose} />}
+      {tab === 'text' ? <TextImport onClose={onClose} deckId={deckId} initialTarget={initialTarget ?? (deckId ? 'existing-deck' : 'new-deck')} /> : <MpcImport onClose={onClose} />}
     </Modal>
   );
 }
@@ -45,7 +45,6 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
   const [name, setName] = useState('');
   const [format, setFormat] = useState<DeckFormat>('commander');
   const [commander, setCommander] = useState<Card | undefined>();
-  const [alsoCollection, setAlsoCollection] = useState(false);
   const [progress, setProgress] = useState<{ msg: string; pct: number } | null>(null);
   const [missing, setMissing] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -60,18 +59,7 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
     try {
       const { resolved, unresolved } = await resolveEntries(mergeEntries(parsed.entries), (msg, pct) => setProgress({ msg, pct }));
       const cards = resolved.filter((r) => r.entry.section !== 'token');
-      if (target === 'collection') {
-        store.update((d) => {
-          const collection = d.collection.slice();
-          for (const r of cards) {
-            const idx = collection.findIndex((i) => sameArt(i.card, r.card) && i.isFoil === !!r.entry.foil && i.condition === 'NM');
-            if (idx >= 0) collection[idx] = { ...collection[idx], quantity: collection[idx].quantity + r.entry.quantity };
-            else collection.unshift({ id: uid('col'), card: r.card, quantity: r.entry.quantity, isFoil: !!r.entry.foil, condition: 'NM', language: r.card.namePt ? 'pt' : 'en', tags: [], dateAdded: new Date().toISOString() });
-          }
-          return { ...d, collection };
-        });
-        toast(`${cards.reduce((s, r) => s + r.entry.quantity, 0)} carta(s) importadas para a coleção.`);
-      } else {
+      {
         const tokens = resolved.filter((r) => r.entry.section === 'token').map((r) => ({ instanceId: uid('dt'), card: { ...r.card, utilityType: 'token' as const }, quantity: r.entry.quantity }));
         // Lista de Commander sem comandante informado: tenta usar a primeira carta da lista.
         const detected = target === 'new-deck' && formatInfo(format).hasCommander && !commander ? detectCommanderFromList(cards) : { consumed: 0 as number, commander: undefined, partner: undefined };
@@ -82,22 +70,6 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
         let cmd = commander ?? newCards.find((c) => c.category === 'commander')?.card;
         const ptn = newCards.find((c) => c.category === 'partner')?.card;
         if (detected.commander) toast(`Comandante detectado: ${detected.commander.name}${detected.partner ? ` + ${detected.partner.name}` : ''}.`, 'info', 5000);
-        // Vincula à coleção (cria/incrementa itens) se pedido.
-        const link = (d: { collection: typeof store.data.collection }) => {
-          if (!alsoCollection) return d.collection;
-          const collection = d.collection.slice();
-          newCards = newCards.map((dc) => {
-            const idx = collection.findIndex((i) => sameArt(i.card, dc.card) && i.isFoil === !!dc.isFoil);
-            if (idx >= 0) {
-              collection[idx] = { ...collection[idx], quantity: collection[idx].quantity + dc.quantity };
-              return { ...dc, collectionItemId: collection[idx].id };
-            }
-            const id = uid('col');
-            collection.unshift({ id, card: dc.card, quantity: dc.quantity, isFoil: !!dc.isFoil, condition: 'NM', language: 'en', tags: [], dateAdded: new Date().toISOString() });
-            return { ...dc, collectionItemId: id };
-          });
-          return collection;
-        };
         if (target === 'new-deck') {
           if (commander && !newCards.some((c) => c.category === 'commander')) {
             // Remove o comandante do principal se veio na lista.
@@ -106,25 +78,22 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
           }
           const id = uid('deck');
           store.update((d) => {
-            const collection = link(d);
             const deck = normalizeDeck({ id, name: name.trim(), format, commander: cmd, partner: ptn, cards: newCards, tokens, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-            return { ...d, collection, decks: [deck, ...d.decks] };
+            return { ...d, decks: [deck, ...d.decks] };
           });
           toast(`Deck “${name.trim()}” criado.`);
           onClose();
           openDeck(id);
         } else {
           store.update((d) => {
-            const collection = link(d);
             return {
               ...d,
-              collection,
               decks: d.decks.map((dk) => {
                 if (dk.id !== existing) return dk;
                 const merged = dk.cards.slice();
                 for (const nc of newCards) {
                   const i = merged.findIndex((c) => sameArt(c.card, nc.card) && c.category === nc.category);
-                  if (i >= 0) merged[i] = { ...merged[i], quantity: merged[i].quantity + nc.quantity, collectionItemId: merged[i].collectionItemId ?? nc.collectionItemId };
+                  if (i >= 0) merged[i] = { ...merged[i], quantity: merged[i].quantity + nc.quantity };
                   else merged.push(nc);
                 }
                 cmd = dk.commander ?? cmd;
@@ -164,7 +133,6 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
       <div className="field">
         <label>Destino</label>
         <div className="btn-group" style={{ alignSelf: 'flex-start' }}>
-          <button className={`btn btn-ghost btn-sm ${target === 'collection' ? 'active' : ''}`} onClick={() => setTarget('collection')}>Coleção</button>
           <button className={`btn btn-ghost btn-sm ${target === 'new-deck' ? 'active' : ''}`} onClick={() => setTarget('new-deck')}>Novo deck</button>
           <button className={`btn btn-ghost btn-sm ${target === 'existing-deck' ? 'active' : ''}`} onClick={() => setTarget('existing-deck')} disabled={!store.data.decks.length}>Deck existente</button>
         </div>
@@ -182,9 +150,7 @@ function TextImport({ onClose, deckId, initialTarget }: { onClose: () => void; d
       {target === 'existing-deck' && (
         <div className="field"><label>Deck</label><select className="select" value={existing} onChange={(e) => setExisting(e.target.value)}>{store.data.decks.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select></div>
       )}
-      {target !== 'collection' && (
-        <label className="check"><input type="checkbox" checked={alsoCollection} onChange={(e) => setAlsoCollection(e.target.checked)} /> Também registrar as cartas na coleção (se você as possui)</label>
-      )}
+      <p className="small subtle">A coleção é atualizada automaticamente com as cartas dos decks.</p>
 
       {progress && (
         <div className="col" style={{ gap: 6 }}>

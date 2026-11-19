@@ -125,7 +125,6 @@ export function normalizeDeckCard(raw: Any): DeckCard {
     card: normalizeCard(raw?.card ?? raw),
     quantity: Math.max(1, Math.round(num(raw?.quantity, 1))),
     category: normalizeCategory(raw?.category ?? raw?.board),
-    collectionItemId: raw?.collectionItemId ?? undefined,
     isFoil: raw?.isFoil ? true : undefined,
   };
 }
@@ -143,7 +142,7 @@ export function normalizeDeck(raw: Any): Deck {
     if (seen.has(c.instanceId)) c.instanceId = uid('dc');
     seen.add(c.instanceId);
     const same = cards.find(
-      (o) => o.card.id === c.card.id && o.category === c.category && o.collectionItemId === c.collectionItemId && !!o.isFoil === !!c.isFoil,
+      (o) => o.card.id === c.card.id && o.category === c.category && !!o.isFoil === !!c.isFoil,
     );
     if (same) same.quantity += c.quantity;
     else cards.push(c);
@@ -166,7 +165,7 @@ export function normalizeDeck(raw: Any): Deck {
         inMain.quantity -= 1;
         if (inMain.quantity <= 0) cards.splice(cards.indexOf(inMain), 1);
       }
-      cards.unshift({ instanceId: uid('dc'), card, quantity: 1, category, collectionItemId: inMain?.collectionItemId });
+      cards.unshift({ instanceId: uid('dc'), card, quantity: 1, category });
     }
   };
   ensure(commander, 'commander');

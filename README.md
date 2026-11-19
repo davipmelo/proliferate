@@ -3,7 +3,7 @@
 App pessoal para jogadores de **Magic: The Gathering**, com interface 100% em português do Brasil.
 Publicado em **https://davimelo.com/proliferate/**.
 
-- **Coleção** — sua "pool" de cartas. Cada arte/impressão é um item separado, com quantidade, foil, condição (NM/SP/MP/HP/DMG), idioma, notas e tags. O app calcula sozinho quantas cópias estão **em uso** nos decks e quantas estão **livres**.
+- **Coleção** — reflete exatamente as cartas dos seus decks (sem o "Talvez"), agrupando cópias da mesma arte/impressão. Adicionar ou remover cartas de qualquer deck atualiza a coleção; trocar a arte ou remover pela coleção vale para todos os decks.
 - **Decks** — formatos Commander, Brawl, Standard, Modern, Pioneer, Pauper, Legacy, Vintage e Casual; comandante/parceiro, contagem vs. meta, agrupamento por tipo ou categoria, filtros de cor (Exato `=` / Identidade `≤`), gráficos (curva de mana, cores, tipos, custo médio, valor), fichas do deck, tags coloridas, capa ajustável e **pôster** em JPEG/PNG/PDF.
 - **Utilitários** — fichas, planos, emblemas, marcadores, masmorras, esquemas, conspirações e atrações (Scryfall), com atalhos rápidos (Tesouro, Comida, Pista, Zumbi…).
 - **Proxies (Proxy Studio)** — folhas A4 com 9 cartas em tamanho real (63 × 88 mm), dupla face expandida em frente + verso, linhas de corte, marcas de enquadramento, réguas, cruzes, presets (Guilhotina, Estilete Manual, Minimalista, Econômico), impressão pelo navegador e **PDF direto** (jsPDF) com o mesmo layout.
@@ -29,7 +29,7 @@ Em desenvolvimento, o MPCFill é acessado pelo proxy do Vite (`/api-mpcfill`). E
 ```
 src/
   types/        modelos (models.ts), formatos (formats.ts) e regras de cartas (cardRules.ts)
-  services/     scryfall, storage + normalize (migração), usage (em uso/disponível),
+  services/     scryfall, storage + normalize (migração), collection (coleção derivada dos decks), stats, enrich,
                 importParser + importer, exporters, backup, mpcfill, proxyLayout + proxyPdf,
                 poster, firebase + firebaseConfig, cloudCodec, sync, image, sorting
   state/        store (estado global + persistência), ui (modais, toasts, preview), syncStatus, nav

@@ -1,7 +1,7 @@
 import type { Card } from '../types/models.ts';
 import { mainType, TYPE_ORDER } from '../types/cardRules.ts';
 
-export type SortKey = 'name' | 'cmc' | 'type' | 'set' | 'rarity' | 'price' | 'quantity' | 'available' | 'date';
+export type SortKey = 'name' | 'cmc' | 'type' | 'set' | 'rarity' | 'price' | 'quantity' | 'date';
 export const SORT_LABELS: Record<SortKey, string> = {
   name: 'Nome',
   cmc: 'Custo',
@@ -10,7 +10,6 @@ export const SORT_LABELS: Record<SortKey, string> = {
   rarity: 'Raridade',
   price: 'Preço',
   quantity: 'Quantidade',
-  available: 'Disponível / uso',
   date: 'Data de inclusão',
 };
 
@@ -19,7 +18,6 @@ const RARITY_RANK: Record<string, number> = { common: 0, uncommon: 1, rare: 2, m
 export interface Sortable {
   card: Card;
   quantity?: number;
-  available?: number;
   date?: string;
 }
 
@@ -38,8 +36,6 @@ export function compareBy(key: SortKey): (a: Sortable, b: Sortable) => number {
       return (a, b) => (b.card.priceUsd ?? -1) - (a.card.priceUsd ?? -1) || byName(a, b);
     case 'quantity':
       return (a, b) => (b.quantity ?? 0) - (a.quantity ?? 0) || byName(a, b);
-    case 'available':
-      return (a, b) => (b.available ?? 0) - (a.available ?? 0) || byName(a, b);
     case 'date':
       return (a, b) => (b.date ?? '').localeCompare(a.date ?? '') || byName(a, b);
     default:

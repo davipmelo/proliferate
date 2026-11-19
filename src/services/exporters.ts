@@ -1,5 +1,5 @@
 // Exportação de decks e coleção (lógica pura).
-import type { CollectionItem, Deck, DeckCard, DeckCategory } from '../types/models.ts';
+import type { Deck, DeckCard, DeckCategory } from '../types/models.ts';
 import { CATEGORY_LABELS } from '../types/models.ts';
 
 export type ExportFormat = 'arena' | 'moxfield' | 'ligamagic' | 'csv' | 'json';
@@ -84,13 +84,21 @@ export function exportDeck(deck: Deck, fmt: ExportFormat): string {
   return out.join('\n').trim() + '\n';
 }
 
-export function exportCollection(items: CollectionItem[], fmt: ExportFormat): string {
+/** Item exportável da coleção (derivada dos decks). */
+export interface ExportableEntry {
+  card: DeckCard['card'];
+  quantity: number;
+  isFoil?: boolean;
+  decks?: { deckName: string; quantity: number }[];
+}
+
+export function exportCollection(items: ExportableEntry[], fmt: ExportFormat): string {
   const sorted = items.slice().sort((a, b) => a.card.name.localeCompare(b.card.name));
   if (fmt === 'json') return JSON.stringify({ app: 'proliferate', type: 'collection', collection: sorted }, null, 2);
   if (fmt === 'csv') {
-    const rows = [['Quantidade', 'Nome', 'Edição', 'Número', 'Foil', 'Condição', 'Idioma', 'Preço USD', 'Notas']];
+    const rows = [['Quantidade', 'Nome', 'Edição', 'Número', 'Foil', 'Preço USD', 'Decks']];
     for (const i of sorted)
-      rows.push([String(i.quantity), i.card.name, i.card.setCode?.toUpperCase() ?? '', i.card.collectorNumber ?? '', i.isFoil ? 'sim' : '', i.condition, i.language, i.card.priceUsd?.toFixed(2) ?? '', i.notes ?? '']);
+      rows.push([String(i.quantity), i.card.name, i.card.setCode?.toUpperCase() ?? '', i.card.collectorNumber ?? '', i.isFoil ? 'sim' : '', i.card.priceUsd?.toFixed(2) ?? '', (i.decks ?? []).map((d) => `${d.quantity}× ${d.deckName}`).join('; ')]);
     return rows.map((r) => r.map(csvCell).join(',')).join('\n');
   }
   return sorted.map((i) => line({ quantity: i.quantity, card: i.card, isFoil: i.isFoil }, fmt)).join('\n') + '\n';

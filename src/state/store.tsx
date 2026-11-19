@@ -1,41 +1,32 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import type {
-  AppData, Card, CollectionItem, CollectionUsage, Deck, DeckCard, DeckCategory, DeckTag, Preferences, ProxyItem, TokenCard,
-} from '../types/models.ts';
+import type { AppData, Card, Deck, DeckCard, DeckCategory, DeckTag, Preferences, ProxyItem, TokenCard } from '../types/models.ts';
 import { sameArt } from '../types/cardRules.ts';
-import { computeUsage } from '../services/usage.ts';
+import { deriveCollection, mapEntryInDecks, type CollectionEntry } from '../services/collection.ts';
 import { DEFAULT_PREFS, loadData, loadMeta, loadPrefs, QuotaError, saveData, saveMeta, savePrefs } from '../services/storage.ts';
 import { normalizeDeck, uid } from '../services/normalize.ts';
 import { toast } from './ui.tsx';
 
 type Updater<T> = (prev: T) => T;
 
-export interface AddToCollectionOpts {
-  quantity?: number;
-  isFoil?: boolean;
-  condition?: CollectionItem['condition'];
-  language?: string;
-}
-
 export interface Store {
   data: AppData;
   prefs: Preferences;
-  usage: Map<string, CollectionUsage>;
+  /** Coleção derivada dos decks (cartas dos decks agrupadas pela mesma arte). */
+  collection: CollectionEntry[];
   /** Incrementado a cada alteração local (usado pela sincronização). */
   revision: number;
   update: (fn: Updater<AppData>) => void;
   /** Substitui tudo (restauração/sincronização) sem gerar nova revisão local se `remote`. */
   replaceAll: (data: AppData, opts?: { remote?: boolean; revision?: number; prefs?: Partial<Preferences> }) => void;
   setPrefs: (p: Partial<Preferences>) => void;
-  // Coleção
-  addToCollection: (card: Card, opts?: AddToCollectionOpts) => void;
-  updateCollectionItem: (id: string, patch: Partial<CollectionItem>) => void;
-  removeCollectionItems: (ids: string[]) => void;
+  // Coleção (age sobre todas as cópias nos decks)
+  replaceEntryCard: (key: string, card: Card) => void;
+  removeEntries: (keys: string[]) => void;
   // Decks
   createDeck: (deck: Partial<Deck>) => Deck;
   updateDeck: (id: string, fn: Updater<Deck>) => void;
   deleteDeck: (id: string) => void;
-  addCardToDeck: (deckId: string, card: Card, opts?: { quantity?: number; category?: DeckCategory; isFoil?: boolean; linkCollection?: boolean }) => void;
+  addCardToDeck: (deckId: string, card: Card, opts?: { quantity?: number; category?: DeckCategory; isFoil?: boolean }) => void;
   // Proxies
   addToProxies: (cards: { card: Card | TokenCard; quantity?: number }[]) => void;
   updateProxies: (fn: Updater<ProxyItem[]>) => void;
@@ -123,59 +114,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const usage = useMemo(() => computeUsage(data.collection, data.decks), [data.collection, data.decks]);
+  const collection = useMemo(() => deriveCollection(data.decks), [data.decks]);
 
   const store = useMemo<Store>(() => {
-    const findOrCreateItem = (col: CollectionItem[], card: Card, o: AddToCollectionOpts): [CollectionItem[], CollectionItem] => {
-      const qty = o.quantity ?? 1;
-      const idx = col.findIndex(
-        (i) => sameArt(i.card, card) && !!i.isFoil === !!o.isFoil && i.condition === (o.condition ?? 'NM') && i.language === (o.language ?? 'en'),
-      );
-      if (idx >= 0) {
-        const item = { ...col[idx], quantity: col[idx].quantity + qty };
-        const next = col.slice();
-        next[idx] = item;
-        return [next, item];
-      }
-      const item: CollectionItem = {
-        id: uid('col'),
-        card: { ...card, isFoil: undefined },
-        quantity: qty,
-        isFoil: !!o.isFoil,
-        condition: o.condition ?? 'NM',
-        language: o.language ?? 'en',
-        tags: [],
-        dateAdded: new Date().toISOString(),
-      };
-      delete (item.card as any).isFoil;
-      return [[item, ...col], item];
-    };
-
     return {
       data,
       prefs,
-      usage,
+      collection,
       revision,
       update,
       replaceAll,
       setPrefs,
-      addToCollection: (card, opts = {}) =>
-        update((d) => ({ ...d, collection: findOrCreateItem(d.collection, card, opts)[0] })),
-      updateCollectionItem: (id, patch) =>
-        update((d) => ({ ...d, collection: d.collection.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
-      removeCollectionItems: (ids) => {
-        const set = new Set(ids);
-        update((d) => ({
-          ...d,
-          collection: d.collection.filter((i) => !set.has(i.id)),
-          // Remove vínculos órfãos nos decks.
-          decks: d.decks.map((dk) =>
-            dk.cards.some((c) => c.collectionItemId && set.has(c.collectionItemId))
-              ? { ...dk, cards: dk.cards.map((c) => (c.collectionItemId && set.has(c.collectionItemId) ? { ...c, collectionItemId: undefined } : c)) }
-              : dk,
-          ),
-        }));
-      },
+      replaceEntryCard: (key, card) => update((d) => ({ ...d, decks: mapEntryInDecks(d.decks, key, (old) => ({ ...card, isFoil: old.isFoil })) })),
+      removeEntries: (keys) => update((d) => ({ ...d, decks: keys.reduce((ds, k) => mapEntryInDecks(ds, k, () => null), d.decks) })),
       createDeck: (partial) => {
         const deck = normalizeDeck({ ...partial, id: uid('deck'), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
         update((d) => ({ ...d, decks: [deck, ...d.decks] }));
@@ -190,27 +141,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addCardToDeck: (deckId, card, opts = {}) => {
         const qty = opts.quantity ?? 1;
         const category = opts.category ?? 'main';
-        update((d) => {
-          let collection = d.collection;
-          let itemId: string | undefined;
-          if (opts.linkCollection !== false) {
-            const [next, item] = findOrCreateItem(collection, card, { quantity: qty, isFoil: opts.isFoil });
-            collection = next;
-            itemId = item.id;
-          }
-          const decks = d.decks.map((dk) => {
+        update((d) => ({
+          ...d,
+          decks: d.decks.map((dk) => {
             if (dk.id !== deckId) return dk;
             const cards = dk.cards.slice();
-            const idx = cards.findIndex((c) => c.category === category && sameArt(c.card, card) && c.collectionItemId === itemId && !!c.isFoil === !!opts.isFoil);
+            const idx = cards.findIndex((c) => c.category === category && sameArt(c.card, card) && !!c.isFoil === !!opts.isFoil);
             if (idx >= 0) cards[idx] = { ...cards[idx], quantity: cards[idx].quantity + qty };
-            else cards.push({ instanceId: uid('dc'), card, quantity: qty, category, collectionItemId: itemId, isFoil: opts.isFoil || undefined } as DeckCard);
+            else cards.push({ instanceId: uid('dc'), card, quantity: qty, category, isFoil: opts.isFoil || undefined } as DeckCard);
             const patch: Partial<Deck> = {};
             if (category === 'commander') patch.commander = card;
             if (category === 'partner') patch.partner = card;
             return { ...dk, ...patch, cards, updatedAt: new Date().toISOString() };
-          });
-          return { ...d, collection, decks };
-        });
+          }),
+        }));
       },
       addToProxies: (cards) =>
         update((d) => {
@@ -225,7 +169,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updateProxies: (fn) => update((d) => ({ ...d, proxies: fn(d.proxies) })),
       setTags: (fn) => update((d) => ({ ...d, tags: fn(d.tags) })),
     };
-  }, [data, prefs, usage, revision, update, replaceAll, setPrefs]);
+  }, [data, prefs, collection, revision, update, replaceAll, setPrefs]);
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
 }

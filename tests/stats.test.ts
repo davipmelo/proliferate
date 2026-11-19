@@ -1,8 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { computeCardStats, computeCollectionExtras, computeDecksExtras, identityName } from '../src/services/stats.ts';
+import { computeCardStats, computeDecksExtras, identityName } from '../src/services/stats.ts';
 import { normalizeAppData } from '../src/services/normalize.ts';
-import { computeUsage } from '../src/services/usage.ts';
 
 const c = (p: Record<string, unknown>) => ({ id: String(p.name), cmc: 0, typeLine: '', colors: [], colorIdentity: [], images: {}, ...p }) as any;
 
@@ -39,30 +38,19 @@ test('computeCardStats: cores, curva, tipos, tribos, palavras-chave e preço', (
   assert.ok(!s.mostCopies.some((m) => m.label === 'Forest'));
 });
 
-test('extras da coleção e dos decks', () => {
+test('extras dos decks', () => {
   const data = normalizeAppData({
-    collection: [
-      { id: 'a', card: { id: 'sol', name: 'Sol Ring' }, quantity: 2, isFoil: true, language: 'pt', dateAdded: new Date().toISOString() },
-      { id: 'b', card: { id: 'isl', name: 'Island', type_line: 'Basic Land — Island' }, quantity: 5, condition: 'SP', dateAdded: '2020-01-01' },
-    ],
     decks: [
       { id: 'd1', name: 'A', format: 'commander', commander: { id: 'x', name: 'Atraxa', color_identity: ['W', 'U', 'B', 'G'] }, cards: [{ card: { id: 'sol', name: 'Sol Ring', priceUsd: 2 }, quantity: 1 }] },
       { id: 'd2', name: 'B', format: 'modern', cards: [{ card: { id: 'sol2', name: 'Sol Ring', priceUsd: 2 }, quantity: 1 }, { card: { id: 'bolt', name: 'Bolt', color_identity: ['R'] }, quantity: 59 }] },
     ],
   });
-  const usage = computeUsage(data.collection, data.decks);
-  const e = computeCollectionExtras(data.collection, usage);
-  assert.equal(e.foil, 2);
-  assert.equal(e.inUse, 1);
-  assert.equal(e.free, 6);
-  assert.equal(e.recent, 2);
-  assert.equal(e.conditions[0].key, 'NM');
-  const d = computeDecksExtras(data.decks, new Set(data.collection.map((i) => i.card.id)), new Set(data.collection.map((i) => i.card.name)));
+  const d = computeDecksExtras(data.decks);
   assert.equal(d.decks, 2);
   assert.equal(d.complete, 1);
   assert.equal(d.staples[0].label, 'Sol Ring');
   assert.equal(d.staples[0].value, 2);
   assert.equal(d.identities.find((i) => i.label === 'Sem vermelho')?.value, 1);
   assert.equal(d.commanders[0].label, 'Atraxa');
-  assert.ok(d.ownedPct > 0 && d.ownedPct < 1);
+  assert.deepEqual(d.sizes.map((x) => x.value), [60, 2]);
 });

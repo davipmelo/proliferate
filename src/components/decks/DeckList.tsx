@@ -48,7 +48,7 @@ export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
     toast(`${cards.reduce((s, c) => s + c.quantity, 0)} cartas de “${d.name}” na fila de impressão.`);
   };
   const remove = async (d: Deck) => {
-    const ok = await confirmDialog({ title: 'Excluir deck?', message: <p><b>{d.name}</b> será excluído. As cartas continuam na coleção e ficam disponíveis.</p>, confirmLabel: 'Excluir', danger: true });
+    const ok = await confirmDialog({ title: 'Excluir deck?', message: <p><b>{d.name}</b> será excluído. As cartas dele também saem da coleção.</p>, confirmLabel: 'Excluir', danger: true });
     if (ok) {
       store.deleteDeck(d.id);
       toast('Deck excluído.');

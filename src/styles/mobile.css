@@ -79,7 +79,6 @@
   .viz-grid { grid-template-columns: 1fr; }
   .kpi-row { grid-template-columns: 1fr 1fr; }
   .stats-teaser, .stats-hint { display: none; }
-  .col-usage { width: auto; }
   .util-search { flex-direction: column; }
   .util-kind { width: 100%; height: 42px; }
   .util-input .input { height: 44px; }

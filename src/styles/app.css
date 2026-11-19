@@ -1,16 +1,17 @@
 /* Estilos específicos das telas (usa somente tokens). */
 
-/* Badges de uso com popover de decks */
-.usage-badge { position: relative; cursor: default; }
-.usage-pop { display: none; position: absolute; top: calc(100% + 4px); right: 0; z-index: 20; flex-direction: column; align-items: stretch; gap: 2px; padding: 5px; min-width: 200px; background: rgba(32, 33, 38, 0.97); backdrop-filter: blur(12px); border: var(--border-width) solid var(--border-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
-.usage-badge:hover .usage-pop, .usage-badge:focus-within .usage-pop { display: flex; }
-.usage-pop .btn { justify-content: flex-start; color: var(--text); }
 .inline-select { position: static; flex-shrink: 0; background: transparent; border-color: var(--border-strong); opacity: 0; }
 .list-row:hover .inline-select, .inline-select.checked, .list-row.selected .inline-select { opacity: 1; }
 
 /* Colunas alinhadas nas linhas da coleção */
-.col-usage { width: 190px; display: flex; justify-content: flex-end; }
+.col-decks { width: 300px; display: flex; justify-content: flex-end; }
 .col-price { width: 72px; text-align: right; font-variant-numeric: tabular-nums; }
+.col-qty { width: 44px; text-align: right; font-weight: 700; color: var(--accent); }
+.deck-chips { display: flex; gap: 4px; justify-content: flex-end; min-width: 0; }
+.deck-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 150px; height: 24px; padding: 0 9px; border-radius: var(--radius-pill); border: var(--border-width) solid var(--border-strong); background: var(--surface-2); color: var(--text-2); font: inherit; font-size: var(--fs-xs); font-weight: 600; cursor: pointer; transition: color var(--dur), border-color var(--dur); }
+.deck-chip:hover { color: var(--accent); border-color: var(--accent-line); }
+.deck-chip b { color: var(--accent); }
+.deck-chip.more { cursor: default; }
 
 /* Adicionar carta */
 .add-card-layout { display: flex; gap: var(--space-5); align-items: flex-start; }
@@ -103,10 +104,6 @@
 .deck-groups.list-mode .list-group-header { position: static; }
 .chart-box { position: relative; height: 170px; }
 .chart-box-sm { position: relative; height: 150px; }
-.avail { font-size: var(--fs-xs); font-weight: 650; padding: 2px 7px; border-radius: var(--radius-pill); white-space: nowrap; }
-.avail.ok { color: var(--success); background: var(--success-soft); }
-.avail.short { color: var(--warning); background: var(--warning-soft); }
-.avail.missing { color: var(--text-3); background: rgba(255, 255, 255, 0.05); }
 .cover-preview { position: relative; height: 200px; border-radius: var(--radius-md); overflow: hidden; background: var(--surface-3); }
 .cover-preview img { position: absolute; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .tag-color-grid { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }

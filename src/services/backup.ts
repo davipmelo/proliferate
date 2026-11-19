@@ -54,16 +54,13 @@ export function mergeData(current: AppData, incoming: AppData): AppData {
 
   // Coleção
   const collection: CollectionItem[] = current.collection.slice();
-  const colMap = new Map<string, string>();
   for (const it of incoming.collection) {
     const idx = collection.findIndex((c) => sameItem(c, it));
     if (idx >= 0) {
       collection[idx] = { ...collection[idx], quantity: collection[idx].quantity + it.quantity, tags: [...new Set([...collection[idx].tags, ...it.tags])] };
-      colMap.set(it.id, collection[idx].id);
     } else {
       const id = collection.some((c) => c.id === it.id) ? uid('col') : it.id;
       collection.push({ ...it, id });
-      colMap.set(it.id, id);
     }
   }
 
@@ -77,7 +74,6 @@ export function mergeData(current: AppData, incoming: AppData): AppData {
       ...d,
       id,
       tags: d.tags.map((t) => tagMap.get(t) ?? t),
-      cards: d.cards.map((c) => ({ ...c, collectionItemId: c.collectionItemId ? colMap.get(c.collectionItemId) ?? c.collectionItemId : undefined })),
     });
   }
 
@@ -93,6 +89,6 @@ export function mergeData(current: AppData, incoming: AppData): AppData {
 }
 
 export function backupSummary(d: AppData): string {
-  const cards = d.collection.reduce((s, i) => s + i.quantity, 0);
-  return `${cards} carta(s) na coleção (${d.collection.length} itens), ${d.decks.length} deck(s), ${d.proxies.length} item(ns) na fila e ${d.tags.length} tag(s)`;
+  const deckCards = d.decks.reduce((s, dk) => s + dk.cards.reduce((n, c) => n + c.quantity, 0), 0);
+  return `${d.decks.length} deck(s) com ${deckCards} carta(s), ${d.proxies.length} item(ns) na fila e ${d.tags.length} tag(s)`;
 }

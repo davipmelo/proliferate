@@ -1,7 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeAppData, normalizeCard, normalizeDeck, packAppData, unpackAppData } from '../src/services/normalize.ts';
-import { computeUsage, summarizeCollection } from '../src/services/usage.ts';
 
 test('normalizeCard aceita formato antigo e JSON cru do Scryfall', () => {
   const old = normalizeCard({ id: 'a', name: 'Sol Ring', imageUrl: 'https://img/n.jpg', set: 'C21', price: '1.5', type_line: 'Artifact' });
@@ -64,26 +63,6 @@ test('pack/unpack preserva dados e deduplica cartas', () => {
   assert.deepEqual(back.collection, data.collection);
   assert.deepEqual(back.decks, data.decks);
   assert.equal((back.proxies[0].card as any).utilityType, 'token');
-});
-
-test('computeUsage: em uso, disponível e decks por impressão', () => {
-  const data = normalizeAppData({
-    collection: [{ id: 'c1', card: { id: 'sol', name: 'Sol Ring' }, quantity: 2 }, { id: 'c2', card: { id: 'isl', name: 'Island' }, quantity: 10 }],
-    decks: [
-      { id: 'd1', name: 'A', cards: [{ card: { id: 'sol', name: 'Sol Ring' }, quantity: 1 }, { card: { id: 'isl', name: 'Island' }, quantity: 4, collectionItemId: 'c2' }] },
-      { id: 'd2', name: 'B', cards: [{ card: { id: 'sol', name: 'Sol Ring' }, quantity: 2 }, { card: { id: 'isl', name: 'Island' }, quantity: 9, category: 'maybeboard' }] },
-    ],
-  });
-  const u = computeUsage(data.collection, data.decks);
-  assert.equal(u.get('c1')!.inUse, 3);
-  assert.equal(u.get('c1')!.available, 0);
-  assert.equal(u.get('c1')!.decks.length, 2);
-  assert.equal(u.get('c2')!.inUse, 4);
-  assert.equal(u.get('c2')!.available, 6);
-  const s = summarizeCollection(data.collection, u);
-  assert.equal(s.total, 12);
-  assert.equal(s.inUse, 6);
-  assert.equal(s.available, 6);
 });
 
 test('migração: formato do Proliferate v1', () => {
