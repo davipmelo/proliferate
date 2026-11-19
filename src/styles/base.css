@@ -223,7 +223,7 @@ input[type='color'] { width: 36px; height: 30px; border: var(--border-width) sol
 .color-btn.C { background: var(--mana-c); }
 
 /* ---------- Listas ---------- */
-.list { display: flex; flex-direction: column; border: var(--border-width) solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--surface-1); }
+.list { display: flex; flex-direction: column; border: var(--border-width) solid var(--border); border-radius: var(--radius-md); overflow: clip; background: var(--surface-1); }
 .list-row {
   display: flex; align-items: center; gap: var(--space-3);
   min-height: 52px; padding: 6px var(--space-3);

@@ -300,3 +300,23 @@ export async function getRelatedTokens(cardId: string): Promise<TokenCard[]> {
   const { found } = await getCollection(parts.map((p: any) => ({ id: p.id })));
   return found.map((c) => ({ ...c, utilityType: detectUtilityType(c) }));
 }
+
+/** Fichas/emblemas gerados por um conjunto de cartas (via all_parts, em lote). */
+export async function getTokensForCards(cardIds: string[]): Promise<TokenCard[]> {
+  const ids = [...new Set(cardIds.filter((id) => /^[0-9a-f-]{36}$/.test(id)))];
+  const partIds = new Set<string>();
+  for (let i = 0; i < ids.length; i += 75) {
+    const r = await sfFetch<any>('/cards/collection', { method: 'POST', body: JSON.stringify({ identifiers: ids.slice(i, i + 75).map((id) => ({ id })) }) });
+    for (const raw of r.data ?? []) {
+      for (const p of raw.all_parts ?? []) {
+        if (p.id !== raw.id && (p.component === 'token' || /Emblem|Dungeon|Card\b/.test(p.type_line ?? ''))) partIds.add(p.id);
+      }
+    }
+  }
+  if (!partIds.size) return [];
+  const { found } = await getCollection([...partIds].map((id) => ({ id })));
+  const seen = new Set<string>();
+  return found
+    .filter((c) => (seen.has(c.name) ? false : (seen.add(c.name), true)))
+    .map((c) => ({ ...c, utilityType: detectUtilityType(c) }));
+}
