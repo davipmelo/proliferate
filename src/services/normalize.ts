@@ -172,8 +172,21 @@ export function normalizeDeckCard(raw: Any): DeckCard {
 }
 
 /**
- * Normaliza um deck: preenche campos ausentes, junta cópias repetidas da mesma impressão
- * (mesma categoria, sem vínculo distinto) e garante comandante/parceiro na lista.
+ * Cartas do deck nunca são agrupadas: cada cópia vira uma entrada própria (quantidade 1),
+ * para que cada uma possa ter uma arte diferente. A primeira cópia mantém o instanceId.
+ */
+export function splitDeckCards(cards: DeckCard[]): DeckCard[] {
+  if (cards.every((c) => c.quantity === 1)) return cards;
+  return cards.flatMap((c) =>
+    c.quantity <= 1
+      ? [c.quantity === 1 ? c : { ...c, quantity: 1 }]
+      : Array.from({ length: c.quantity }, (_, i) => ({ ...c, instanceId: i === 0 ? c.instanceId : uid('dc'), quantity: 1 })),
+  );
+}
+
+/**
+ * Normaliza um deck: preenche campos ausentes, separa cópias repetidas em entradas individuais
+ * e garante comandante/parceiro na lista.
  */
 export function normalizeDeck(raw: Any): Deck {
   const format: DeckFormat = (Object.keys(FORMATS) as DeckFormat[]).includes(raw?.format) ? raw.format : 'casual';
@@ -183,11 +196,7 @@ export function normalizeDeck(raw: Any): Deck {
   for (const c of arr<Any>(raw?.cards).map(normalizeDeckCard)) {
     if (seen.has(c.instanceId)) c.instanceId = uid('dc');
     seen.add(c.instanceId);
-    const same = cards.find(
-      (o) => o.card.id === c.card.id && o.category === c.category && !!o.isFoil === !!c.isFoil,
-    );
-    if (same) same.quantity += c.quantity;
-    else cards.push(c);
+    cards.push(c);
   }
   const cmdRaw = raw?.commander ?? raw?.commanderCard;
   const ptnRaw = raw?.partner ?? raw?.partnerCard;
@@ -225,7 +234,7 @@ export function normalizeDeck(raw: Any): Deck {
     description: str(raw?.description),
     commander,
     partner,
-    cards,
+    cards: splitDeckCards(cards),
     tokens,
     cover: {
       image: coverRaw.image ?? raw?.coverImage ?? raw?.coverImageUrl ?? undefined,

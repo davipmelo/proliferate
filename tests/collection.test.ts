@@ -46,7 +46,7 @@ test('mapEntryInDecks troca a arte ou remove de todos os decks', () => {
   const key = entryKey(data.decks[1].cards.find((c) => c.card.id === 'sol' && !c.isFoil)!.card, false);
   const swapped = mapEntryInDecks(data.decks, key, (c) => ({ ...c, id: 'sol-new' }));
   assert.equal(swapped[0].cards.find((c) => c.card.name === 'Sol Ring' && c.category === 'main')?.card.id, 'sol-new');
-  assert.equal(swapped[1].cards.filter((c) => c.card.id === 'sol-new').length, 1);
+  assert.equal(swapped[1].cards.filter((c) => c.card.id === 'sol-new').length, 2);
   assert.ok(swapped[1].cards.some((c) => c.card.id === 'sol' && c.isFoil), 'foil não é afetado');
   const removed = mapEntryInDecks(data.decks, key, () => null);
   assert.equal(deriveCollection(removed).find((e) => e.key === key), undefined);

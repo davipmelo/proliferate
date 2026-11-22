@@ -33,7 +33,18 @@ function line(dc: { quantity: number; card: DeckCard['card']; isFoil?: boolean }
 function grouped(deck: Deck): Map<DeckCategory, DeckCard[]> {
   const m = new Map<DeckCategory, DeckCard[]>();
   for (const c of ORDER) m.set(c, []);
-  for (const dc of deck.cards) m.get(dc.category)!.push(dc);
+  // No deck cada cópia é uma entrada própria; na exportação, impressões iguais voltam a se somar.
+  const merged = new Map<string, DeckCard>();
+  for (const dc of deck.cards) {
+    const key = `${dc.category}|${dc.card.id}|${dc.isFoil ? 1 : 0}`;
+    const prev = merged.get(key);
+    if (prev) prev.quantity += dc.quantity;
+    else {
+      const copy = { ...dc };
+      merged.set(key, copy);
+      m.get(dc.category)!.push(copy);
+    }
+  }
   for (const list of m.values()) list.sort((a, b) => a.card.name.localeCompare(b.card.name));
   return m;
 }

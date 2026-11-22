@@ -3,7 +3,7 @@ import type { AppData, Card, Deck, DeckCard, DeckCategory, DeckTag, Preferences,
 import { sameArt } from '../types/cardRules.ts';
 import { deriveCollection, mapEntryInDecks, type CollectionEntry } from '../services/collection.ts';
 import { DEFAULT_PREFS, PROXY_SETTINGS_VERSION, loadData, loadMeta, loadPrefs, QuotaError, saveData, saveMeta, savePrefs } from '../services/storage.ts';
-import { normalizeDeck, uid } from '../services/normalize.ts';
+import { normalizeDeck, splitDeckCards, uid } from '../services/normalize.ts';
 import { toast } from './ui.tsx';
 
 type Updater<T> = (prev: T) => T;
@@ -140,7 +140,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       updateDeck: (id, fn) =>
         update((d) => ({
           ...d,
-          decks: d.decks.map((dk) => (dk.id === id ? { ...fn(dk), updatedAt: new Date().toISOString() } : dk)),
+          decks: d.decks.map((dk) => {
+            if (dk.id !== id) return dk;
+            const next = fn(dk);
+            return { ...next, cards: splitDeckCards(next.cards), updatedAt: new Date().toISOString() };
+          }),
         })),
       deleteDeck: (id) => update((d) => ({ ...d, decks: d.decks.filter((dk) => dk.id !== id) })),
       addCardToDeck: (deckId, card, opts = {}) => {
@@ -150,10 +154,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...d,
           decks: d.decks.map((dk) => {
             if (dk.id !== deckId) return dk;
+            // Cada cópia é uma entrada própria (nunca agrupa), para permitir artes diferentes.
             const cards = dk.cards.slice();
-            const idx = cards.findIndex((c) => c.category === category && sameArt(c.card, card) && !!c.isFoil === !!opts.isFoil);
-            if (idx >= 0) cards[idx] = { ...cards[idx], quantity: cards[idx].quantity + qty };
-            else cards.push({ instanceId: uid('dc'), card, quantity: qty, category, isFoil: opts.isFoil || undefined } as DeckCard);
+            for (let i = 0; i < Math.max(1, qty); i++) {
+              cards.push({ instanceId: uid('dc'), card, quantity: 1, category, isFoil: opts.isFoil || undefined } as DeckCard);
+            }
             const patch: Partial<Deck> = {};
             if (category === 'commander') patch.commander = card;
             if (category === 'partner') patch.partner = card;

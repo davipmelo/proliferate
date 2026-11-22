@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, useRef, useState } from 'react';
 import {
-  ArrowLeft, ArrowRightLeft, ChevronDown, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown, Info,
+  ArrowLeft, ArrowRightLeft, ChevronDown, CopyPlus, ChevronsDownUp, ChevronsUpDown, Crop, Download, Hand, Image as ImageIcon, ImageDown, Info,
   MoreVertical, Pencil, Plus, Printer, Search, Tag as TagIcon, Trash2, Upload,
 } from 'lucide-react';
 import type { ColorMatchMode, Deck, DeckCard, DeckCategory, DeckGroupMode } from '../../types/models.ts';
@@ -10,7 +10,7 @@ import { confirmDialog, openModal, previewProps, toast } from '../../state/ui.ts
 import { formatInfo } from '../../types/formats.ts';
 import { backImage, frontImage, isLand, mainType, matchesColorFilter, TYPE_LABELS, TYPE_ORDER, type ColorFilterValue, type MainType } from '../../types/cardRules.ts';
 import { compareBy, matchesText, SORT_LABELS, type SortKey } from '../../services/sorting.ts';
-import { CardThumb, ColorPips, Dropdown, formatUsd, Loading, ManaCost, QtyControl, ViewToggle } from '../common/bits.tsx';
+import { CardThumb, ColorPips, Dropdown, formatUsd, Loading, ManaCost, ViewToggle } from '../common/bits.tsx';
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls } from '../common/selection.tsx';
 import { useFitsViewport, usePersistent } from '../common/hooks.ts';
@@ -102,6 +102,9 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
       return { ...d, cards, commander: cmd, partner: ptn };
     });
 
+  // Quantidade 2 é separada em duas entradas pelo store: a cópia nova entra logo depois da original.
+  const addCopy = (dc: DeckCard) => setCard(dc.instanceId, { quantity: 2 });
+
   const changeArt = (list: DeckCard[], start: number) =>
     openArtPicker({ cards: list.map((c) => c.card), start, onSelect: (i, card) => setCard(list[i].instanceId, { card }) });
 
@@ -134,7 +137,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
       </div>
       {details && <div className="list-meta hide-mobile"><span className="deck-price small subtle tabular">{formatUsd(dc.card.priceUsd)}</span></div>}
       <div className="list-actions">
-        <QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} />
+        {dc.category !== 'commander' && dc.category !== 'partner' && <button className="btn btn-ghost btn-icon btn-sm" title="Adicionar cópia" onClick={() => addCopy(dc)}><CopyPlus size={15} /></button>}
         <CardMenu dc={dc} onArt={onArt} onProxy={() => toProxy([dc])} onMove={(cat) => setCard(dc.instanceId, { category: cat })} onRemove={() => setCard(dc.instanceId, null)} />
       </div>
     </div>
@@ -144,7 +147,6 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
     <div key={dc.instanceId} className="card-tile">
       <div className={`card-img-wrap ${(dc.isFoil || dc.card.isFoil) && prefs.showFoil ? 'foil' : ''}`} {...previewProps(frontImage(dc.card, 'normal'), backImage(dc.card))}>
         <img src={frontImage(dc.card, prefs.gridSize > 200 ? 'normal' : 'small')} loading="lazy" decoding="async" alt={dc.card.name} />
-        {dc.quantity > 1 && <span className="qty-badge">{dc.quantity}×</span>}
         <div className="card-tile-actions">
           <button className="btn btn-secondary btn-icon btn-sm" title="Informações" onClick={() => openCardInfo(dc.card, { foil: dc.isFoil || dc.card.isFoil })}><Info size={15} /></button>
           <button className="btn btn-secondary btn-icon btn-sm" title="Trocar arte" onClick={onArt}><ImageIcon size={15} /></button>
@@ -155,7 +157,7 @@ export function DeckEditor({ deck, onBack }: { deck: Deck; onBack: () => void })
       {details && (
         <div className="card-tile-info">
           <span className="name">{dc.card.name}</span>
-          <span className="meta"><QtyControl value={dc.quantity} min={1} onChange={(n) => setCard(dc.instanceId, { quantity: n })} /><span className="tabular">{formatUsd(dc.card.priceUsd)}</span></span>
+          <span className="meta"><button className="btn btn-ghost btn-icon btn-sm" title="Adicionar cópia" onClick={() => addCopy(dc)}><CopyPlus size={15} /></button><span className="tabular">{formatUsd(dc.card.priceUsd)}</span></span>
         </div>
       )}
     </div>

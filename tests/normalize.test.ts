@@ -18,7 +18,7 @@ test('normalizeCard aceita formato antigo e JSON cru do Scryfall', () => {
   assert.equal(raw.cardFaces?.[1].images?.normal, 'b.jpg');
 });
 
-test('normalizeDeck: junta cópias, coloca comandante e limita capa', () => {
+test('normalizeDeck: separa cópias, coloca comandante e limita capa', () => {
   const deck = normalizeDeck({
     name: '  Meu deck ',
     format: 'commander',
@@ -34,8 +34,9 @@ test('normalizeDeck: junta cópias, coloca comandante e limita capa', () => {
   });
   assert.equal(deck.name, 'Meu deck');
   const sol = deck.cards.filter((c) => c.card.id === 'x');
-  assert.equal(sol.length, 1);
-  assert.equal(sol[0].quantity, 3);
+  assert.equal(sol.length, 3, 'cada cópia vira uma entrada própria');
+  assert.ok(sol.every((c) => c.quantity === 1));
+  assert.equal(new Set(sol.map((c) => c.instanceId)).size, 3);
   assert.equal(deck.cards.find((c) => c.category === 'commander')?.card.name, 'Atraxa');
   assert.equal(deck.cards.filter((c) => c.card.name === 'Atraxa').length, 1);
   assert.equal(deck.cards.find((c) => c.card.id === 'y')?.category, 'sideboard');
