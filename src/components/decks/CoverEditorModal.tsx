@@ -168,7 +168,7 @@ export function CoverEditorModal({ deck, onClose }: { deck: Deck; onClose: () =>
       <div className="art-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))' }}>
         {options.map((u) => (
           <button key={u} className={`art-option ${shown === u ? 'active' : ''}`} onClick={() => setImage(u)}>
-            <img src={u} loading="lazy" alt="" style={{ aspectRatio: '4 / 3' }} />
+            <img src={u} loading="lazy" alt="" className="no-trim" style={{ aspectRatio: '4 / 3' }} />
           </button>
         ))}
       </div>

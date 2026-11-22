@@ -9,8 +9,8 @@ const META_KEY = 'proliferate:meta:v2';
 /** Chaves de versões antigas que tentamos migrar no primeiro uso. */
 const LEGACY_KEYS = ['proliferate-data', 'mtg-manager-data', 'dms-mtg-data'];
 
-/** Padrão = preset Guilhotina (rodapé ligado, sem recorte de sangria). */
-export const DEFAULT_PROXY_SETTINGS: ProxySettings = { ...PROXY_PRESETS[0].values, footer: true, trimBleed: false };
+/** Padrão = preset Guilhotina (rodapé ligado). A sangria do MPCFill é sempre recortada. */
+export const DEFAULT_PROXY_SETTINGS: ProxySettings = { ...PROXY_PRESETS[0].values, footer: true };
 /** Versão das configurações de proxy; ao subir, as preferências salvas voltam ao padrão. */
 export const PROXY_SETTINGS_VERSION = 2;
 

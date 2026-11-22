@@ -143,3 +143,21 @@ test('carta reversível já salva (com verso e faces com imagem) é reparada ao 
   assert.equal(sld.cardFaces, undefined);
   assert.ok(!isDoubleFaced(sld));
 });
+
+test('sangria do MPCFill: detecção pela URL e recorte de 1/8"', async () => {
+  const { hasBleedImage, cardHasBleed, bleedSourceRect } = await import('../src/types/cardRules.ts');
+  const { expandQueue } = await import('../src/services/proxyLayout.ts');
+  const drive = 'https://lh3.googleusercontent.com/d/1W1JwQiJLR82XemKhDOH5Cnyy82IdT_Kd=w1000';
+  assert.ok(hasBleedImage(drive));
+  assert.ok(!hasBleedImage('https://cards.scryfall.io/normal/front/a/b/ab.jpg'));
+  assert.ok(cardHasBleed({ hasBleed: false }, drive));
+  // 2,75" × 3,75" → 2,5" × 3,5" central.
+  const [sx, sy, sw, sh] = bleedSourceRect(825, 1125);
+  assert.equal(Math.round(sx), 38);
+  assert.equal(Math.round(sy), 38);
+  assert.equal(Math.round(sw), 750);
+  assert.equal(Math.round(sh), 1050);
+  // Arte do Drive é recortada na impressão mesmo sem a flag hasBleed salva.
+  const slots = expandQueue([{ id: 'p', card: card({ images: { normal: drive, large: drive } }), quantity: 1 }]);
+  assert.ok(slots[0].trimBleed);
+});

@@ -79,6 +79,30 @@ export function namesMatch(a: string, b: string): boolean {
   return frontName(a) === frontName(b);
 }
 
+/**
+ * Sangria das artes do MPCFill: 1/8" de cada lado de uma carta de 2,5" × 3,5"
+ * (imagem de 2,75" × 3,75"). Frações da largura/altura da imagem a descartar de cada lado.
+ */
+export const BLEED_X = 0.125 / 2.75;
+export const BLEED_Y = 0.125 / 3.75;
+
+/** Imagem hospedada no Google Drive (MPCFill), que sempre vem com sangria. */
+export function hasBleedImage(url: string | undefined): boolean {
+  return !!url && /googleusercontent\.com\/d\/|drive\.google\.com/.test(url);
+}
+
+/** A carta (ou a imagem dela) tem sangria a descartar? */
+export function cardHasBleed(card: Pick<Card, 'hasBleed'>, url?: string): boolean {
+  return !!card.hasBleed || hasBleedImage(url);
+}
+
+/** Retângulo de origem (sx, sy, sw, sh) sem a sangria, para `drawImage`. */
+export function bleedSourceRect(w: number, h: number): [number, number, number, number] {
+  const bx = w * BLEED_X;
+  const by = h * BLEED_Y;
+  return [bx, by, w - 2 * bx, h - 2 * by];
+}
+
 export function isCustomArt(card: Pick<Card, 'artSource' | 'id'>): boolean {
   return card.artSource === 'mpcfill' || card.artSource === 'custom' || /^(mpc|custom)-/.test(card.id);
 }

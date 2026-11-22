@@ -1,4 +1,5 @@
 // Utilitários de imagem no navegador.
+import { bleedSourceRect } from '../types/cardRules.ts';
 
 /** Comprime uma imagem enviada pelo usuário (JPEG, lado maior até `max` px). */
 export async function compressImage(file: File | Blob, max = 1200, quality = 0.86): Promise<string> {
@@ -38,12 +39,7 @@ export function cropToDataUrl(img: HTMLImageElement, opts: { trimBleed?: boolean
   let sh = img.naturalHeight;
   if (opts.trimBleed) {
     // Arte com sangria: 2,75" × 3,75" → mantém 2,5" × 3,5" central.
-    const bx = sw * (0.125 / 2.75);
-    const by = sh * (0.125 / 3.75);
-    sx = bx;
-    sy = by;
-    sw -= bx * 2;
-    sh -= by * 2;
+    [sx, sy, sw, sh] = bleedSourceRect(sw, sh);
   }
   const maxW = opts.maxWidth ?? 745;
   const scale = Math.min(1, maxW / sw);

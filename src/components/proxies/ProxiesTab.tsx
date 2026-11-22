@@ -230,7 +230,6 @@ export default function ProxiesTab() {
             </div>
             <div className="col" style={{ gap: 2, marginTop: 10 }}>
               <label className="check"><input type="checkbox" checked={s.footer} onChange={(e) => set({ footer: e.target.checked })} /> Rodapé com metadados</label>
-              <label className="check"><input type="checkbox" checked={s.trimBleed} onChange={(e) => set({ trimBleed: e.target.checked })} /> Recortar sangria das artes MPCFill</label>
             </div>
             <details className="details" style={{ marginTop: 8 }} open>
               <summary><ChevronRight size={14} className="chev" /> Controles avançados</summary>

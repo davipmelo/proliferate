@@ -10,7 +10,7 @@ export function Sheet({ slots, settings, page, total, scale, eager }: { slots: S
     <div className="a4" style={scale ? { transform: `scale(${scale})` } : undefined}>
       {slots.map((s, i) => {
         const { x, y } = slotPosition(i);
-        const trim = s.trimBleed && settings.trimBleed;
+        const trim = s.trimBleed;
         return (
           <div key={s.key} className={`slot ${rounded ? 'rounded' : ''}`} style={{ left: `${x}mm`, top: `${y}mm` }}>
             {rounded && <div className={`bg ${settings.cornerFill}`} />}

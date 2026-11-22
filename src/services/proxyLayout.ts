@@ -1,6 +1,6 @@
 // Layout das folhas de proxies (lógica pura, em milímetros).
 import type { Card, ProxyItem, ProxySettings } from '../types/models.ts';
-import { backImage, frontImage, isDoubleFaced } from '../types/cardRules.ts';
+import { backImage, cardHasBleed, frontImage, hasBleedImage, isDoubleFaced } from '../types/cardRules.ts';
 
 export const PAGE_W = 210;
 export const PAGE_H = 297;
@@ -30,12 +30,12 @@ export function expandQueue(items: ProxyItem[], size: 'large' | 'normal' = 'larg
     const dfc = isDoubleFaced(item.card);
     const front = frontImage(item.card, size);
     const back = dfc ? backImage(item.card, size) : undefined;
-    const bleed = !!item.card.hasBleed;
+    const bleed = cardHasBleed(item.card, front);
     for (let i = 0; i < item.quantity; i++) {
       out.push({ key: `${item.id}-${i}-f`, itemId: item.id, name: item.card.cardFaces?.[0]?.name ?? item.card.name, face: 'front', image: front, trimBleed: bleed, card: item.card });
       if (back) {
         // Verso customizado (MPCFill) também tem sangria; verso oficial não.
-        const backBleed = bleed && !!item.card.backImage && item.card.artSource === 'mpcfill';
+        const backBleed = (!!item.card.hasBleed && !!item.card.backImage && item.card.artSource === 'mpcfill') || hasBleedImage(back);
         out.push({ key: `${item.id}-${i}-b`, itemId: item.id, name: item.card.cardFaces?.[1]?.name ?? `${item.card.name} (verso)`, face: 'back', image: back, trimBleed: backBleed, card: item.card });
       }
     }
@@ -161,7 +161,7 @@ export function lineStyle(s: ProxySettings, kind: Line['kind']): { color: string
 export interface ProxyPreset {
   id: 'guillotine' | 'craft-knife' | 'minimal' | 'eco';
   label: string;
-  values: Omit<ProxySettings, 'footer' | 'trimBleed'>;
+  values: Omit<ProxySettings, 'footer'>;
 }
 
 const NO_CROSS = { cornerCrosses: false, crossColor: '#000000', crossWidth: 0.25, crossSize: 1.5, crossShape: 'plus', crossScope: 'all' } as const;

@@ -1,6 +1,6 @@
 // Pôster do deck renderizado em canvas.
 import type { Card, Deck, DeckCard } from '../types/models.ts';
-import { frontImage, mainType, TYPE_ORDER } from '../types/cardRules.ts';
+import { bleedSourceRect, cardHasBleed, frontImage, mainType, TYPE_ORDER } from '../types/cardRules.ts';
 import { formatInfo } from '../types/formats.ts';
 import { loadImage } from './image.ts';
 
@@ -202,9 +202,7 @@ export async function renderPoster(deck: Deck, o: PosterOptions, onProgress: (pc
     ctx.clip();
     if (img) {
       let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
-      if (c.hasBleed) {
-        sx = sw * (0.125 / 2.75); sy = sh * (0.125 / 3.75); sw -= sx * 2; sh -= sy * 2;
-      }
+      if (cardHasBleed(c, img.src)) [sx, sy, sw, sh] = bleedSourceRect(sw, sh);
       ctx.drawImage(img, sx, sy, sw, sh, x, y, cwid, chei);
     } else {
       ctx.fillStyle = '#2a2c31';

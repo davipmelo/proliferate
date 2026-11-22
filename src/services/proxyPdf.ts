@@ -2,12 +2,13 @@
 import type { ProxySettings } from '../types/models.ts';
 import { CARD_H, CARD_W, CORNER_RADIUS, footerText, lineStyle, PAGE_H, PAGE_W, paginate, ROWS, COLS, sheetLines, slotPosition, type Slot } from './proxyLayout.ts';
 import { loadImage } from './image.ts';
+import { bleedSourceRect } from '../types/cardRules.ts';
 
 const PX_PER_MM = 745 / CARD_W; // ~11,8 px/mm (≈300 DPI)
 
 /** Prepara a imagem da carta (recorte de sangria + cantos) como JPEG em data URL. */
 async function prepareImage(slot: Slot, s: ProxySettings, cache: Map<string, string>): Promise<string> {
-  const key = `${slot.image}|${slot.trimBleed && s.trimBleed}|${s.cornerFill}`;
+  const key = `${slot.image}|${slot.trimBleed}|${s.cornerFill}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const img = await loadImage(slot.image);
@@ -15,14 +16,7 @@ async function prepareImage(slot: Slot, s: ProxySettings, cache: Map<string, str
   let sy = 0;
   let sw = img.naturalWidth;
   let sh = img.naturalHeight;
-  if (slot.trimBleed && s.trimBleed) {
-    const bx = sw * (0.125 / 2.75);
-    const by = sh * (0.125 / 3.75);
-    sx = bx;
-    sy = by;
-    sw -= 2 * bx;
-    sh -= 2 * by;
-  }
+  if (slot.trimBleed) [sx, sy, sw, sh] = bleedSourceRect(sw, sh);
   const W = Math.round(CARD_W * PX_PER_MM);
   const H = Math.round(CARD_H * PX_PER_MM);
   const c = document.createElement('canvas');

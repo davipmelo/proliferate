@@ -406,3 +406,22 @@ input[type='color'] { width: 36px; height: 30px; border: var(--border-width) sol
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ===== Sangria do MPCFill =====
+ * Artes do MPCFill (hospedadas no Google Drive) vêm com 1/8" de sangria em cada lado
+ * (imagem de 2,75" × 3,75" para uma carta de 2,5" × 3,5"). Em todas as telas mostramos só
+ * a carta: recorta a sangria (clip-path) e amplia o resto para ocupar a mesma caixa.
+ * Usa `scale` (não `transform`) para não brigar com efeitos de hover. Capas de deck, folhas A4
+ * (que recortam por conta própria) e imagens com `.no-trim` ficam de fora. */
+:where(img[src*="googleusercontent.com/d/"], img[src*="drive.google.com"]):not(:where(.a4 img, .no-trim, .deck-row-art img, .deck-cover img, .deck-hero-cover img, .cover-pv-box img, .crop-stage img, .poster-preview img)) {
+  aspect-ratio: 63 / 88;
+  object-fit: fill !important;
+  scale: 1.1 1.071428;
+  clip-path: inset(3.3333% 4.5455% round 4.318% / 3.267%);
+}
+/* O clip-path corta o box-shadow da própria imagem: a sombra passa para o contêiner. */
+.card-preview:has(> img[src*="googleusercontent.com/d/"]),
+.art-compare > .col:has(> img[src*="googleusercontent.com/d/"]),
+.hand-card-img:has(> img[src*="googleusercontent.com/d/"]) {
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.55));
+}

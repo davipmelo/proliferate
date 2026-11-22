@@ -230,7 +230,6 @@ export interface ProxySettings {
   crossScope: 'all' | 'outer' | 'inner';
   cornerFill: 'black' | 'white' | 'none';
   footer: boolean;
-  trimBleed: boolean;
 }
 
 export interface Preferences {
