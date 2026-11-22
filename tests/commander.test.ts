@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { canBeCommander, hasPartner } from '../src/types/cardRules.ts';
-import { assignCommanders, canPair, detectCommanderFromList } from '../src/components/decks/deckBuild.ts';
+import { assignCommanders, buildDeckCards, canPair, detectCommanderFromList } from '../src/components/decks/deckBuild.ts';
 import { parseDeckList } from '../src/services/importParser.ts';
 
 const card = (name: string, typeLine: string, oracleText = '') => ({ id: name, name, typeLine, oracleText, cmc: 0, colors: [], colorIdentity: [], images: {} });
@@ -78,4 +78,28 @@ test('canPair cobre Background e Partner with', () => {
 test('parseDeckList reconhece marcas *CMDR* e [Commander]', () => {
   const p = parseDeckList('1 Sol Ring\n1 Atraxa, Praetors\' Voice *CMDR*\n1 Thrasios [Commander{top}]');
   assert.deepEqual(p.entries.map((e) => [e.name, e.section]), [['Sol Ring', 'main'], ["Atraxa, Praetors' Voice", 'commander'], ['Thrasios', 'commander']]);
+});
+
+test('buildDeckCards mantém as artes já escolhidas, cópia a cópia', () => {
+  const art = (id: string, name: string) => ({ ...card(name, 'Basic Land'), id });
+  const existing = [
+    { instanceId: 'f1', card: art('forest-a', 'Forest'), quantity: 1, category: 'main' },
+    { instanceId: 'f2', card: art('forest-b', 'Forest'), quantity: 1, category: 'main' },
+    { instanceId: 's1', card: art('sol-mpc', 'Sol Ring'), quantity: 1, category: 'main', isFoil: true },
+  ] as any[];
+  const listed = (c: ReturnType<typeof card>, quantity: number, set?: string) => ({ card: c, entry: { name: c.name, quantity, section: 'main', line: 1, set } }) as any;
+  const resolved = [listed(art('forest-new', 'Forest'), 3), listed(art('sol-c21', 'Sol Ring'), 1, 'c21'), listed(art('bolt', 'Lightning Bolt'), 1)];
+
+  const kept = buildDeckCards(resolved, existing, { keepArts: true });
+  assert.ok(kept.every((c) => c.quantity === 1));
+  assert.deepEqual(kept.filter((c) => c.card.name === 'Forest').map((c) => c.card.id), ['forest-a', 'forest-b', 'forest-b'], 'cópia extra sem edição usa uma arte existente');
+  assert.deepEqual(kept.filter((c) => c.card.name === 'Forest').slice(0, 2).map((c) => c.instanceId), ['f1', 'f2']);
+  const sol = kept.find((c) => c.card.name === 'Sol Ring')!;
+  assert.equal(sol.card.id, 'sol-mpc', 'mantém a arte mesmo com edição na lista');
+  assert.equal(sol.isFoil, true);
+  assert.equal(kept.find((c) => c.card.name === 'Lightning Bolt')?.card.id, 'bolt');
+
+  const fresh = buildDeckCards(resolved, existing, { keepArts: false });
+  assert.deepEqual([...new Set(fresh.map((c) => c.card.id))], ['forest-new', 'sol-c21', 'bolt']);
+  assert.equal(fresh.length, 5);
 });

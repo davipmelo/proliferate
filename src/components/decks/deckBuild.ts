@@ -4,26 +4,37 @@ import { uid } from '../../services/normalize.ts';
 import type { ResolvedEntry } from '../../services/importer.ts';
 
 /**
- * Monta as cartas do deck a partir de entradas resolvidas, reaproveitando a arte e o vínculo
- * com a coleção de cartas já existentes (quando a lista não especifica a edição).
+ * Monta as cartas do deck (uma entrada por cópia) a partir de entradas resolvidas.
+ *
+ * Com `keepArts`, cada cópia da nova lista reaproveita, uma a uma, as cópias que o deck já tinha
+ * com o mesmo nome (arte, foil e id), mesmo que a lista indique outra edição — a mesma categoria
+ * tem preferência. Cópias novas além das existentes usam a arte da lista (ou, se a linha não
+ * indicar edição, a arte de uma cópia já existente). Sem `keepArts`, vale a arte da lista.
  */
-export function buildDeckCards(resolved: ResolvedEntry[], existing: DeckCard[] = []): DeckCard[] {
+export function buildDeckCards(resolved: ResolvedEntry[], existing: DeckCard[] = [], opts: { keepArts?: boolean } = {}): DeckCard[] {
+  const keepArts = opts.keepArts ?? true;
+  const pool = keepArts ? existing.filter((e) => e.category !== 'commander' && e.category !== 'partner').flatMap((e) => Array.from({ length: Math.max(1, e.quantity) }, () => e)) : [];
+  const take = (name: string, category: DeckCategory): DeckCard | undefined => {
+    let i = pool.findIndex((e) => e.category === category && namesMatch(e.card.name, name));
+    if (i < 0) i = pool.findIndex((e) => namesMatch(e.card.name, name));
+    return i >= 0 ? pool.splice(i, 1)[0] : undefined;
+  };
+  const usedIds = new Set<string>();
   const out: DeckCard[] = [];
   for (const r of resolved) {
     if (r.entry.section === 'token') continue;
     const category = r.entry.section as DeckCategory;
-    const prev = !r.entry.set ? existing.find((e) => namesMatch(e.card.name, r.card.name)) : undefined;
-    const card: Card = prev?.card ?? r.card;
-    const same = out.find((o) => o.card.id === card.id && o.category === category && !!o.isFoil === !!r.entry.foil);
-    if (same) same.quantity += r.entry.quantity;
-    else
-      out.push({
-        instanceId: uid('dc'),
-        card,
-        quantity: r.entry.quantity,
-        category,
-        isFoil: r.entry.foil || prev?.isFoil || undefined,
-      });
+    let last: DeckCard | undefined;
+    for (let n = 0; n < r.entry.quantity; n++) {
+      const prev = take(r.card.name, category);
+      if (prev) last = prev;
+      const fallback = keepArts && !r.entry.set ? last ?? existing.find((e) => namesMatch(e.card.name, r.card.name)) : undefined;
+      const src = prev ?? fallback;
+      const card: Card = src?.card ?? r.card;
+      const instanceId = prev && !usedIds.has(prev.instanceId) ? prev.instanceId : uid('dc');
+      usedIds.add(instanceId);
+      out.push({ instanceId, card, quantity: 1, category, isFoil: r.entry.foil || src?.isFoil || undefined });
+    }
   }
   return out;
 }

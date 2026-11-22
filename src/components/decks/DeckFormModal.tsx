@@ -12,6 +12,7 @@ import { Modal } from '../common/Modal.tsx';
 import { CommanderPicker } from './CommanderPicker.tsx';
 import { assignCommanders, buildDeckCards } from './deckBuild.ts';
 import { TagSelect } from './TagSelect.tsx';
+import { usePersistent } from '../common/hooks.ts';
 
 interface Props {
   deck?: Deck;
@@ -36,6 +37,7 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
   const initialList = useMemo(() => (deck ? listText(deck) : ''), [deck]);
   const [list, setList] = useState(initialList);
   const [busy, setBusy] = useState<string | null>(null);
+  const [keepArts, setKeepArts] = usePersistent<boolean>('deck-edit-keep-arts', true);
   const info = formatInfo(format);
   const preview = useMemo(() => (list.trim() ? parseDeckList(list) : null), [list]);
 
@@ -59,7 +61,7 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
           }
           cmd = asg.commander;
           ptn = asg.partner;
-          cards = buildDeckCards(asg.rest, deck?.cards ?? []);
+          cards = buildDeckCards(asg.rest, deck?.cards ?? [], { keepArts: !!deck && keepArts });
         } catch (e: any) {
           setBusy(null);
           return toast(e?.message ?? 'Falha ao ler a lista.', 'error');
@@ -135,6 +137,11 @@ export function DeckFormModal({ deck, onClose, onSaved }: Props) {
           Formato “Qtd Nome (SET) NUM”. Aceita Arena, Moxfield, LigaMagic e nomes em português. Seções: Commander, Deck, Sideboard, Maybeboard.
           {preview && ` · ${preview.entries.reduce((s, e) => s + e.quantity, 0)} cartas reconhecidas${preview.errors.length ? `, ${preview.errors.length} linha(s) ignorada(s)` : ''}`}
         </span>
+        {deck && (
+          <label className="check" style={{ marginTop: 6 }} title="Cartas que continuarem na lista mantêm a arte que você já escolheu, mesmo que a linha indique outra edição.">
+            <input type="checkbox" checked={keepArts} onChange={(e) => setKeepArts(e.target.checked)} /> Manter as artes já escolhidas das cartas que continuarem na lista
+          </label>
+        )}
       </div>
     </Modal>
   );
