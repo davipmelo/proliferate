@@ -69,6 +69,8 @@ if (process.argv.includes('--review')) {
     const m = out[t.slug];
     return `| ${t.name} | ${m?.count ?? '—'} | ${m?.artCard ?? '—'} | \`${t.query.replace(/\|/g, '\\|')}\` |`;
   };
+  // Maior número de commanders primeiro.
+  const byCount = (l: ExploreTheme[]) => [...l].sort((a, b) => (out[b.slug]?.count ?? -1) - (out[a.slug]?.count ?? -1) || a.name.localeCompare(b.name));
   const kept = TRIBES.filter((t) => (out[t.slug]?.count ?? 0) >= MIN_TRIBE_COMMANDERS);
   const dropped = TRIBES.filter((t) => (out[t.slug]?.count ?? 0) < MIN_TRIBE_COMMANDERS);
   const head = '| Nome | Commanders | Mais popular (capa) | Busca no Scryfall |\n|---|---:|---|---|';
@@ -80,17 +82,17 @@ if (process.argv.includes('--review')) {
     `## Temas (${THEMES.length})`,
     '',
     head,
-    ...THEMES.map(row),
+    ...byCount(THEMES).map(row),
     '',
     `## Tribos na grade (${kept.length}, mínimo de ${MIN_TRIBE_COMMANDERS} commanders)`,
     '',
     head,
-    ...kept.map(row),
+    ...byCount(kept).map(row),
     '',
     `## Tribos fora da grade (${dropped.length})`,
     '',
     head,
-    ...dropped.map(row),
+    ...byCount(dropped).map(row),
     '',
   ].join('\n');
   writeFileSync(new URL('../explore-review.md', import.meta.url), md);
