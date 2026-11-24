@@ -126,7 +126,8 @@ function CommanderBrowser({ themes }: { themes: CatalogItem[] }) {
   const activeCount = [colors.length > 0, !!cmc, !!maxPrice, !!era, partner, backgrounds, !!extra].filter(Boolean).length;
   const clearFilters = () => navigate(themesPath(slugs) + (sort !== 'popular' ? `?sort=${sort}` : ''), { replace: true });
 
-  const others = useMemo(() => CATALOG.filter((t) => !slugs.includes(t.slug)), [slugs.join('/')]); // eslint-disable-line react-hooks/exhaustive-deps
+  // No menu "Combinar com…" a ordem alfabética facilita achar pelo nome.
+  const others = useMemo(() => CATALOG.filter((t) => !slugs.includes(t.slug)).sort((a, b) => a.name.localeCompare(b.name, 'en')), [slugs.join('/')]); // eslint-disable-line react-hooks/exhaustive-deps
   const addTheme = (slug: string) => slug && navigate(themesPath([...slugs, slug]) + window.location.search);
   const removeTheme = (slug: string) => {
     const next = slugs.filter((s) => s !== slug);
