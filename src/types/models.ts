@@ -250,4 +250,4 @@ export interface Preferences {
 
 export type DeckGroupMode = 'none' | 'type' | 'cmc';
 
-export type TabId = 'decks' | 'collection' | 'utilities' | 'proxies';
+export type TabId = 'decks' | 'collection' | 'explore' | 'utilities' | 'proxies';

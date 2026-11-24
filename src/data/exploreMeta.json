@@ -1,0 +1,1305 @@
+{
+ "generatedAt": "2026-11-24",
+ "items": {
+  "plus-1-counters": {
+   "count": 707,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e81eddc2-8311-4618-849d-3717cdf83681.jpg?1783908624",
+   "artCard": "Rishkar, Peema Renegade"
+  },
+  "minus-1-counters": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1783918469",
+   "artCard": "Yawgmoth, Thran Physician"
+  },
+  "adventures": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/f/e/fe604232-19da-4331-a6f2-ddb004f1dd90.jpg?1783922690",
+   "artCard": "Lozhan, Dragons' Legacy"
+  },
+  "affinity": {
+   "count": 21,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c977d89a-bfd1-4e98-9d95-3e41c53dd188.jpg?1783906044",
+   "artCard": "Emry, Lurker of the Loch"
+  },
+  "airbending": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/8/2/829d91e9-4878-4e55-a262-ac0d55b65d4e.jpg?1783905005",
+   "artCard": "Appa, Steadfast Guardian"
+  },
+  "amass": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/0/3/034e0929-b2c7-4b5f-94f2-8eaf4fb1a2a1.jpg?1783916249",
+   "artCard": "Sauron, the Dark Lord"
+  },
+  "anthems": {
+   "count": 120,
+   "art": "https://cards.scryfall.io/art_crop/front/4/7/4736a2c4-c89c-48db-a104-6303e7e2eee8.jpg?1783915646",
+   "artCard": "Purphoros, God of the Forge"
+  },
+  "aristocrats": {
+   "count": 167,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "artifacts": {
+   "count": 105,
+   "art": "https://cards.scryfall.io/art_crop/front/7/b/7b7a348a-51f7-4dc5-8fe7-1c70fea5e050.jpg?1783915686",
+   "artCard": "Urza, Lord High Artificer"
+  },
+  "attack-triggers": {
+   "count": 569,
+   "art": "https://cards.scryfall.io/art_crop/front/b/6/b6af9894-95b5-4c8e-902f-a9ba70f02e4a.jpg?1783909067",
+   "artCard": "Etali, Primal Storm"
+  },
+  "attractions": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/5/e/5e57baea-00ee-49dc-80ce-a8c11a67a6db.jpg?1783920538",
+   "artCard": "Myra the Magnificent"
+  },
+  "auras": {
+   "count": 49,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fbd18ce-0ac3-4b52-9cd0-0af7e0244207.jpg?1783903797",
+   "artCard": "Sram, Senior Edificer"
+  },
+  "birthing-pod": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/8/4/84abfc59-10a7-4cb5-9cdd-81797116c810.jpg?1783933641",
+   "artCard": "Prime Speaker Vannifar"
+  },
+  "blink": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/c/8/c83ed3e0-82d0-4410-a6ca-b0f923eadf83.jpg?1783931576",
+   "artCard": "Thassa, Deep-Dwelling"
+  },
+  "blood": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/6/2/625b8023-2ef1-4b7b-9e48-4f774fee14e0.jpg?1783924790",
+   "artCard": "Old Rutstein"
+  },
+  "bounce": {
+   "count": 84,
+   "art": "https://cards.scryfall.io/art_crop/front/3/c/3c35ca79-eb72-427a-a8ed-404b2214389a.jpg?1783931034",
+   "artCard": "Kogla, the Titan Ape"
+  },
+  "burn": {
+   "count": 78,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "card-draw": {
+   "count": 66,
+   "art": "https://cards.scryfall.io/art_crop/front/d/6/d67be074-cdd4-41d9-ac89-0a0456c4e4b2.jpg?1783921327",
+   "artCard": "Sheoldred, the Apocalypse"
+  },
+  "cascade": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/5/6/5685b28a-b943-4143-b9ed-4796c1ffbf9c.jpg?1783904536",
+   "artCard": "Maelstrom Wanderer"
+  },
+  "charge-counters": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/4/6/46900ec7-eb18-45c4-8e90-a48b665cfdee.jpg?1783906067",
+   "artCard": "Inspirit, Flagship Vessel"
+  },
+  "clones": {
+   "count": 60,
+   "art": "https://cards.scryfall.io/art_crop/front/7/1/714c3a1f-7b30-4ed8-8f38-6176758741fb.jpg?1783928853",
+   "artCard": "Sakashima of a Thousand Faces"
+  },
+  "clues": {
+   "count": 20,
+   "art": "https://cards.scryfall.io/art_crop/front/e/7/e786423d-3a49-4318-ac77-791918bcafcb.jpg?1783912977",
+   "artCard": "Lonis, Cryptozoologist"
+  },
+  "coin-flip": {
+   "count": 13,
+   "art": "https://cards.scryfall.io/art_crop/front/4/3/438d8a26-ddc9-4829-8aff-22d6af6575cf.jpg?1783911228",
+   "artCard": "Ral, Monsoon Mage // Ral, Leyline Prodigy"
+  },
+  "commander-matters": {
+   "count": 119,
+   "art": "https://cards.scryfall.io/art_crop/front/7/c/7cb9d4a0-66bd-454d-b676-80192a96c723.jpg?1783915656",
+   "artCard": "Daretti, Scrap Savant"
+  },
+  "connive": {
+   "count": 21,
+   "art": "https://cards.scryfall.io/art_crop/front/7/1/716a44b4-f6b0-4f14-a270-6442aed3251f.jpg?1783923074",
+   "artCard": "Raffine, Scheming Seer"
+  },
+  "convoke": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/9/0/90645549-20f1-4fe9-8363-7f67c20fa3b6.jpg?1783913033",
+   "artCard": "Bennie Bracks, Zoologist"
+  },
+  "counters-matter": {
+   "count": 26,
+   "art": "https://cards.scryfall.io/art_crop/front/9/2/92613468-205e-488b-930d-11908477e9f8.jpg?1783928202",
+   "artCard": "Vorinclex, Monstrous Raider"
+  },
+  "counterspells": {
+   "count": 9,
+   "art": "https://cards.scryfall.io/art_crop/front/c/4/c41554e7-2a07-4cc7-b01b-44deed08e588.jpg?1783915732",
+   "artCard": "Kozilek, the Great Distortion"
+  },
+  "crime": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/4443d112-209b-49ec-bc40-3a11dcdb092e.jpg?1783911819",
+   "artCard": "Magda, the Hoardmaster"
+  },
+  "curses": {
+   "count": 3,
+   "art": "https://cards.scryfall.io/art_crop/front/6/a/6add5d2a-950e-4bee-9850-e68f5f6d6142.jpg?1783905326",
+   "artCard": "Lizard, Connors's Curse"
+  },
+  "cycling": {
+   "count": 13,
+   "art": "https://cards.scryfall.io/art_crop/front/2/a/2a3fcfdc-f2cf-42d8-8bb4-7308bc12746e.jpg?1783916023",
+   "artCard": "The Balrog of Moria"
+  },
+  "deathtouch": {
+   "count": 38,
+   "art": "https://cards.scryfall.io/art_crop/front/8/0/8050afb7-3c16-4456-aa34-4cc999fac7f5.jpg?1783912987",
+   "artCard": "Saryth, the Viper's Fang"
+  },
+  "defenders": {
+   "count": 19,
+   "art": "https://cards.scryfall.io/art_crop/front/2/4/24a14ac5-0b7e-4441-9963-782a7cda3f4a.jpg?1783904915",
+   "artCard": "The Walls of Ba Sing Se"
+  },
+  "delirium": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/d/c/dcf3b17b-f2f6-4702-864d-8c96100b0563.jpg?1783909437",
+   "artCard": "The Swarmweaver"
+  },
+  "deserts": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/3/7/37dd84b4-0b8d-4303-8405-45e2c144f691.jpg?1783911900",
+   "artCard": "Hazezon, Shaper of Sand"
+  },
+  "devotion": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/4/7/4736a2c4-c89c-48db-a104-6303e7e2eee8.jpg?1783915646",
+   "artCard": "Purphoros, God of the Forge"
+  },
+  "die-roll": {
+   "count": 13,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e87459aa-af8f-4bd2-a310-151353083a2e.jpg?1783926480",
+   "artCard": "Delina, Wild Mage"
+  },
+  "discard": {
+   "count": 27,
+   "art": "https://cards.scryfall.io/art_crop/front/e/9/e9ff50c0-915e-4055-a595-3df6be8f1e1b.jpg?1783907091",
+   "artCard": "Junji, the Midnight Sky"
+  },
+  "discover": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/2/5/2524645e-b066-4351-885b-10faa8d819d7.jpg?1783913937",
+   "artCard": "Pantlaza, Sun-Favored"
+  },
+  "donate": {
+   "count": 9,
+   "art": "https://cards.scryfall.io/art_crop/front/8/e/8e2fac8c-a574-4414-ac68-632fc822ddbb.jpg?1783912412",
+   "artCard": "Yes Man, Personal Securitron"
+  },
+  "dredge": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fcf68cf-0dac-4b29-90d5-c18c685182e6.jpg?1783911249",
+   "artCard": "The Necrobloom"
+  },
+  "dungeon": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/d/d/dd52d0bd-3abd-401c-9f56-ee911613da3b.jpg?1783926501",
+   "artCard": "Acererak the Archlich"
+  },
+  "earthbending": {
+   "count": 13,
+   "art": "https://cards.scryfall.io/art_crop/front/e/3/e3ba3395-39db-4330-9801-53def924f253.jpg?1783904919",
+   "artCard": "Toph, Hardheaded Teacher"
+  },
+  "enchantress": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/8/9/89511ab5-8ea6-4f07-a80b-c1ec7e89924e.jpg?1783915411",
+   "artCard": "Sythis, Harvest's Hand"
+  },
+  "energy": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/3/b/3b964bbe-54cc-425c-9cc6-c877f82af7ba.jpg?1783911437",
+   "artCard": "Satya, Aetherflux Genius"
+  },
+  "enrage": {
+   "count": 18,
+   "art": "https://cards.scryfall.io/art_crop/front/2/b/2bc79ed6-057b-439f-b2cd-58d5bcd8b551.jpg?1783912395",
+   "artCard": "Strong, the Brutish Thespian"
+  },
+  "equipment": {
+   "count": 115,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fbd18ce-0ac3-4b52-9cd0-0af7e0244207.jpg?1783903797",
+   "artCard": "Sram, Senior Edificer"
+  },
+  "etb": {
+   "count": 47,
+   "art": "https://cards.scryfall.io/art_crop/front/8/1/812856be-cf51-42de-96d2-4ac91e71d442.jpg?1783904541",
+   "artCard": "Selvala, Heart of the Wilds"
+  },
+  "evoke": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/5/9/5924c01f-2815-4e37-b700-3ba6cc81e0e4.jpg?1783904607",
+   "artCard": "Ashling, the Limitless"
+  },
+  "exalted": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/e/b/ebdd967d-b364-47ad-a1c2-49b155f72c5b.jpg?1783915611",
+   "artCard": "Rafiq of the Many"
+  },
+  "exile": {
+   "count": 69,
+   "art": "https://cards.scryfall.io/art_crop/front/f/d/fd00d56a-86bd-41d8-82b6-975404ef8067.jpg?1783911305",
+   "artCard": "Ulamog, the Defiler"
+  },
+  "experience-counters": {
+   "count": 17,
+   "art": "https://cards.scryfall.io/art_crop/front/5/0/508b1442-bf2c-4ad6-9bcf-bd894e081ab6.jpg?1783907026",
+   "artCard": "Meren of Clan Nel Toth"
+  },
+  "explore": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/e/7/e738e675-4fd1-4bc3-97f5-71d0e2fc3f2e.jpg?1783913937",
+   "artCard": "Hakbal of the Surging Soul"
+  },
+  "extra-combats": {
+   "count": 15,
+   "art": "https://cards.scryfall.io/art_crop/front/b/c/bc6ffc1c-575b-4116-83c9-d13b29886c35.jpg?1783908915",
+   "artCard": "Aurelia, the Warleader"
+  },
+  "extra-turns": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/7/1/71911392-42b0-4b6d-baf7-918a4bd3b924.jpg?1783908188",
+   "artCard": "Emrakul, the Promised End"
+  },
+  "fight": {
+   "count": 25,
+   "art": "https://cards.scryfall.io/art_crop/front/3/c/3c35ca79-eb72-427a-a8ed-404b2214389a.jpg?1783931034",
+   "artCard": "Kogla, the Titan Ape"
+  },
+  "firebending": {
+   "count": 17,
+   "art": "https://cards.scryfall.io/art_crop/front/b/c/bc6146bf-f0c6-4557-af6a-74c643d5fc01.jpg?1783904927",
+   "artCard": "Fire Lord Azula"
+  },
+  "flash": {
+   "count": 24,
+   "art": "https://cards.scryfall.io/art_crop/front/c/3/c31e6768-bcab-43c4-bfc1-76e961689ae9.jpg?1783920018",
+   "artCard": "Liberator, Urza's Battlethopter"
+  },
+  "flashback": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/b/8/b8b70585-e0ea-4cb4-9360-a8ab47626696.jpg?1783907103",
+   "artCard": "Lier, Disciple of the Drowned"
+  },
+  "flying": {
+   "count": 108,
+   "art": "https://cards.scryfall.io/art_crop/front/7/2/729ee848-6c27-4202-b2bc-605f45209468.jpg?1783915714",
+   "artCard": "Sephara, Sky's Blade"
+  },
+  "food": {
+   "count": 71,
+   "art": "https://cards.scryfall.io/art_crop/front/f/5/f5baee8d-88e7-4468-94a9-66ca8e2caf15.jpg?1783916263",
+   "artCard": "Peregrin Took"
+  },
+  "forced-combat": {
+   "count": 49,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e82e61d1-488d-4627-a54c-d8496a967814.jpg?1783912984",
+   "artCard": "Toski, Bearer of Secrets"
+  },
+  "foretell": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/6/e/6e779a16-7528-49f4-8304-502bb603c15b.jpg?1783906765",
+   "artCard": "Bohn, Beguiling Balladeer"
+  },
+  "go-wide": {
+   "count": 32,
+   "art": "https://cards.scryfall.io/art_crop/front/1/d/1de30c12-2011-495a-be25-f7a46b23e142.jpg?1783907131",
+   "artCard": "Adeline, Resplendent Cathar"
+  },
+  "graveyard": {
+   "count": 467,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f9246b68-580f-4f53-883d-7900880e4b0d.jpg?1783911256",
+   "artCard": "Six"
+  },
+  "group-hug": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/2/8/28c1b84a-a21b-4df1-9fc9-5b387fb56810.jpg?1786381273",
+   "artCard": "Selvala, Explorer Returned"
+  },
+  "group-slug": {
+   "count": 60,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f96223d0-04c4-40c2-87a9-0c6bc74adddb.jpg?1783906041",
+   "artCard": "Braids, Arisen Nightmare"
+  },
+  "guildgates": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f90eb8ef-ad70-4d6c-9958-e6153f8599bc.jpg?1783906373",
+   "artCard": "G'raha Tia, Scion Reborn"
+  },
+  "hand-size": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a959b40d-dd8c-49d8-8003-744d0c877b04.jpg?1783928719",
+   "artCard": "Nezahal, Primal Tide"
+  },
+  "haste": {
+   "count": 116,
+   "art": "https://cards.scryfall.io/art_crop/front/6/f/6f1bc3bb-46da-492a-850c-f1f588ad8d18.jpg?1783913842",
+   "artCard": "Xenagos, God of Revels"
+  },
+  "historic": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/7/7/776f490a-2f75-4c18-8164-56bd65bb09c6.jpg?1783906028",
+   "artCard": "Jhoira, Weatherlight Captain"
+  },
+  "impulse-draw": {
+   "count": 71,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1791803835",
+   "artCard": "Ragavan, Nimble Pilferer"
+  },
+  "indestructible": {
+   "count": 81,
+   "art": "https://cards.scryfall.io/art_crop/front/7/4/74e5dcec-ef1d-4461-bb23-61d98ff082dd.jpg?1783907976",
+   "artCard": "Avacyn, Angel of Hope"
+  },
+  "infect": {
+   "count": 20,
+   "art": "https://cards.scryfall.io/art_crop/front/9/5/95c14c4d-6c16-4826-8d93-d89ad04aee09.jpg?1783916997",
+   "artCard": "Etali, Primal Conqueror // Etali, Primal Sickness"
+  },
+  "land-animation": {
+   "count": 9,
+   "art": "https://cards.scryfall.io/art_crop/front/7/3/732c208b-cd9e-48a9-9b9d-aba63066ba53.jpg?1783906029",
+   "artCard": "Titania, Protector of Argoth"
+  },
+  "land-destruction": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/4/0/40489e28-878d-44a2-847f-07beef1aa0f8.jpg?1783906028",
+   "artCard": "The Gitrog Monster"
+  },
+  "landfall": {
+   "count": 56,
+   "art": "https://cards.scryfall.io/art_crop/front/e/a/eabc978a-0666-472d-bdc6-d4b29d29eca4.jpg?1783909051",
+   "artCard": "Tatyova, Benthic Druid"
+  },
+  "lands-matter": {
+   "count": 292,
+   "art": "https://cards.scryfall.io/art_crop/front/e/a/eabc978a-0666-472d-bdc6-d4b29d29eca4.jpg?1783909051",
+   "artCard": "Tatyova, Benthic Druid"
+  },
+  "legends": {
+   "count": 86,
+   "art": "https://cards.scryfall.io/art_crop/front/a/2/a2ff0ee3-9600-4c7d-acec-6ec90595384e.jpg?1783935527",
+   "artCard": "Kiki-Jiki, Mirror Breaker"
+  },
+  "lessons": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/e/3/e3ba3395-39db-4330-9801-53def924f253.jpg?1783904919",
+   "artCard": "Toph, Hardheaded Teacher"
+  },
+  "lifedrain": {
+   "count": 39,
+   "art": "https://cards.scryfall.io/art_crop/front/e/d/ed0ace28-9a33-4f0d-b8c8-f5517f20ccf1.jpg?1783932644",
+   "artCard": "Ayara, First of Locthwain"
+  },
+  "lifegain": {
+   "count": 252,
+   "art": "https://cards.scryfall.io/art_crop/front/5/d/5deb74ff-15df-4894-b074-9a98731bd2c0.jpg?1783908850",
+   "artCard": "Vito, Thorn of the Dusk Rose"
+  },
+  "looting": {
+   "count": 44,
+   "art": "https://cards.scryfall.io/art_crop/front/1/9/19d6834d-afa3-4747-a62d-0654f4d9729f.jpg?1783913793",
+   "artCard": "Malcolm, Alluring Scoundrel"
+  },
+  "madness": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/b/9/b914bfd9-5be3-4459-a68a-9b3ea2747bbc.jpg?1783911308",
+   "artCard": "Emrakul, the World Anew"
+  },
+  "mill": {
+   "count": 24,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "modified-creatures": {
+   "count": 14,
+   "art": "https://cards.scryfall.io/art_crop/front/a/4/a4f53a56-eb8e-44cd-ab13-8ac068052c68.jpg?1783908846",
+   "artCard": "Kodama of the West Tree"
+  },
+  "monarch": {
+   "count": 18,
+   "art": "https://cards.scryfall.io/art_crop/front/0/f/0fdae05f-7bdc-45fb-b9b9-e5ec3766f965.jpg?1783911896",
+   "artCard": "Queen Marchesa"
+  },
+  "morph": {
+   "count": 50,
+   "art": "https://cards.scryfall.io/art_crop/front/d/c/dcc50ba7-c4be-4c20-a1fc-466194aab7c2.jpg?1783903241",
+   "artCard": "Chameleon, Master of Disguise"
+  },
+  "multicolor-matters": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/6/0/600dca0f-5964-45e7-86df-f16a5b4a0106.jpg?1783926816",
+   "artCard": "General Ferrous Rokiric"
+  },
+  "mutate": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/0/4/04b9b58f-4c01-48a5-afaf-b8a37165a83f.jpg?1783921407",
+   "artCard": "Nethroi, Apex of Death"
+  },
+  "myriad": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/7/f/7f734ca0-91bc-4496-9bd7-2d09415e850f.jpg?1783914628",
+   "artCard": "The Master, Multiplied"
+  },
+  "ninjutsu": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/1/e/1e62de3b-6a41-43e3-93ad-9a1e3894be3b.jpg?1783911927",
+   "artCard": "Nashi, Moon Sage's Scion"
+  },
+  "outlaws": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/a/f/af0b3a41-ba99-41e8-bcfb-5796500c17c7.jpg?1783911791",
+   "artCard": "Laughing Jasper Flint"
+  },
+  "party": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/8/9/899e278d-5d4e-461a-9878-2b85de16b38d.jpg?1783922517",
+   "artCard": "Burakos, Party Leader"
+  },
+  "pillow-fort": {
+   "count": 14,
+   "art": "https://cards.scryfall.io/art_crop/front/9/1/91bbe20b-0d39-46fc-a09a-fc8c676f1fe7.jpg?1783915726",
+   "artCard": "Baird, Steward of Argive"
+  },
+  "pingers": {
+   "count": 59,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "planeswalkers": {
+   "count": 138,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f96223d0-04c4-40c2-87a9-0c6bc74adddb.jpg?1783906041",
+   "artCard": "Braids, Arisen Nightmare"
+  },
+  "populate": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/3/4/34ea44f2-cb2f-4b86-83fc-fe507f05bb9d.jpg?1783932732",
+   "artCard": "Trostani, Selesnya's Voice"
+  },
+  "proliferate": {
+   "count": 18,
+   "art": "https://cards.scryfall.io/art_crop/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1783918469",
+   "artCard": "Yawgmoth, Thran Physician"
+  },
+  "prowess": {
+   "count": 82,
+   "art": "https://cards.scryfall.io/art_crop/front/e/c/ecc1027a-8c07-44a0-bdde-fa2844cff694.jpg?1783906561",
+   "artCard": "Vivi Ornitier"
+  },
+  "rad-counters": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/c/f/cfb80c75-4b1b-4f25-923a-933855e7345c.jpg?1783904269",
+   "artCard": "The Wise Mothman"
+  },
+  "ramp": {
+   "count": 51,
+   "art": "https://cards.scryfall.io/art_crop/front/0/9/09980ce6-425b-4e03-94d0-0f02043cb361.jpg?1783909097",
+   "artCard": "Loot, Exuberant Explorer"
+  },
+  "reanimator": {
+   "count": 64,
+   "art": "https://cards.scryfall.io/art_crop/front/8/b/8b207a4a-47d1-4905-81d3-455c59bfd7da.jpg?1783930409",
+   "artCard": "Sheoldred, Whispering One"
+  },
+  "sacrifice": {
+   "count": 120,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f96223d0-04c4-40c2-87a9-0c6bc74adddb.jpg?1783906041",
+   "artCard": "Braids, Arisen Nightmare"
+  },
+  "sagas": {
+   "count": 22,
+   "art": "https://cards.scryfall.io/art_crop/front/7/1/712fb9e5-bd67-4173-a2d4-061aeb6253b5.jpg?1783916984",
+   "artCard": "Urabrask // The Great Work"
+  },
+  "scry": {
+   "count": 61,
+   "art": "https://cards.scryfall.io/art_crop/front/f/4/f4f414ef-84a2-4694-9e98-51bee4576c84.jpg?1783915611",
+   "artCard": "The Scarab God"
+  },
+  "self-damage": {
+   "count": 58,
+   "art": "https://cards.scryfall.io/art_crop/front/b/5/b5a79f5d-d0df-4799-ac3a-84305e3af0c9.jpg?1783918469",
+   "artCard": "Yawgmoth, Thran Physician"
+  },
+  "self-discard": {
+   "count": 45,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/44657ab1-0a6a-4a5f-9688-86f239083821.jpg?1783928241",
+   "artCard": "Birgi, God of Storytelling // Harnfel, Horn of Bounty"
+  },
+  "self-mill": {
+   "count": 55,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f9246b68-580f-4f53-883d-7900880e4b0d.jpg?1783911256",
+   "artCard": "Six"
+  },
+  "snow": {
+   "count": 9,
+   "art": "https://cards.scryfall.io/art_crop/front/2/2/22fdbe71-abca-4e48-99b2-1cb6b35d930b.jpg?1783928193",
+   "artCard": "Moritte of the Frost"
+  },
+  "speed": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/8/9/893254c7-64cc-4cb9-b79f-2c41a8935ea0.jpg?1783907900",
+   "artCard": "Vnwxt, Verbose Host"
+  },
+  "spell-copy": {
+   "count": 42,
+   "art": "https://cards.scryfall.io/art_crop/front/c/5/c57b4876-5387-4f73-b8e2-8e7bdca8b0bc.jpg?1783923901",
+   "artCard": "Jin-Gitaxias, Progress Tyrant"
+  },
+  "spellslinger": {
+   "count": 261,
+   "art": "https://cards.scryfall.io/art_crop/front/1/c/1cb06c70-7ff2-4c88-9931-1bfe8a3226d9.jpg?1783903742",
+   "artCard": "Veyran, Voice of Duality"
+  },
+  "stax": {
+   "count": 34,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c9f88a40-a6ed-4c1f-a309-011aca1acddd.jpg?1783913732",
+   "artCard": "Kutzil, Malamet Exemplar"
+  },
+  "stompy": {
+   "count": 58,
+   "art": "https://cards.scryfall.io/art_crop/front/8/1/812856be-cf51-42de-96d2-4ac91e71d442.jpg?1783904541",
+   "artCard": "Selvala, Heart of the Wilds"
+  },
+  "storm": {
+   "count": 33,
+   "art": "https://cards.scryfall.io/art_crop/front/c/e/ce01ff8f-a037-484f-9148-c847ffaabc5a.jpg?1783916251",
+   "artCard": "Lotho, Corrupt Shirriff"
+  },
+  "surveil": {
+   "count": 38,
+   "art": "https://cards.scryfall.io/art_crop/front/0/8/08c9bf6c-fc52-4565-96d1-951a314e59e5.jpg?1783906359",
+   "artCard": "Fandaniel, Telophoroi Ascian"
+  },
+  "suspend": {
+   "count": 19,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9d71007-bc04-4dff-ad3f-e2c0b5b4400e.jpg?1783913797",
+   "artCard": "Ojer Pakpatiq, Deepest Epoch // Temple of Cyclical Time"
+  },
+  "tap-untap": {
+   "count": 44,
+   "art": "https://cards.scryfall.io/art_crop/front/b/c/bc6ffc1c-575b-4116-83c9-d13b29886c35.jpg?1783908915",
+   "artCard": "Aurelia, the Warleader"
+  },
+  "the-ring": {
+   "count": 17,
+   "art": "https://cards.scryfall.io/art_crop/front/f/6/f6bc3720-2892-4dda-8f30-079a1ac8e1e2.jpg?1783916338",
+   "artCard": "Boromir, Warden of the Tower"
+  },
+  "theft": {
+   "count": 54,
+   "art": "https://cards.scryfall.io/art_crop/front/7/1/71911392-42b0-4b6d-baf7-918a4bd3b924.jpg?1783908188",
+   "artCard": "Emrakul, the Promised End"
+  },
+  "topdeck": {
+   "count": 108,
+   "art": "https://cards.scryfall.io/art_crop/front/d/8/d859de3a-0be1-4e66-b438-1c3d4ee756cd.jpg?1783923896",
+   "artCard": "The Reality Chip"
+  },
+  "toughness-matters": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/f/c/fc018483-69a7-4c4c-adfe-44071f53a7de.jpg?1783907130",
+   "artCard": "Baldin, Century Herdmaster"
+  },
+  "transform": {
+   "count": 83,
+   "art": "https://cards.scryfall.io/art_crop/front/9/5/95c14c4d-6c16-4826-8d93-d89ad04aee09.jpg?1783916997",
+   "artCard": "Etali, Primal Conqueror // Etali, Primal Sickness"
+  },
+  "treasure": {
+   "count": 125,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1791803835",
+   "artCard": "Ragavan, Nimble Pilferer"
+  },
+  "unblockable": {
+   "count": 114,
+   "art": "https://cards.scryfall.io/art_crop/front/b/e/be219928-3d0e-4d00-b124-152ce8a8c13b.jpg?1783912925",
+   "artCard": "Delney, Streetwise Lookout"
+  },
+  "vehicles": {
+   "count": 73,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fbd18ce-0ac3-4b52-9cd0-0af7e0244207.jpg?1783903797",
+   "artCard": "Sram, Senior Edificer"
+  },
+  "voltron": {
+   "count": 94,
+   "art": "https://cards.scryfall.io/art_crop/front/2/1/21b78c55-20cf-4a65-b50b-2f8093465646.jpg?1783908852",
+   "artCard": "Danitha Capashen, Paragon"
+  },
+  "voting": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/9/2/9235977e-a999-4ed0-83a3-742be87b13bb.jpg?1783923378",
+   "artCard": "Tivit, Seller of Secrets"
+  },
+  "waterbending": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/0/e/0ecd8b38-9ee5-41a5-9b93-21c33fc1a6ff.jpg?1783904980",
+   "artCard": "The Unagi of Kyoshi Island"
+  },
+  "wheels": {
+   "count": 14,
+   "art": "https://cards.scryfall.io/art_crop/front/9/a/9a069e96-2786-493d-aca8-f70611435dbe.jpg?1783906611",
+   "artCard": "Clive, Ifrit's Dominant // Ifrit, Warden of Inferno"
+  },
+  "x-spells": {
+   "count": 43,
+   "art": "https://cards.scryfall.io/art_crop/front/e/2/e20da6b5-1057-4a28-9e85-07de714e262f.jpg?1783904979",
+   "artCard": "Wan Shi Tong, Librarian"
+  },
+  "advisors": {
+   "count": 131,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fbd18ce-0ac3-4b52-9cd0-0af7e0244207.jpg?1783903797",
+   "artCard": "Sram, Senior Edificer"
+  },
+  "allies": {
+   "count": 81,
+   "art": "https://cards.scryfall.io/art_crop/front/0/8/0850b41d-3589-40cd-ae22-cc5b4ddee1c4.jpg?1783913874",
+   "artCard": "Drana, Liberator of Malakir"
+  },
+  "angels": {
+   "count": 84,
+   "art": "https://cards.scryfall.io/art_crop/front/7/4/74e5dcec-ef1d-4461-bb23-61d98ff082dd.jpg?1783907976",
+   "artCard": "Avacyn, Angel of Hope"
+  },
+  "apes": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/3/c/3c35ca79-eb72-427a-a8ed-404b2214389a.jpg?1783931034",
+   "artCard": "Kogla, the Titan Ape"
+  },
+  "archers": {
+   "count": 31,
+   "art": "https://cards.scryfall.io/art_crop/front/0/d/0dee197d-c313-4364-b52c-f83d5f579bc3.jpg?1783910796",
+   "artCard": "Finneas, Ace Archer"
+  },
+  "artificers": {
+   "count": 130,
+   "art": "https://cards.scryfall.io/art_crop/front/e/5/e58c2b2c-4206-4e9c-97c4-4b58baa554de.jpg?1793111849",
+   "artCard": "Loran of the Third Path"
+  },
+  "assassins": {
+   "count": 68,
+   "art": "https://cards.scryfall.io/art_crop/front/8/e/8ef53e5e-709c-4613-a5ab-6bf12961b2e1.jpg?1783904559",
+   "artCard": "Massacre Girl, Known Killer"
+  },
+  "astartes": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/c/2/c29e6c69-7830-4898-9d1e-97dfc2e868d9.jpg?1783920889",
+   "artCard": "Khârn the Betrayer"
+  },
+  "atogs": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/4/a/4a3e6eb5-6d0f-4f82-86f9-bbce8d27afbb.jpg?1783945206",
+   "artCard": "Atogatog"
+  },
+  "avatars": {
+   "count": 79,
+   "art": "https://cards.scryfall.io/art_crop/front/7/0/705b4d97-2f50-47f7-9053-d748f4337553.jpg?1783904538",
+   "artCard": "Muldrotha, the Gravetide"
+  },
+  "barbarians": {
+   "count": 20,
+   "art": "https://cards.scryfall.io/art_crop/front/7/7/775480ed-f574-40cb-bd9b-21102eaaff63.jpg?1783922734",
+   "artCard": "Karlach, Fury of Avernus"
+  },
+  "bards": {
+   "count": 35,
+   "art": "https://cards.scryfall.io/art_crop/front/3/1/31e4b7a1-b377-49d2-a92e-4bcb0db35f16.jpg?1783910738",
+   "artCard": "Bello, Bard of the Brambles"
+  },
+  "bats": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/6/2/627c392c-4d18-4eb2-a4e8-c668f61f5487.jpg?1783913789",
+   "artCard": "Aclazotz, Deepest Betrayal // Temple of the Dead"
+  },
+  "bears": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/e/e/ee47f23a-3ba9-4615-b170-c89d8ab99d78.jpg?1783915630",
+   "artCard": "Goreclaw, Terror of Qal Sisma"
+  },
+  "beasts": {
+   "count": 40,
+   "art": "https://cards.scryfall.io/art_crop/front/0/9/09980ce6-425b-4e03-94d0-0f02043cb361.jpg?1783909097",
+   "artCard": "Loot, Exuberant Explorer"
+  },
+  "berserkers": {
+   "count": 35,
+   "art": "https://cards.scryfall.io/art_crop/front/7/c/7c0f7712-7bbf-471b-8107-3a49cf922ad9.jpg?1783909592",
+   "artCard": "Kardur, Doomscourge"
+  },
+  "birds": {
+   "count": 73,
+   "art": "https://cards.scryfall.io/art_crop/front/e/2/e20da6b5-1057-4a28-9e85-07de714e262f.jpg?1783904979",
+   "artCard": "Wan Shi Tong, Librarian"
+  },
+  "cats": {
+   "count": 83,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c9f88a40-a6ed-4c1f-a309-011aca1acddd.jpg?1783913732",
+   "artCard": "Kutzil, Malamet Exemplar"
+  },
+  "cephalids": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/f/1/f17671ec-7ace-4a16-a135-4dfe21995c14.jpg?1783925954",
+   "artCard": "Khod, Etlan Shiis Envoy"
+  },
+  "clerics": {
+   "count": 138,
+   "art": "https://cards.scryfall.io/art_crop/front/5/d/5deb74ff-15df-4894-b074-9a98731bd2c0.jpg?1783908850",
+   "artCard": "Vito, Thorn of the Dusk Rose"
+  },
+  "constructs": {
+   "count": 26,
+   "art": "https://cards.scryfall.io/art_crop/front/7/b/7b7a348a-51f7-4dc5-8fe7-1c70fea5e050.jpg?1783915686",
+   "artCard": "Urza, Lord High Artificer"
+  },
+  "crabs": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e83a6804-1e3c-428c-af5e-1d56ba11c108.jpg?1783929402",
+   "artCard": "Charix, the Raging Isle"
+  },
+  "crocodiles": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/e/d/edb40ab9-e552-4eb5-9c35-09094136dd4f.jpg?1783912862",
+   "artCard": "The Pride of Hull Clade"
+  },
+  "daleks": {
+   "count": 3,
+   "art": "https://cards.scryfall.io/art_crop/front/5/9/59c5bd2b-cf68-4e5e-819d-53917a6c5275.jpg?1783914687",
+   "artCard": "Davros, Dalek Creator"
+  },
+  "demons": {
+   "count": 80,
+   "art": "https://cards.scryfall.io/art_crop/front/7/c/7c0f7712-7bbf-471b-8107-3a49cf922ad9.jpg?1783909592",
+   "artCard": "Kardur, Doomscourge"
+  },
+  "detectives": {
+   "count": 34,
+   "art": "https://cards.scryfall.io/art_crop/front/c/4/c49690c7-c282-4eb4-8da3-5e0c46a80fc4.jpg?1783912845",
+   "artCard": "Kellan, Inquisitive Prodigy // Tail the Suspect"
+  },
+  "devils": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/c/3/c3da2b1a-76c5-4d36-bdf8-025b86f61eb5.jpg?1783922689",
+   "artCard": "Mahadi, Emporium Master"
+  },
+  "dinosaurs": {
+   "count": 55,
+   "art": "https://cards.scryfall.io/art_crop/front/b/6/b6af9894-95b5-4c8e-902f-a9ba70f02e4a.jpg?1783909067",
+   "artCard": "Etali, Primal Storm"
+  },
+  "dogs": {
+   "count": 34,
+   "art": "https://cards.scryfall.io/art_crop/front/5/5/55707746-da6e-46e5-a5ca-7ac843fdc38e.jpg?1783911298",
+   "artCard": "Phelia, Exuberant Shepherd"
+  },
+  "dragons": {
+   "count": 183,
+   "art": "https://cards.scryfall.io/art_crop/front/8/6/86c5c337-d25f-4c3e-9762-09ed0c2d36d7.jpg?1783911897",
+   "artCard": "Niv-Mizzet, Parun"
+  },
+  "drakes": {
+   "count": 3,
+   "art": "https://cards.scryfall.io/art_crop/front/1/b/1be3ed47-072e-481a-b3d9-dc232ac4b24f.jpg?1783911937",
+   "artCard": "Talrand, Sky Summoner"
+  },
+  "druids": {
+   "count": 97,
+   "art": "https://cards.scryfall.io/art_crop/front/e/a/eabc978a-0666-472d-bdc6-d4b29d29eca4.jpg?1783909051",
+   "artCard": "Tatyova, Benthic Druid"
+  },
+  "dwarves": {
+   "count": 62,
+   "art": "https://cards.scryfall.io/art_crop/front/8/f/8fbd18ce-0ac3-4b52-9cd0-0af7e0244207.jpg?1783903797",
+   "artCard": "Sram, Senior Edificer"
+  },
+  "elders": {
+   "count": 68,
+   "art": "https://cards.scryfall.io/art_crop/front/b/6/b6af9894-95b5-4c8e-902f-a9ba70f02e4a.jpg?1783909067",
+   "artCard": "Etali, Primal Storm"
+  },
+  "eldrazi": {
+   "count": 17,
+   "art": "https://cards.scryfall.io/art_crop/front/d/2/d27cf7b7-7982-46bd-a559-7789c0e74bae.jpg?1783921940",
+   "artCard": "Kozilek, Butcher of Truth"
+  },
+  "elementals": {
+   "count": 97,
+   "art": "https://cards.scryfall.io/art_crop/front/0/a/0a74b4e6-f6c9-4fef-a83c-a285a541e720.jpg?1783909609",
+   "artCard": "Ashaya, Soul of the Wild"
+  },
+  "elephants": {
+   "count": 18,
+   "art": "https://cards.scryfall.io/art_crop/front/e/e/ee6b54de-8e79-4f60-b642-3d259bf74ea0.jpg?1783915719",
+   "artCard": "Losheel, Clockwork Scholar"
+  },
+  "elves": {
+   "count": 179,
+   "art": "https://cards.scryfall.io/art_crop/front/8/1/812856be-cf51-42de-96d2-4ac91e71d442.jpg?1783904541",
+   "artCard": "Selvala, Heart of the Wilds"
+  },
+  "faeries": {
+   "count": 33,
+   "art": "https://cards.scryfall.io/art_crop/front/4/8/4821d865-2a46-4611-ab93-1a9fdde08302.jpg?1783911926",
+   "artCard": "Rankle, Master of Pranks"
+  },
+  "foxes": {
+   "count": 14,
+   "art": "https://cards.scryfall.io/art_crop/front/7/e/7e8d6bc1-4609-4802-a4b6-7e75fdae186c.jpg?1783903804",
+   "artCard": "Pearl-Ear, Imperial Advisor"
+  },
+  "fractals": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/1/8/186e15a7-d97e-40df-adaa-96d9bd64f3ca.jpg?1783903791",
+   "artCard": "Deekah, Fractal Theorist"
+  },
+  "frogs": {
+   "count": 22,
+   "art": "https://cards.scryfall.io/art_crop/front/4/0/40489e28-878d-44a2-847f-07beef1aa0f8.jpg?1783906028",
+   "artCard": "The Gitrog Monster"
+  },
+  "fungi": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/c/b/cb12173d-3afb-4e8b-b612-fa7737a8c6c2.jpg?1783915609",
+   "artCard": "Slimefoot, the Stowaway"
+  },
+  "giants": {
+   "count": 33,
+   "art": "https://cards.scryfall.io/art_crop/front/a/0/a0b6a71e-56cb-4d25-8f2b-7a4f1b60900d.jpg?1783931516",
+   "artCard": "Uro, Titan of Nature's Wrath"
+  },
+  "gnomes": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/8/6/868856b7-8875-43c1-8249-0f8fb2c8319b.jpg?1783913734",
+   "artCard": "Anim Pakal, Thousandth Moon"
+  },
+  "goats": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/0/8/082f4abc-c09f-42cf-977f-060875dfd411.jpg?1783904943",
+   "artCard": "Flopsie, Bumi's Buddy"
+  },
+  "goblins": {
+   "count": 88,
+   "art": "https://cards.scryfall.io/art_crop/front/0/c/0c7d8714-a0ef-4ae8-909b-60f3319c646c.jpg?1783908678",
+   "artCard": "Krenko, Tin Street Kingpin"
+  },
+  "gods": {
+   "count": 100,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/44657ab1-0a6a-4a5f-9688-86f239083821.jpg?1783928241",
+   "artCard": "Birgi, God of Storytelling // Harnfel, Horn of Bounty"
+  },
+  "golems": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/1/0/10ff4bac-1f93-4dd3-987a-523a6f733a1e.jpg?1783906029",
+   "artCard": "Alibou, Ancient Witness"
+  },
+  "gorgons": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/6/c/6cb0f825-b75b-4f2a-803c-08142ca07e76.jpg?1783904402",
+   "artCard": "Tam, Mindful First-Year"
+  },
+  "griffins": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/e/7/e7efbb9a-e0b3-412c-9ee7-a90123033999.jpg?1783921477",
+   "artCard": "Zeriam, Golden Wind"
+  },
+  "halflings": {
+   "count": 49,
+   "art": "https://cards.scryfall.io/art_crop/front/c/e/ce01ff8f-a037-484f-9148-c847ffaabc5a.jpg?1783916251",
+   "artCard": "Lotho, Corrupt Shirriff"
+  },
+  "heroes": {
+   "count": 296,
+   "art": "https://cards.scryfall.io/art_crop/front/4/6/46b6cc5d-7a37-4e8b-a1a5-9a573056610c.jpg?1783905344",
+   "artCard": "Gwenom, Remorseless"
+  },
+  "horrors": {
+   "count": 55,
+   "art": "https://cards.scryfall.io/art_crop/front/8/2/8296a455-21d5-498e-9029-2bdf0da855a8.jpg?1783918077",
+   "artCard": "Mondrak, Glory Dominus"
+  },
+  "horses": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/e/7/e7a70f5a-2056-4c26-b6ea-9f751b5d0d8c.jpg?1783911823",
+   "artCard": "Calamity, Galloping Inferno"
+  },
+  "humans": {
+   "count": 1784,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "hydras": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/a/0/a094fa16-256f-4fb1-9738-3025085d1941.jpg?1783903751",
+   "artCard": "The Goose Mother"
+  },
+  "illusions": {
+   "count": 21,
+   "art": "https://cards.scryfall.io/art_crop/front/9/5/952cb0b3-a6b7-4279-8833-3d8890b2d005.jpg?1783919194",
+   "artCard": "Preston, the Vanisher"
+  },
+  "insects": {
+   "count": 35,
+   "art": "https://cards.scryfall.io/art_crop/front/9/4/940ae3c2-7ac2-412b-afd0-c8b0099bc3aa.jpg?1783903748",
+   "artCard": "Mazirek, Kraul Death Priest"
+  },
+  "kithkin": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/c/b/cb7d5bbb-4f68-4e38-8bb0-a95af21b24c8.jpg?1783904517",
+   "artCard": "Brigid, Clachan's Heart // Brigid, Doun's Mind"
+  },
+  "knights": {
+   "count": 116,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/443a4eac-f972-4027-aed4-552d4edc2ce1.jpg?1783909613",
+   "artCard": "Syr Konrad, the Grim"
+  },
+  "kor": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/1/c/1c3f0ffe-cf51-4c30-8cd5-9e3c7e92c019.jpg?1783921287",
+   "artCard": "Elas il-Kor, Sadistic Pilgrim"
+  },
+  "lhurgoyfs": {
+   "count": 2,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c976edeb-0fa1-4647-a16c-870d8a3c30c6.jpg?1783911438",
+   "artCard": "Disa the Restless"
+  },
+  "lizards": {
+   "count": 20,
+   "art": "https://cards.scryfall.io/art_crop/front/f/6/f606ebf1-483d-4331-b16a-9fb6f591a39f.jpg?1783928811",
+   "artCard": "Kediss, Emberclaw Familiar"
+  },
+  "mercenaries": {
+   "count": 31,
+   "art": "https://cards.scryfall.io/art_crop/front/2/c/2cf7e8a3-fad7-413d-b17c-7519a9cf5fb5.jpg?1783906652",
+   "artCard": "Cloud, Midgar Mercenary"
+  },
+  "merfolk": {
+   "count": 51,
+   "art": "https://cards.scryfall.io/art_crop/front/e/a/eabc978a-0666-472d-bdc6-d4b29d29eca4.jpg?1783909051",
+   "artCard": "Tatyova, Benthic Druid"
+  },
+  "mice": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/4/1/41f18f42-b86b-4a12-9f0d-76b761571195.jpg?1783905324",
+   "artCard": "Spider-Ham, Peter Porker"
+  },
+  "minions": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/4/f/4f087b1c-97e0-4379-a94d-beac53685314.jpg?1783911216",
+   "artCard": "K'rrik, Son of Yawgmoth"
+  },
+  "minotaurs": {
+   "count": 13,
+   "art": "https://cards.scryfall.io/art_crop/front/4/4/4481eab8-9e7d-4db8-b1f2-fdf5ee1919a2.jpg?1783906037",
+   "artCard": "Moraug, Fury of Akoum"
+  },
+  "monkeys": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1791803835",
+   "artCard": "Ragavan, Nimble Pilferer"
+  },
+  "monks": {
+   "count": 43,
+   "art": "https://cards.scryfall.io/art_crop/front/2/f/2fe97fbe-a6d6-4e96-8c26-f81bcdf579a1.jpg?1783915637",
+   "artCard": "Azusa, Lost but Seeking"
+  },
+  "moonfolk": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/6/0/60b9db96-a6ab-454b-99a7-910ef77560d7.jpg?1783928719",
+   "artCard": "Meloku the Clouded Mirror"
+  },
+  "mounts": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/8/2/82512813-8618-483b-a7f0-e6a611d9d487.jpg?1783911793",
+   "artCard": "The Gitrog, Ravenous Ride"
+  },
+  "mutants": {
+   "count": 141,
+   "art": "https://cards.scryfall.io/art_crop/front/3/a/3a14d6c5-cfd1-4860-834a-5a0dc9df0320.jpg?1783907438",
+   "artCard": "Deadpool, Trading Card"
+  },
+  "myr": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/d/2/d24bf1df-5087-4ad6-a1aa-4eda2340cd8b.jpg?1783903759",
+   "artCard": "Brudiclad, Telchor Engineer"
+  },
+  "necrons": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/2/8/286ff901-1faf-4a02-a37a-fa165989112f.jpg?1783920952",
+   "artCard": "Imotekh the Stormlord"
+  },
+  "nightmares": {
+   "count": 21,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f96223d0-04c4-40c2-87a9-0c6bc74adddb.jpg?1783906041",
+   "artCard": "Braids, Arisen Nightmare"
+  },
+  "ninjas": {
+   "count": 68,
+   "art": "https://cards.scryfall.io/art_crop/front/1/e/1e62de3b-6a41-43e3-93ad-9a1e3894be3b.jpg?1783911927",
+   "artCard": "Nashi, Moon Sage's Scion"
+  },
+  "nobles": {
+   "count": 206,
+   "art": "https://cards.scryfall.io/art_crop/front/e/d/ed0ace28-9a33-4f0d-b8c8-f5517f20ccf1.jpg?1783932644",
+   "artCard": "Ayara, First of Locthwain"
+  },
+  "ogres": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/7/2/721df547-d777-4247-b130-a4e247445b04.jpg?1783912996",
+   "artCard": "Kazuul, Tyrant of the Cliffs"
+  },
+  "oozes": {
+   "count": 19,
+   "art": "https://cards.scryfall.io/art_crop/front/6/8/6800e935-d327-464c-ab88-7c0193827da3.jpg?1783911971",
+   "artCard": "Felix Five-Boots"
+  },
+  "orcs": {
+   "count": 31,
+   "art": "https://cards.scryfall.io/art_crop/front/e/6/e66ee7c6-23bc-4fef-a566-35aee2064bd9.jpg?1783903772",
+   "artCard": "Plargg and Nassari"
+  },
+  "otters": {
+   "count": 9,
+   "art": "https://cards.scryfall.io/art_crop/front/c/8/c8ff751a-ec64-41d5-b22c-2a483ad9a9b2.jpg?1783910847",
+   "artCard": "Kitsa, Otterball Elite"
+  },
+  "pegasi": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/a/a/aad65c60-b9e8-4a8f-92e8-3dff63232102.jpg?1783908860",
+   "artCard": "Thurid, Mare of Destiny"
+  },
+  "phoenixes": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/8/9/89b4491d-154d-46e2-84c2-afa4596e2b13.jpg?1787700360",
+   "artCard": "Otharri, Suns' Glory"
+  },
+  "phyrexians": {
+   "count": 89,
+   "art": "https://cards.scryfall.io/art_crop/front/8/2/8296a455-21d5-498e-9029-2bdf0da855a8.jpg?1783918077",
+   "artCard": "Mondrak, Glory Dominus"
+  },
+  "pirates": {
+   "count": 39,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1791803835",
+   "artCard": "Ragavan, Nimble Pilferer"
+  },
+  "plants": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/5/2/52eef0d6-24b7-40b7-8403-e8e863d0cd55.jpg?1783911810",
+   "artCard": "Bristly Bill, Spine Sower"
+  },
+  "praetors": {
+   "count": 16,
+   "art": "https://cards.scryfall.io/art_crop/front/d/6/d67be074-cdd4-41d9-ac89-0a0456c4e4b2.jpg?1783921327",
+   "artCard": "Sheoldred, the Apocalypse"
+  },
+  "rabbits": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/f/5/f571fef1-1fd2-4355-b803-5edccb6f4b94.jpg?1783928771",
+   "artCard": "Kwain, Itinerant Meddler"
+  },
+  "raccoons": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/3/1/31e4b7a1-b377-49d2-a92e-4bcb0db35f16.jpg?1783910738",
+   "artCard": "Bello, Bard of the Brambles"
+  },
+  "rats": {
+   "count": 30,
+   "art": "https://cards.scryfall.io/art_crop/front/1/e/1e62de3b-6a41-43e3-93ad-9a1e3894be3b.jpg?1783911927",
+   "artCard": "Nashi, Moon Sage's Scion"
+  },
+  "rebels": {
+   "count": 31,
+   "art": "https://cards.scryfall.io/art_crop/front/b/3/b36efbe2-3798-43e5-8640-f003c77440a1.jpg?1783904820",
+   "artCard": "Longshot, Rebel Bowman"
+  },
+  "robots": {
+   "count": 63,
+   "art": "https://cards.scryfall.io/art_crop/front/b/b/bbdfbd21-61b1-4ebd-8d37-bce2a391a7e9.jpg?1783912418",
+   "artCard": "Codsworth, Handy Helper"
+  },
+  "rogues": {
+   "count": 183,
+   "art": "https://cards.scryfall.io/art_crop/front/c/e/ce01ff8f-a037-484f-9148-c847ffaabc5a.jpg?1783916251",
+   "artCard": "Lotho, Corrupt Shirriff"
+  },
+  "samurai": {
+   "count": 31,
+   "art": "https://cards.scryfall.io/art_crop/front/a/0/a062a004-984e-4b62-960c-af7288f7a3e9.jpg?1783923833",
+   "artCard": "Isshin, Two Heavens as One"
+  },
+  "saprolings": {
+   "count": 12,
+   "art": "https://cards.scryfall.io/art_crop/front/a/d/adcd556d-351f-4faf-9456-0e47def69a69.jpg?1783921281",
+   "artCard": "Nemata, Primeval Warden"
+  },
+  "satyrs": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/a/d/ad107ae0-2540-46f8-9970-72983b87ba04.jpg?1783915659",
+   "artCard": "Anax, Hardened in the Forge"
+  },
+  "scarecrows": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/d/2/d2119f3f-27d2-4d43-a5ef-35c1b73d182a.jpg?1783904605",
+   "artCard": "The Reaper, King No More"
+  },
+  "shades": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/f/f/ff128110-b87e-451c-a51d-9f116892e482.jpg?1783935165",
+   "artCard": "Ihsan's Shade"
+  },
+  "shamans": {
+   "count": 88,
+   "art": "https://cards.scryfall.io/art_crop/front/a/2/a2ff0ee3-9600-4c7d-acec-6ec90595384e.jpg?1783935527",
+   "artCard": "Kiki-Jiki, Mirror Breaker"
+  },
+  "shapeshifters": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/8/4/84238335-e08c-421c-b9b9-70a679ff2967.jpg?1783916893",
+   "artCard": "Morophon, the Boundless"
+  },
+  "sharks": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/9/b/9b4fdcd5-5346-46a8-b1a4-84ddb74089e0.jpg?1783931233",
+   "artCard": "Brallin, Skyshark Rider"
+  },
+  "skeletons": {
+   "count": 15,
+   "art": "https://cards.scryfall.io/art_crop/front/f/f/ff3d85bc-ef2d-4251-baf4-a14bd0cee61e.jpg?1783909107",
+   "artCard": "Tinybones, Bauble Burglar"
+  },
+  "slivers": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/2/b/2b902f64-7795-4f1f-81e6-26db7c78a10c.jpg?1783915410",
+   "artCard": "Sliver Hivelord"
+  },
+  "snakes": {
+   "count": 33,
+   "art": "https://cards.scryfall.io/art_crop/front/e/d/ed8ea0da-c9d4-4158-aaa7-ebe2fe2b1e15.jpg?1783907041",
+   "artCard": "Shigeki, Jukai Visionary"
+  },
+  "soldiers": {
+   "count": 225,
+   "art": "https://cards.scryfall.io/art_crop/front/f/6/f6bc3720-2892-4dda-8f30-079a1ac8e1e2.jpg?1783916338",
+   "artCard": "Boromir, Warden of the Tower"
+  },
+  "specters": {
+   "count": 1,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e8652fb7-1bce-44ee-b75e-4c773ff8fdb3.jpg?1783935001",
+   "artCard": "Urgoros, the Empty One"
+  },
+  "sphinxes": {
+   "count": 21,
+   "art": "https://cards.scryfall.io/art_crop/front/9/2/9235977e-a999-4ed0-83a3-742be87b13bb.jpg?1783923378",
+   "artCard": "Tivit, Seller of Secrets"
+  },
+  "spiders": {
+   "count": 60,
+   "art": "https://cards.scryfall.io/art_crop/front/9/5/95a87b4e-f0ea-457c-9517-4acf313c4ca6.jpg?1783907053",
+   "artCard": "Arasta of the Endless Web"
+  },
+  "spirits": {
+   "count": 161,
+   "art": "https://cards.scryfall.io/art_crop/front/a/4/a4f53a56-eb8e-44cd-ab13-8ac068052c68.jpg?1783908846",
+   "artCard": "Kodama of the West Tree"
+  },
+  "squirrels": {
+   "count": 15,
+   "art": "https://cards.scryfall.io/art_crop/front/e/8/e82e61d1-488d-4627-a54c-d8496a967814.jpg?1783912984",
+   "artCard": "Toski, Bearer of Secrets"
+  },
+  "symbiotes": {
+   "count": 10,
+   "art": "https://cards.scryfall.io/art_crop/front/4/6/46b6cc5d-7a37-4e8b-a1a5-9a573056610c.jpg?1783905344",
+   "artCard": "Gwenom, Remorseless"
+  },
+  "thopters": {
+   "count": 11,
+   "art": "https://cards.scryfall.io/art_crop/front/a/1/a1091e0e-a179-4241-8be0-ea92d86f4c08.jpg?1783908851",
+   "artCard": "Sai, Master Thopterist"
+  },
+  "time-lords": {
+   "count": 29,
+   "art": "https://cards.scryfall.io/art_crop/front/5/6/568c2687-4381-4954-9cab-f669d1fe6306.jpg?1783914623",
+   "artCard": "The Second Doctor"
+  },
+  "treefolk": {
+   "count": 20,
+   "art": "https://cards.scryfall.io/art_crop/front/f/9/f9246b68-580f-4f53-883d-7900880e4b0d.jpg?1783911256",
+   "artCard": "Six"
+  },
+  "turtles": {
+   "count": 54,
+   "art": "https://cards.scryfall.io/art_crop/front/b/7/b760ebdf-bea6-4c43-a187-4a02ebf95ebf.jpg?1783916942",
+   "artCard": "Kogla and Yidaro"
+  },
+  "tyranids": {
+   "count": 6,
+   "art": "https://cards.scryfall.io/art_crop/front/f/a/fa7349d9-c82f-4cf8-a852-92168d1f4966.jpg?1783920850",
+   "artCard": "Ghyrson Starn, Kelermorph"
+  },
+  "unicorns": {
+   "count": 5,
+   "art": "https://cards.scryfall.io/art_crop/front/0/f/0f594562-7e9f-47e6-a033-fb70e3cf1e10.jpg?1783921937",
+   "artCard": "Emiel the Blessed"
+  },
+  "vampires": {
+   "count": 97,
+   "art": "https://cards.scryfall.io/art_crop/front/5/d/5deb74ff-15df-4894-b074-9a98731bd2c0.jpg?1783908850",
+   "artCard": "Vito, Thorn of the Dusk Rose"
+  },
+  "warriors": {
+   "count": 374,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c9f88a40-a6ed-4c1f-a309-011aca1acddd.jpg?1783913732",
+   "artCard": "Kutzil, Malamet Exemplar"
+  },
+  "werewolves": {
+   "count": 8,
+   "art": "https://cards.scryfall.io/art_crop/front/0/2/028ef608-acfe-4e9d-90db-eca4411ba78a.jpg?1783906613",
+   "artCard": "Vincent Valentine // Galian Beast"
+  },
+  "whales": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/c/6/c66b452b-9c49-4c58-9966-6bafbfa34c36.jpg?1783911893",
+   "artCard": "Ukkima, Stalking Shadow"
+  },
+  "wizards": {
+   "count": 362,
+   "art": "https://cards.scryfall.io/art_crop/front/c/9/c977d89a-bfd1-4e98-9d95-3e41c53dd188.jpg?1783906044",
+   "artCard": "Emry, Lurker of the Loch"
+  },
+  "wolves": {
+   "count": 23,
+   "art": "https://cards.scryfall.io/art_crop/front/4/8/48494ef9-5eb3-4b55-ad1d-b32bbed89ca5.jpg?1783910736",
+   "artCard": "Wildsear, Scouring Maw"
+  },
+  "wraiths": {
+   "count": 7,
+   "art": "https://cards.scryfall.io/art_crop/front/a/5/a55e6508-0b59-4573-bc4e-67b27279cfed.jpg?1783916294",
+   "artCard": "Witch-king of Angmar"
+  },
+  "wurms": {
+   "count": 4,
+   "art": "https://cards.scryfall.io/art_crop/front/a/b/ab8935b1-ec87-4330-9952-9ef8cd344531.jpg?1783934853",
+   "artCard": "Grothama, All-Devouring"
+  },
+  "tokens": {
+   "count": 877,
+   "art": "https://cards.scryfall.io/art_crop/front/a/9/a9738cda-adb1-47fb-9f4c-ecd930228c4d.jpg?1791803835",
+   "artCard": "Ragavan, Nimble Pilferer"
+  }
+ }
+}

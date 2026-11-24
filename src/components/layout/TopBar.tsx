@@ -33,13 +33,13 @@ export function TopBar({ tab, onTab, proxyCount }: Props) {
       <div className="topbar-actions">
         <div className="row hide-mobile" style={{ gap: 2 }}>
           <button className="btn btn-ghost btn-sm" onClick={() => openBackup()} title="Backup completo">
-            <Archive size={16} /> Backup
+            <Archive size={16} /> <span className="topbar-label">Backup</span>
           </button>
           <button className="btn btn-ghost btn-sm" onClick={() => openExport()} title="Exportar decks e coleção">
-            <Upload size={16} /> Exportar
+            <Upload size={16} /> <span className="topbar-label">Exportar</span>
           </button>
           <button className="btn btn-ghost btn-sm" onClick={() => openImport()} title="Importar listas e XML do MPCFill">
-            <Download size={16} /> Importar
+            <Download size={16} /> <span className="topbar-label">Importar</span>
           </button>
         </div>
         <span className="topbar-divider hide-mobile" />

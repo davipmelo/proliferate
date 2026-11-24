@@ -495,3 +495,32 @@
 /* Janelas que se ajustam ao conteúdo (sem a altura fixa do tamanho xl). */
 .modal-xl:has(> .modal-body.info-body) { height: auto; width: min(1200px, 100%); }
 .modal-xl:has(> .modal-body.hand-body) { height: auto; }
+
+/* ---------- Explorar ---------- */
+.explore-themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 8px; }
+.theme-tile { display: flex; align-items: center; gap: 10px; height: 48px; padding-right: 12px; border-radius: var(--radius-sm); border: var(--border-width) solid var(--border); background: var(--surface-1); color: var(--text); text-decoration: none; overflow: hidden; transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.theme-tile:hover { border-color: var(--accent-line); background: var(--surface-2); transform: translateY(-1px); }
+.theme-tile:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.theme-tile-art { flex: none; width: 68px; height: 100%; background: var(--surface-3); -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent); mask-image: linear-gradient(90deg, #000 60%, transparent); }
+.theme-tile-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.theme-tile-name { flex: 1; min-width: 0; font-size: var(--fs-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.theme-tile-count { flex: none; font-size: var(--fs-xs); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.explore-back { margin-bottom: 8px; margin-left: -8px; }
+.chip .chip-x { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; margin-right: -6px; border: none; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+.chip .chip-x:hover { background: var(--accent-soft); }
+.explore-add { position: relative; }
+.explore-add select { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.explore-adv { flex: 1 1 280px; max-width: 420px; }
+.explore-filter-toggle { display: none; }
+.explore-card { display: block; padding: 0; border: none; cursor: pointer; width: 100%; font: inherit; }
+.explore-card:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent); }
+.banned-badge { position: absolute; top: 7px; right: 7px; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--danger); color: #fff; font-size: var(--fs-xs); font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; box-shadow: var(--shadow-sm); }
+.explore-card .qty-badge { color: var(--text); font-weight: 700; }
+/* Com 5 abas, telas médias mostram só os ícones de Backup/Exportar/Importar. */
+@media (max-width: 1240px) { .topbar-label { display: none; } }
+@media (max-width: 1100px) and (min-width: 769px) {
+  .topbar-inner { gap: var(--space-3); }
+  .tab { padding: 0 11px; gap: 6px; }
+  .brand small { display: none; }
+}
+.explore-filters .select, .explore-sort { width: auto; }

@@ -2,7 +2,7 @@ import type { TabId } from '../types/models.ts';
 import type { ColorFilterValue } from '../types/cardRules.ts';
 
 /** Abas que têm caminho próprio na URL (o caminho é o próprio id). */
-export const ROUTE_TABS: readonly TabId[] = ['decks', 'collection', 'utilities', 'proxies'];
+export const ROUTE_TABS: readonly TabId[] = ['decks', 'collection', 'explore', 'utilities', 'proxies'];
 export const DEFAULT_TAB: TabId = 'decks';
 
 export interface PathRoute {

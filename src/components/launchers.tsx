@@ -91,10 +91,10 @@ export function openUtilityPicker(opts: { title?: string; onPick: (cards: TokenC
 }
 
 /** Janela de informações da carta (dados do Scryfall). */
-export function openCardInfo(card: Card, opts: { foil?: boolean } = {}): void {
+export function openCardInfo(card: Card, opts: { foil?: boolean; edhrecUrl?: string } = {}): void {
   openModal((close) => (
     <Suspense fallback={<ModalFallback />}>
-      <CardInfoModal card={card} foil={opts.foil ?? card.isFoil} onClose={close} />
+      <CardInfoModal card={card} foil={opts.foil ?? card.isFoil} edhrecUrl={opts.edhrecUrl} onClose={close} />
     </Suspense>
   ));
 }

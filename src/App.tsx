@@ -11,6 +11,7 @@ import { CardRepair } from './components/common/CardRepair.tsx';
 
 const DecksTab = lazy(() => import('./components/decks/DecksTab.tsx'));
 const CollectionTab = lazy(() => import('./components/collection/CollectionTab.tsx'));
+const ExploreTab = lazy(() => import('./components/explore/ExploreTab.tsx'));
 const UtilitiesTab = lazy(() => import('./components/utilities/UtilitiesTab.tsx'));
 const ProxiesTab = lazy(() => import('./components/proxies/ProxiesTab.tsx'));
 
@@ -31,6 +32,7 @@ export default function App() {
         <Suspense fallback={<div className="lazy-fallback"><Loading /></div>}>
           {tab === 'decks' && <DecksTab />}
           {tab === 'collection' && <CollectionTab />}
+          {tab === 'explore' && <ExploreTab />}
           {tab === 'utilities' && <UtilitiesTab />}
           {tab === 'proxies' && <ProxiesTab />}
         </Suspense>

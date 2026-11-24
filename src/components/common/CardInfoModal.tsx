@@ -34,7 +34,7 @@ function RulesText({ text, italic }: { text?: string; italic?: boolean }) {
 }
 
 /** Janela com as informações da carta vindas do Scryfall (textos, legalidade, preços e impressões). */
-export default function CardInfoModal({ card, foil, onClose }: { card: Card; foil?: boolean; onClose: () => void }) {
+export default function CardInfoModal({ card, foil, edhrecUrl, onClose }: { card: Card; foil?: boolean; edhrecUrl?: string; onClose: () => void }) {
   const [printId, setPrintId] = useState<string | undefined>();
   const [data, setData] = useState<CardDetails | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -142,6 +142,9 @@ export default function CardInfoModal({ card, foil, onClose }: { card: Card; foi
             {printId && <button className="btn btn-ghost btn-sm" onClick={() => setPrintId(undefined)}>Voltar para a sua impressão</button>}
             {data.scryfallUri && (
               <a className="btn btn-ghost btn-sm" href={data.prints.find(isCurrent)?.scryfallUri ?? data.scryfallUri} target="_blank" rel="noreferrer"><ExternalLink size={14} /> Abrir no Scryfall</a>
+            )}
+            {edhrecUrl && (
+              <a className="btn btn-ghost btn-sm" href={edhrecUrl} target="_blank" rel="noreferrer"><ExternalLink size={14} /> Abrir no EDHREC</a>
             )}
           </div>
         </div>
