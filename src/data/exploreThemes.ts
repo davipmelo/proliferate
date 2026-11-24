@@ -26,7 +26,7 @@ export const COMMANDER_BASE = '(is:commander or (banned:commander (t:legendary t
 export const NO_BACKGROUNDS = '-t:background';
 
 /** Tribos com menos commanders que isso ficam fora da grade. */
-export const MIN_TRIBE_COMMANDERS = 20;
+export const MIN_TRIBE_COMMANDERS = 10;
 
 const slugify = (s: string) =>
   s.toLowerCase().replace(/\+1\/\+1/g, 'plus-1').replace(/-1\/-1/g, 'minus-1').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
