@@ -16,7 +16,7 @@ export function TopBar({ tab, onTab, proxyCount }: Props) {
   return (
     <header className="topbar">
       <div className="topbar-inner">
-      <a className="brand" href="./" onClick={(e) => e.preventDefault()}>
+      <a className="brand" href={import.meta.env.BASE_URL} onClick={(e) => { e.preventDefault(); onTab('decks'); }}>
         <img className="brand-mark" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" />
         <span>Proliferate</span>
         <small>V2</small>

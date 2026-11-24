@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Crop, Layers, MoreVertical, Pencil, Printer, Search, Tags, Trash2, Download, X } from 'lucide-react';
 import type { ColorMatchMode, Deck } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
@@ -8,6 +8,8 @@ import { matchesColorFilter, type ColorFilterValue } from '../../types/cardRules
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { ColorPips, Dropdown, Empty, formatUsd, ViewToggle } from '../common/bits.tsx';
 import { usePersistent } from '../common/hooks.ts';
+import { useUrlParam, useUrlState } from '../../state/router.ts';
+import { colorsFromParam, colorsToParam, listFromParam, listToParam } from '../../services/routes.ts';
 import { openImport } from '../launchers.tsx';
 import { DeckFormModal } from './DeckFormModal.tsx';
 import { TagPills, TagSelect, type TagMatch } from './TagSelect.tsx';
@@ -26,13 +28,14 @@ const STATUS_LABELS: Record<DeckStatus, string> = { all: 'Todos os status', comp
 export function DeckList({ onOpen }: { onOpen: (id: string) => void }) {
   const store = useStore();
   const { data, prefs, setPrefs } = store;
-  const [q, setQ] = useState('');
-  const [tagFilter, setTagFilter] = useState<string[]>([]);
+  // Filtros ficam na URL (o "voltar" e o F5 mantêm a busca).
+  const [q, setQ] = useUrlParam('q');
+  const [tagFilter, setTagFilter] = useUrlState('tags', listFromParam, listToParam);
   const [tagMatch, setTagMatch] = usePersistent<TagMatch>('decks-tag-match', 'all');
-  const [colors, setColors] = useState<ColorFilterValue[]>([]);
+  const [colors, setColors] = useUrlState<ColorFilterValue[]>('colors', colorsFromParam, colorsToParam);
   const [colorMode, setColorMode] = usePersistent<ColorMatchMode>('decks-color-mode', 'identity');
-  const [formatFilter, setFormatFilter] = useState('');
-  const [status, setStatus] = useState<DeckStatus>('all');
+  const [formatFilter, setFormatFilter] = useUrlParam('format');
+  const [status, setStatus] = useUrlState<DeckStatus>('status', (s) => (s in STATUS_LABELS ? (s as DeckStatus) : 'all'), (v) => (v === 'all' ? '' : v));
   const [sort, setSort] = usePersistent<DeckSort>('deck-sort', 'updated');
   const [cardW, setCardW] = usePersistent<number>('decks-grid-size', 310);
   const view = prefs.decksView;

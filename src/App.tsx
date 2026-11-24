@@ -1,8 +1,9 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
 import type { TabId } from './types/models.ts';
 import { TABS } from './components/layout/tabs.ts';
 import { useStore } from './state/store.tsx';
-import { closeDeck } from './state/nav.ts';
+import { goToTab } from './state/nav.ts';
+import { useRoute } from './state/router.ts';
 import { TopBar } from './components/layout/TopBar.tsx';
 import { Loading } from './components/common/bits.tsx';
 import { SyncManager } from './components/auth/SyncManager.tsx';
@@ -15,27 +16,13 @@ const ProxiesTab = lazy(() => import('./components/proxies/ProxiesTab.tsx'));
 
 
 export default function App() {
-  const { prefs, setPrefs, data } = useStore();
-  const tab = prefs.lastTab;
-  const setTab = (t: TabId) => {
-    setPrefs({ lastTab: t });
-    window.scrollTo({ top: 0 });
-  };
-
-  // Permite navegar entre abas a partir de qualquer componente.
-  useEffect(() => {
-    const on = (e: Event) => setTab((e as CustomEvent<TabId>).detail);
-    window.addEventListener('proliferate:tab', on);
-    return () => window.removeEventListener('proliferate:tab', on);
-  });
+  const { data } = useStore();
+  const { tab } = useRoute();
 
   const proxyCount = data.proxies.reduce((s, p) => s + p.quantity, 0);
 
-  // Clique direto na aba (header/barra inferior): "Decks" sempre volta para a lista.
-  const onNavClick = (t: TabId) => {
-    if (t === 'decks') closeDeck();
-    setTab(t);
-  };
+  // Clique direto na aba (header/barra inferior): sempre abre a página inicial da aba ("Decks" volta para a lista).
+  const onNavClick = (t: TabId) => goToTab(t);
 
   return (
     <div className="app">

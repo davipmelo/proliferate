@@ -175,13 +175,13 @@ function PreviewLayer() {
     // Qualquer clique, troca de aba ou tecla fecha o preview (a linha sob o mouse pode ter sumido).
     window.addEventListener('pointerdown', hidePreview, true);
     window.addEventListener('keydown', hidePreview, true);
-    window.addEventListener('proliferate:tab', hidePreview);
+    window.addEventListener('proliferate:route', hidePreview);
     return () => {
       window.removeEventListener('resize', r);
       window.removeEventListener('scroll', hidePreview, true);
       window.removeEventListener('pointerdown', hidePreview, true);
       window.removeEventListener('keydown', hidePreview, true);
-      window.removeEventListener('proliferate:tab', hidePreview);
+      window.removeEventListener('proliferate:route', hidePreview);
     };
   }, []);
   if (!p.url) return null;

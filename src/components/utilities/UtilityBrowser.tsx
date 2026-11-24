@@ -9,6 +9,8 @@ import { Empty, Loading, useDebounced } from '../common/bits.tsx';
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls, SelectBox, useSelection } from '../common/selection.tsx';
 import { openArtPicker, openCardInfo } from '../launchers.tsx';
+import { useUrlParam, useUrlState } from '../../state/router.ts';
+import { colorsFromParam, colorsToParam } from '../../services/routes.ts';
 
 type Kind = UtilityCategory | 'all';
 const KIND_LABELS: Record<Kind, string> = {
@@ -25,9 +27,11 @@ interface Props {
 export function UtilityBrowser({ mode, onPick }: Props) {
   const store = useStore();
   const { prefs, setPrefs } = store;
-  const [text, setText] = useState('');
-  const [kind, setKind] = useState<Kind>('all');
-  const [colors, setColors] = useState<ColorFilterValue[]>([]);
+  // Na aba, os filtros ficam na URL; dentro do deck (modal) são estado local.
+  const inUrl = mode === 'tab';
+  const [text, setText] = useUrlParam('q', inUrl);
+  const [kind, setKind] = useUrlState<Kind>('kind', (s) => (s in KIND_LABELS ? (s as Kind) : 'all'), (v) => (v === 'all' ? '' : v), inUrl);
+  const [colors, setColors] = useUrlState<ColorFilterValue[]>('colors', colorsFromParam, colorsToParam, inUrl);
   const query = useDebounced(text.trim(), 350);
   const [picked, setPicked] = useState<TokenCard[]>([]);
 

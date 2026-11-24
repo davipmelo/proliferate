@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Download, Image as ImageIcon, Info, Library, MoreVertical, Printer, Search, Trash2, X } from 'lucide-react';
 import type { ColorMatchMode } from '../../types/models.ts';
 import { useStore } from '../../state/store.tsx';
@@ -11,6 +11,8 @@ import { CardThumb, Dropdown, Empty, formatUsd, ManaCost, ViewToggle } from '../
 import { ColorFilter } from '../common/ColorFilter.tsx';
 import { GridControls, SelectBox, useSelection } from '../common/selection.tsx';
 import { usePersistent, useProgressive } from '../common/hooks.ts';
+import { useUrlParam, useUrlState } from '../../state/router.ts';
+import { colorsFromParam, colorsToParam } from '../../services/routes.ts';
 import { openArtPicker, openCardInfo, openImport } from '../launchers.tsx';
 import { StatsPanel } from '../stats/StatsPanel.tsx';
 
@@ -19,11 +21,12 @@ const SORTS: SortKey[] = ['name', 'quantity', 'cmc', 'type', 'set', 'rarity', 'p
 export default function CollectionTab() {
   const store = useStore();
   const { data, collection, prefs, setPrefs } = store;
-  const [q, setQ] = useState('');
-  const [colors, setColors] = useState<ColorFilterValue[]>([]);
+  // Filtros ficam na URL (o "voltar" e o F5 mantêm a busca).
+  const [q, setQ] = useUrlParam('q');
+  const [colors, setColors] = useUrlState<ColorFilterValue[]>('colors', colorsFromParam, colorsToParam);
   const [mode, setMode] = usePersistent<ColorMatchMode>('col-color-mode', 'identity');
   const [sort, setSort] = usePersistent<SortKey>('col-sort', 'name');
-  const [deckFilter, setDeckFilter] = useState('');
+  const [deckFilter, setDeckFilter] = useUrlParam('deck');
 
   const summary = useMemo(() => summarize(collection), [collection]);
 
